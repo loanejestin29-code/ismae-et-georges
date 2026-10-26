@@ -1,0 +1,85 @@
+/* Nuit parisienne : fond nuit, encre crème, or des réverbères, rouge des auvents */
+:root {
+  --nuit: #151026;
+  --nuit-2: #221a3a;
+  --encre: #f6ead2;
+  --encre-2: #c9b99a;
+  --or: #e8b54a;
+  --rouge: #c9483b;
+  --pixel: 'Pixelify Sans', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding-block: max(24px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(232, 181, 74, 0.16), transparent 55%),
+    var(--nuit);
+  color: var(--encre);
+  font-family: var(--pixel);
+}
+
+.carton {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  max-width: 560px;
+  text-align: center;
+}
+
+#georges {
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+}
+
+.surtitre {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--encre-2);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(42px, 10vw, 76px);
+  line-height: 0.95;
+  font-weight: 700;
+  text-wrap: balance;
+  text-shadow: 4px 4px 0 var(--rouge), 8px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+h1 em { font-style: normal; color: var(--or); }
+
+.sous {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--encre-2);
+  text-wrap: balance;
+}
+
+.bientot {
+  margin: 8px 0 0;
+  padding: 8px 18px;
+  font-size: 16px;
+  color: var(--nuit);
+  background: var(--or);
+  box-shadow: 0 0 0 3px var(--nuit), 0 0 0 6px var(--or);
+}
+
+@media (max-height: 460px) {
+  .carton { gap: 8px; }
+  #georges { width: 88px; height: 88px; }
+  h1 { font-size: 50px; }
+}
