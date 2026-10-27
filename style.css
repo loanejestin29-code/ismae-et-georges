@@ -69,14 +69,21 @@ h1 em { font-style: normal; color: var(--or); }
   text-wrap: balance;
 }
 
-.bientot {
+.jouer {
   margin: 8px 0 0;
-  padding: 8px 18px;
-  font-size: 16px;
+  padding: 12px 34px;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--nuit);
+  text-decoration: none;
   background: var(--or);
-  box-shadow: 0 0 0 3px var(--nuit), 0 0 0 6px var(--or);
+  box-shadow: 0 4px 0 #9a6a20, 0 0 0 3px var(--nuit), 0 0 0 6px var(--or);
+  -webkit-tap-highlight-color: transparent;
 }
+
+.jouer:active { transform: translateY(3px); box-shadow: 0 1px 0 #9a6a20, 0 0 0 3px var(--nuit), 0 0 0 6px var(--or); }
+
+.jouer:focus-visible { outline: 3px dashed var(--encre); outline-offset: 8px; }
 
 @media (max-height: 460px) {
   .carton { gap: 8px; }
