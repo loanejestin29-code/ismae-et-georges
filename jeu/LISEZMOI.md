@@ -23,12 +23,14 @@ le code au chargement.
 
 ## Tester sur l'iPhone
 
-Il n'y a qu'une seule version du jeu, et un seul lien :
-**https://claude.ai/artifact/HetMZxdvax4z5qm6hZk1uB**
+Le jeu est en ligne sur **https://ismae-et-georges.vercel.app** (bouton « Jouer »), ou
+directement sur **https://ismae-et-georges.vercel.app/jeu/**. Pas besoin de compte pour l'ouvrir.
 
-Ouvre-le sur l'iPhone avec ton compte Claude et garde-le en favori. À chaque modification, je
-republie au même endroit : il suffit de recharger la page sur le téléphone pour voir la nouvelle
-version.
+Pour l'avoir comme une appli : ouvre `…/jeu/` dans Safari, touche le bouton Partager, puis
+« Sur l'écran d'accueil ». L'icône de Georges apparaît, et le jeu s'ouvre en plein écran.
+
+À chaque modification, je pousse sur GitHub et Vercel met le site à jour tout seul, en général
+en moins d'une minute : il suffit de relancer le jeu sur le téléphone.
 
 Le jeu se joue **à l'horizontale**. À la verticale, un écran « Tourne ton téléphone » s'affiche
 et le jeu se met en pause ; il reprend dès qu'on remet le téléphone à l'horizontale.
@@ -45,8 +47,8 @@ La partie droite de l'écran est réservée aux boutons, pour le pouce droit.
 
 ## Modifier le jeu
 
-Le plus simple : demande-moi la modification, je l'applique et je republie sur le lien. Si tu
-modifies un fichier toi-même, dis-le-moi pour que je republie.
+Le plus simple : demande-moi la modification, je l'applique et je la pousse sur GitHub. Si tu
+modifies un fichier toi-même, dis-le-moi pour que je la pousse.
 
 ### Ce qui se change facilement : `js/config.js`
 
