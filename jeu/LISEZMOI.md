@@ -18,9 +18,9 @@ image ni aucun son externe.
   Le bouton ♪ en haut à droite coupe le son.
 - **Des habitants** qui se promènent ou travaillent : Mme Brioche (boulangère), Gaston (livreur),
   Colette, M. Fernand, un peintre dans la cour. Ils s'arrêtent quand Ismae est sur leur chemin.
-- **Les personnages** : Ismae est redessiné d'après la planche de référence (4 vues, coiffure,
-  doudoune noire, baskets blanches) et son portrait de dialogue d'après les photos en gros plan.
-  Les habitants sont dessinés dans le même style.
+- **Ismae** : petits yeux, pas de bouche, silhouette fine (grosse tête ronde, bras et jambes
+  détachés). Le style s'inspire des photos : cheveux en bataille, perfecto noir à zips argentés,
+  pantalon large, baskets grises. Son portrait dans les bulles, c'est le haut de son sprite.
 - **L'introduction** :
   1. Ismae et Georges arrivent tout en haut de la rue (côté est) ; on explore librement.
   2. Quand on se promène dans la rue, Marie, Toulouse et Berlioz passent en courant. Georges les voit
@@ -62,8 +62,8 @@ se met à jour tout seul en moins d'une minute.
 
 ### `js/config.js` — ce qui se change facilement
 
-- `ismae` : `modele: 'planche'` utilise le sprite tiré de la planche de référence
-  (`js/sprite-ismae.js`) ; les autres réglages ne servent qu'aux anciens modèles.
+- `ismae` : `modele: 'inspire'` et les couleurs (peau, cheveux, veste, zips, pantalon, baskets).
+  Le dessin lui-même est la grille `ISMAE_STYLE` de `js/characters.js`.
 - `musique`, `volumeMusique`, `neige`, `ambiance`.
 - `vitesseChatons` : vitesse de Georges pendant la poursuite (Ismae court à 104). La vitesse des
   chatons eux-mêmes est `VITESSE_CHATONS` dans `js/scenes.js`.
@@ -81,8 +81,7 @@ se met à jour tout seul en moins d'une minute.
 | `js/carte-superette.js` | l'intérieur ; le labyrinthe se règle avec les tableaux `H` et `V` |
 | `js/musique.js` | l'orchestre de jazz et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
-| `js/sprite-ismae.js` | Ismae (4 vues) et son portrait, tirés des images de référence |
-| `js/characters.js` | tous les sprites (grilles de lettres : une lettre = un pixel), la marche, les accessoires des habitants |
+| `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
 | `js/entites.js` | Ismae, Georges, les chats, les musiciens, les habitants |
 | `js/moteur.js` | boucle de jeu, caméra, collisions, éclairage, commandes, dialogues |
 

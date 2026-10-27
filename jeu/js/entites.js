@@ -32,7 +32,7 @@ const Entites = (() => {
   const portraits = {};
   function portrait(qui) {
     if (portraits[qui]) return portraits[qui];
-    if (qui === 'ismae') return CONFIG.ismae.modele === 'planche' ? Sprites.portraitIsmae() : SPR.ismae.down.idle;
+    if (qui === 'ismae') return SPR.ismae.down.idle;
     if (qui === 'georges') return SPR.georges.sit[0];
     if (qui === 'duchesse') return chat('duchesse').sit[0];
     if (['marie', 'toulouse', 'berlioz'].includes(qui)) return chaton(qui).sit[0];

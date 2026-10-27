@@ -146,22 +146,15 @@ const Jeu = (() => {
     const img = l.qui && Entites.portrait(l.qui);
     por.hidden = !img;
     if (img) {
-      // portrait dessiné (buste) : affiché en entier ; sinon on cadre la tête et les épaules du sprite
+      // on cadre la tête et le buste (le haut de l'image) et on remplit le cadre
+      const grand = img.height > 24;
+      const sy = grand ? Math.max(0, img.height - 32) : 0, h = grand ? Math.min(20, img.height - sy) : img.height;
+      const marge = 2;
+      por.width = img.width + marge * 2; por.height = Math.round((img.width + marge * 2) * 0.88);
       const g = por.getContext('2d');
-      if (img.buste) {
-        por.width = img.width; por.height = img.height;
-        g.imageSmoothingEnabled = false; g.clearRect(0, 0, por.width, por.height); g.drawImage(img, 0, 0);
-      } else {
-        const humain = img.height > 34;
-        const grand = !humain && img.height > 24;
-        const sy = humain ? 0 : grand ? Math.max(0, img.height - 30) : 0;
-        const h = humain ? 22 : grand ? Math.min(20, img.height - sy) : img.height;
-        const marge = 2;
-        por.width = img.width + marge * 2; por.height = Math.round((img.width + marge * 2) * 0.88);
-        g.imageSmoothingEnabled = false;
-        g.clearRect(0, 0, por.width, por.height);
-        g.drawImage(img, 0, sy, img.width, h, marge, por.height - h, img.width, h);
-      }
+      g.imageSmoothingEnabled = false;
+      g.clearRect(0, 0, por.width, por.height);
+      g.drawImage(img, 0, sy, img.width, h, marge, por.height - h, img.width, h);
     }
     $('dialogue').classList.toggle('narration', !p);
     dialogue.qui = l.qui;

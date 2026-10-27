@@ -328,18 +328,18 @@ Jeu.enregistrerCarte('rue', () => {
   // ---------------------------------------------------------------- HABITANTS
   const habitant = (o) => { const h = new Entites.Passant(Object.assign({ dialogue: (J) => Scenes.repliques(o.id, J) }, o)); C.pnj.push(h); return h; };
   habitant({ id: 'boulangere', x: 970, y: 478, regardeDefaut: 'down',
-    cfg: { modele: 'planche', peau: '#f0c4a0', cheveux: '#8a5a3a', coiffure: 'chignon', veste: '#a8484a', details: '#f4efe6', tablier: '#f4efe6', coupe: 'robe', pantalon: '#7a3a3a', semelles: '#3a2a2a' } });
+    cfg: { peau: '#f0c4a0', cheveux: '#8a5a3a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a2a2e', veste: '#a8484a', tablier: '#f4efe6', coupe: 'robe', pantalon: '#7a3a3a', chaussures: '#3a2a2a' } });
   habitant({ id: 'livreur', x: 340, y: 498, vitesse: 26,
     chemin: [{ x: 700, y: 498, pause: 2, regard: 'up' }, { x: 1040, y: 498, pause: 1.5, regard: 'up' }, { x: 340, y: 498, pause: 2, regard: 'left' }],
-    cfg: { modele: 'planche', peau: '#d8a07a', cheveux: '#2a2020', chapeau: 'casquette', couleurChapeau: '#4a5a7a', veste: '#4f6e52', details: '#e8c84a', pantalon: '#3e4252', semelles: '#d8d0c0' } });
+    cfg: { peau: '#d8a07a', cheveux: '#2a2020', coiffure: 'court', barbe: 'aucune', yeux: '#2a1d2e', chapeau: 'casquette', couleurChapeau: '#4a5a7a', ruban: '#2a3a5a', veste: '#5a7a5a', echarpe: '#e8c84a', pantalon: '#4a4a5a', chaussures: '#3a2a22' } });
   habitant({ id: 'colette', x: 140, y: 614, vitesse: 18,
     chemin: [{ x: 560, y: 614, pause: 3, regard: 'up' }, { x: 820, y: 614, pause: 2.5, regard: 'up' }, { x: 1450, y: 614, pause: 2, regard: 'down' }, { x: 140, y: 614, pause: 2, regard: 'down' }],
-    cfg: { modele: 'planche', peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', details: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', semelles: '#2a2026' } });
+    cfg: { peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a5a8a', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', echarpe: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', chaussures: '#2a2026' } });
   habitant({ id: 'fernand', x: 1110, y: 514, vitesse: 11,
     chemin: [{ x: 1380, y: 514, pause: 4, regard: 'up' }, { x: 1110, y: 514, pause: 4, regard: 'up' }],
-    cfg: { modele: 'planche', peau: '#e8c0a0', cheveux: '#dcd8e2', barbe: 'blanche', couleurBarbe: '#eceaf2', chapeau: 'melon', couleurChapeau: '#2a2630', ruban: '#4a3a3a', veste: '#5e4a3a', details: '#c9a040', pantalon: '#3a3440', semelles: '#2a2026' } });
+    cfg: { peau: '#e8c0a0', cheveux: '#dcd8e2', coiffure: 'court', barbe: 'pleine', couleurBarbe: '#ecebf0', lunettes: true, yeux: '#2a1d2e', chapeau: 'melon', couleurChapeau: '#2a2630', ruban: '#4a3a3a', veste: '#5e4a3a', echarpe: '#8a2a3a', pantalon: '#3a3440', chaussures: '#2a2026' } });
   habitant({ id: 'peintre', x: 718, y: 240, regardeDefaut: 'left',
-    cfg: { modele: 'planche', peau: '#e0b08a', cheveux: '#3a2a24', chapeau: 'beret', couleurChapeau: '#2a2a3a', veste: '#d8d0c0', details: '#c9483b', pantalon: '#4a5a7a', semelles: '#e0d8c8' } });
+    cfg: { peau: '#e0b08a', cheveux: '#3a2a24', coiffure: 'boucles', barbe: 'courte', yeux: '#2a1d2e', chapeau: 'beret', couleurChapeau: '#2a2a3a', veste: '#e8e0d0', echarpe: '#c9483b', pantalon: '#4a5a7a', chaussures: '#3a2a22' } });
 
   // ---------------------------------------------------------------- DUCHESSE ET LES CHATONS (cachés jusqu'à l'intro)
   const aristo = (o) => { const c = new Entites.ChatScript(Object.assign({ visible: false }, o)); C.pnj.push(c); return c; };

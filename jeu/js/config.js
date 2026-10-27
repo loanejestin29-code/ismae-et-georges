@@ -13,28 +13,17 @@ const CONFIG = {
   //  ISMAE — apparence
   // ------------------------------------------------------------------
   ismae: {
-    modele: 'planche',        // 'planche' (d'après ta planche de référence, voir sprite-ismae.js)
-    couleursOrigine: true,    // garde exactement les couleurs de la planche
-    // (les réglages ci-dessous ne servent qu'aux anciens modèles 'detaille' et 'simple')
-    peau: '#ecb994',          // teint
-    cheveux: '#6e4a31',       // brun
-    coiffure: 'degrade',      // 'degrade' | 'court' | 'boucles' | 'meche' | 'rase'
-    barbe: 'courte',          // 'aucune' | 'courte' | 'pleine'
-    couleurBarbe: '#a57859',  // barbe de quelques jours (null = couleur des cheveux)
-    lunettes: false,
-    couleurLunettes: '#2a2233',
-    yeux: '#3a62a0',          // bleus
-    tenue: 'blouson',         // 'blouson' (cuir ouvert + t-shirt + ceinture) | 'manteau'
-    veste: '#3b3946',         // blouson en cuir noir
-    reflets: '#7c7a92',       // reflets gris sur le cuir
-    tshirt: '#24222b',
-    ceinture: '#17161d',
-    boucle: '#d2d0dc',
-    echarpe: null,
-    pantalon: '#302e39',
-    coupe: 'large',           // 'large' (pantalon ample) | 'droit'
-    chaussures: '#25232c',
-    semelles: '#d9d7e2',
+    modele: 'inspire',        // petits yeux, pas de bouche, silhouette fine (dessin dans characters.js)
+    peau: '#e6b08a',          // teint
+    cheveux: '#6b4631',       // brun, en bataille
+    tenue: 'blouson',         // perfecto ouvert sur un t-shirt
+    veste: '#2b2a33',         // cuir noir
+    reflets: '#46455a',       // reflets sur le cuir
+    zips: '#a9a8b8',          // zips argentés
+    tshirt: '#1c1b22',
+    pantalon: '#2a2931',      // pantalon large
+    chaussures: '#8e8c9c',    // baskets grises…
+    semelles: '#eeedf4',      // …à semelle blanche
   },
 
   // ------------------------------------------------------------------
