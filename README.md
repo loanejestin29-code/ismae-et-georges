@@ -1,6 +1,6 @@
-# Ismae et Georges
+# Juste un indice…
 
-Une petite aventure en pixel art dans les rues de Paris, à jouer sur iPhone, à l'horizontale.
+Une petite aventure en pixel art avec Ismae et Georges, à jouer sur iPhone, à l'horizontale.
 
 Site statique en HTML, CSS et JavaScript, sans dépendance ni étape de build :
 

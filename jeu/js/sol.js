@@ -7,7 +7,7 @@
 const Sol = (() => {
   const S = PX.shade;
 
-  // pavés parisiens en rangées décalées
+  // vieux pavés en rangées décalées
   function paves(P, x, y, w, h, r, tons) {
     const T = tons || { base: ['#6f6b7d', '#77728a', '#686478', '#7a727c', '#716d84'], hi: '#928ea2', lo: '#55516a', joint: '#3f3b50' };
     P.rect(x, y, w, h, T.joint);

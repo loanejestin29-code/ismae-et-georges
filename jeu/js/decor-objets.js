@@ -7,7 +7,7 @@
 
 const Objets = (() => {
   const S = PX.shade;
-  const FONTE = { a: '#25332d', b: '#3b5146', hi: '#6a8a78', d: '#141c19' }; // fonte vert sapin parisien
+  const FONTE = { a: '#25332d', b: '#3b5146', hi: '#6a8a78', d: '#141c19' }; // fonte vert sapin
 
   function mk(w, h) { const c = PX.canvas(w, h); return { c, P: PX.painter(c) }; }
 
@@ -120,7 +120,7 @@ const Objets = (() => {
     return { img: c, ax: 14, ay: 15 };
   }
 
-  function fontaineWallace() {
+  function fontaine() {
     const { c, P } = mk(22, 44);
     const A = FONTE.a, B = FONTE.b, H = FONTE.hi;
     // socle
@@ -140,22 +140,74 @@ const Objets = (() => {
     return { img: c, ax: 11, ay: 43 };
   }
 
-  function colonneMorris(seed) {
+  // colonne couverte d'affiches de concerts de jazz
+  function colonneAffiches(seed) {
     const r = PX.rng(seed);
-    const { c, P } = mk(22, 52);
-    P.rect(2, 46, 18, 6, FONTE.a); P.hline(2, 46, 18, FONTE.hi); P.vline(19, 46, 6, FONTE.d);
-    P.rect(3, 12, 16, 34, '#e9dcc0');
-    const cols = ['#c9483b', '#e3b44a', '#3b5f9a', '#f2e6cc', '#6a3e6e', '#2f7a5a', '#e98a5a'];
-    for (let y = 13; y < 45; y += 8) for (let x = 3; x < 19; x += 5) {
+    const { c, P } = mk(25, 56);
+    P.rect(2, 50, 21, 6, FONTE.a); P.hline(2, 50, 21, FONTE.hi); P.vline(22, 50, 6, FONTE.d);
+    P.rect(3, 12, 19, 38, '#e9dcc0');
+    P.draw(Batiments.affiche(seed, 'JAZZ'), 4, 14);
+    const cols = ['#c9483b', '#e3b44a', '#3b5f9a', '#2f7a5a', '#6a3e6e'];
+    for (let x = 3; x < 21; x += 6) {
       const col = r.pick(cols);
-      P.rect(x, y, 5, 7, col); P.hline(x, y, 5, S(col, 0.25)); P.rect(x + 1, y + 2, 3, 1, S(col, -0.35));
-      if (r.chance(0.5)) P.rect(x + 1, y + 4, 2, 2, S(col, 0.4));
+      P.rect(x, 38, 6, 11, col); P.hline(x, 38, 6, S(col, 0.25));
+      P.rect(x + 2, 41, 2, 3, '#1d1626'); P.px(x + 1, 40, '#1d1626'); P.px(x + 4, 40, '#1d1626'); P.px(x + 2, 46, '#f6ead2'); P.px(x + 3, 46, '#f6ead2');
     }
-    P.vline(3, 12, 34, 'rgba(255,240,210,0.35)'); P.rect(16, 12, 3, 34, 'rgba(30,20,50,0.28)');
-    P.rect(1, 9, 20, 3, FONTE.a); P.hline(1, 9, 20, FONTE.hi);
-    P.ellipse(11, 6, 8, 3, FONTE.b); P.ellipse(10, 5, 6, 2, FONTE.hi);
-    P.rect(10, 0, 2, 3, FONTE.a); P.px(10, 0, '#d9a440');
-    return { img: c, ax: 11, ay: 51 };
+    P.vline(3, 12, 38, 'rgba(255,240,210,0.35)'); P.rect(19, 12, 3, 38, 'rgba(30,20,50,0.28)');
+    P.rect(1, 9, 23, 3, FONTE.a); P.hline(1, 9, 23, FONTE.hi);
+    P.ellipse(12, 6, 9, 3, FONTE.b); P.ellipse(11, 5, 7, 2, FONTE.hi);
+    P.rect(11, 0, 2, 3, FONTE.a); P.px(11, 0, '#d9a440');
+    return { img: c, ax: 12, ay: 55 };
+  }
+
+  // chevalet de trottoir avec une affiche de concert
+  function chevaletAffiche(seed, mot) {
+    const { c, P } = mk(23, 31);
+    const B = '#6a4630', Bc = '#9a6a44';
+    Objets.line(P, 3, 30, 6, 1, B, 2); Objets.line(P, 19, 30, 16, 1, B, 2);
+    P.rect(4, 2, 15, 26, B); P.hline(4, 2, 15, Bc);
+    P.draw(Batiments.affiche(seed, mot), 3, 3);
+    P.rect(5, 0, 13, 2, B); P.hline(5, 0, 13, Bc);
+    return { img: c, ax: 11, ay: 30 };
+  }
+
+  // petite scène en bois pour les chats musiciens (plancher vu de dessus + façade)
+  function scene(w, prof) {
+    const H = prof + 9;
+    const { c, P } = mk(w, H);
+    for (let y = 0; y < prof; y += 4) {
+      P.rect(0, y, w, 4, y % 8 ? '#8a5a36' : '#7e5232'); P.hline(0, y, w, '#a87448');
+      for (let x = (y / 4) % 2 ? 6 : 18; x < w; x += 24) P.vline(x, y, 4, '#5e3c26');
+    }
+    P.rect(0, 0, w, 1, '#c08a58');
+    P.rect(0, prof, w, 9, '#5a2a2e'); P.hline(0, prof, w, '#c9a040'); P.hline(0, prof + 1, w, '#7a3438');
+    for (let x = 3; x < w - 3; x += 8) { P.rect(x, prof + 3, 4, 4, '#7a3438'); P.px(x + 1, prof + 4, '#c9a040'); }
+    P.rect(0, prof + 8, w, 1, '#2a1418');
+    return { img: c, ax: 0, ay: H - 1 };
+  }
+
+  // banderole « MATOUS SWING » tendue au-dessus de la scène
+  function banderole(mot) {
+    const larg = mot.length * 4 + 9;
+    const { c, P } = mk(larg + 6, 20);
+    P.vline(1, 0, 20, '#4a3426'); P.vline(larg + 4, 0, 20, '#4a3426');
+    P.rect(3, 2, larg, 11, '#26365e'); P.rect(3, 2, larg, 1, '#3e5288'); P.rect(3, 12, larg, 1, '#141c38');
+    P.hline(4, 3, larg - 2, '#e8b54a'); P.hline(4, 11, larg - 2, '#e8b54a');
+    Batiments.texte(P, mot, 8, 5, '#f6ead2');
+    P.px(5, 7, '#ff8ab0'); P.px(larg, 7, '#ff8ab0');
+    return { img: c, ax: 0, ay: 19 };
+  }
+
+  // chevalet de peintre avec une toile (un chat noir, évidemment)
+  function chevaletPeintre() {
+    const { c, P } = mk(18, 30);
+    const B = '#7a5234';
+    Objets.line(P, 4, 29, 8, 2, B, 1); Objets.line(P, 14, 29, 10, 2, B, 1); Objets.line(P, 9, 29, 9, 10, B, 1);
+    P.rect(2, 4, 14, 13, '#3a2a24'); P.rect(3, 5, 12, 11, '#f0e2c0');
+    P.rect(3, 5, 12, 5, '#3a5a9a'); P.ellipse(12, 7, 1, 1, '#f6ead2');
+    P.rect(6, 11, 4, 4, '#1d1626'); P.px(6, 10, '#1d1626'); P.px(9, 10, '#1d1626'); P.px(7, 12, '#d8e35c'); P.px(10, 14, '#1d1626'); P.px(11, 13, '#1d1626');
+    P.rect(2, 17, 14, 1, B);
+    return { img: c, ax: 9, ay: 29 };
   }
 
   function kiosque() {
@@ -437,8 +489,8 @@ const Objets = (() => {
   }
 
   return {
-    FONTE, line, lampadaire, platane, arbreFeuillu, banc, fontaineWallace, colonneMorris, kiosque, tableCafe, chaiseBistrot,
+    FONTE, line, lampadaire, platane, arbreFeuillu, banc, fontaine, colonneAffiches, kiosque, tableCafe, chaiseBistrot,
     etalFleurs, boiteBouquiniste, borne, caisses, poubelles, velo, pompe, barriere, pot, lanterneMurale, linge, guirlande, peniche, grandSapin,
-    voiture, barque, echelle, tonneau,
+    voiture, barque, echelle, tonneau, chevaletAffiche, scene, banderole, chevaletPeintre,
   };
 })();

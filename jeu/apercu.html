@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>Aperçu des personnages</title>
 <style>
   body { margin: 0; background: #1b1626; color: #e9dcc6; font: 14px/1.4 system-ui, sans-serif; padding: 16px; }
@@ -18,63 +19,33 @@
 <script src="js/pixel.js"></script>
 <script src="js/config.js"></script>
 <script src="js/characters.js"></script>
-<script src="js/decor-batiments.js"></script>
+<script src="js/decor-objets.js"></script>
 <script>
-  const S = 5;
-  const ismae = Sprites.person(CONFIG.ismae);
-  const georges = Sprites.cat('georges');
-  const autres = ['blanc', 'roux', 'gris', 'tigre', 'siamois'].map(Sprites.cat);
-  const pig = Sprites.pigeon();
+  const S = 4, W = 200, H = 150;
   const c = document.getElementById('c');
-  c.width = 160 * S; c.height = 150 * S;
+  c.width = W * S; c.height = H * S;
   const g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
   g.scale(S, S);
-  g.fillStyle = '#8f8676'; g.fillRect(0, 0, 160, 150);
-  let x = 2;
-  for (const d of ['down', 'up', 'left', 'right']) {
-    g.drawImage(ismae[d].idle, x, 2);
-    ismae[d].walk.forEach((f, i) => g.drawImage(f, x, 32 + i * 0));
-    x += 20;
-  }
-  x = 2;
-  ismae.down.walk.concat(ismae.right.walk).forEach((f) => { g.drawImage(f, x, 32); x += 19; });
-  x = 2;
-  georges.walkR.concat(georges.down, georges.up).forEach((f) => { g.drawImage(f, x, 64); x += f.width + 2; });
-  x = 2;
-  georges.sit.concat(georges.sitR, georges.sleep).forEach((f) => { g.drawImage(f, x, 82); x += f.width + 2; });
-  x = 2;
-  autres.forEach((a) => { g.drawImage(a.sit[0], x, 102); g.drawImage(a.walkR[0], x, 120); x += 24; });
-  x = 126;
-  ['stand', 'peck', 'fly1', 'fly2'].forEach((k, i) => g.drawImage(pig[k], x + (i % 2) * 12, 102 + Math.floor(i / 2) * 12));
-
-  // ---- quelques immeubles
-  if (typeof Batiments !== 'undefined') {
-    const specs = [
-      { w: 110, facade: 'creme', boutique: 'fromagerie', seed: 3 },
-      { w: 150, facade: 'ocre', boutique: 'cafe', seed: 5 },
-      { w: 120, facade: 'rose', boutique: 'fleuriste', seed: 9, lierre: 'droite' },
-      { w: 180, facade: 'gris', boutique: 'carrefour', seed: 11 },
-      { w: 130, facade: 'ocre', boutique: 'librairie', style: 'ancien', etages: 4, volets: '#4c6f96', seed: 13 },
-      { w: 140, facade: 'creme', boutique: 'hotel', seed: 17 },
-    ];
-    const bs = specs.map(Batiments.building);
-    const B = 3;
-    const c2 = document.createElement('canvas');
-    const tw = bs.reduce((a, b) => a + b.w, 0);
-    c2.width = tw * B; c2.height = 220 * B;
-    document.body.appendChild(c2);
-    const g2 = c2.getContext('2d');
-    g2.imageSmoothingEnabled = false;
-    g2.scale(B, B);
-    g2.fillStyle = '#6b6878'; g2.fillRect(0, 0, tw, 220);
-    let bx = 0;
-    bs.forEach((b) => { g2.drawImage(b.img, bx, 215 - b.h); bx += b.w; });
-    g2.fillStyle = '#ffffff'; g2.fillRect(0, 0, 200, 40);
-    g2.drawImage(Batiments.carrefourLogo('petit'), 4, 4);
-    g2.drawImage(Batiments.carrefourLogo('grand'), 26, 4);
-    g2.drawImage(Batiments.carrefourLogo('grand', 2), 54, 4);
-  }
+  g.fillStyle = '#8f8676'; g.fillRect(0, 0, W, H);
+  const ligne = (imgs, y, pas) => { let x = 2; imgs.forEach((im) => { g.drawImage(im, x, y); x += pas || im.width + 2; }); };
+  const ismae = Sprites.person(CONFIG.ismae);
+  ligne([ismae.down.idle, ismae.up.idle, ismae.left.idle, ismae.right.idle, ...ismae.down.walk, ...ismae.right.walk], 2, 19);
+  const georges = Sprites.cat('georges'), poses = Sprites.georgesPoses();
+  ligne([georges.sit[0], georges.walkR[0], poses.dosRondR, poses.herisseR, poses.chuteR], 34);
+  const duchesse = Sprites.cat('duchesse');
+  const k = ['marie', 'toulouse', 'berlioz'].map(Sprites.chaton);
+  ligne([duchesse.sit[0], duchesse.walkR[0], duchesse.sitR[0], ...k.map((s) => s.sit[0]), ...k.map((s) => s.walkR[0]), k[1].dosRondR[0], k[1].dosRondR[1], k[2].rire[0]], 54);
+  const m = Object.keys(Sprites.MUSICIENS).map((t) => Sprites.musicien(t));
+  ligne(m.map((f) => f[0]).concat(m.map((f) => f[1])), 76, 33);
+  const pnj = [
+    { peau: '#f0c4a0', cheveux: '#8a5a3a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a2a2e', veste: '#a8484a', tablier: '#f4efe6', coupe: 'robe', pantalon: '#7a3a3a', chaussures: '#3a2a2a' },
+    { peau: '#d8a07a', cheveux: '#2a2020', coiffure: 'court', barbe: 'aucune', yeux: '#2a1d2e', chapeau: 'casquette', couleurChapeau: '#4a5a7a', ruban: '#2a3a5a', veste: '#5a7a5a', echarpe: '#e8c84a', pantalon: '#4a4a5a', chaussures: '#3a2a22' },
+    { peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a5a8a', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', echarpe: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', chaussures: '#2a2026' },
+    { peau: '#e8c0a0', cheveux: '#dcd8e2', coiffure: 'court', barbe: 'pleine', couleurBarbe: '#ecebf0', lunettes: true, yeux: '#2a1d2e', chapeau: 'melon', couleurChapeau: '#2a2630', ruban: '#4a3a3a', veste: '#5e4a3a', echarpe: '#8a2a3a', pantalon: '#3a3440', chaussures: '#2a2026' },
+    { peau: '#e0b08a', cheveux: '#3a2a24', coiffure: 'boucles', barbe: 'courte', yeux: '#2a1d2e', chapeau: 'beret', couleurChapeau: '#2a2a3a', veste: '#e8e0d0', echarpe: '#c9483b', pantalon: '#4a5a7a', chaussures: '#3a2a22' },
+  ].map(Sprites.person);
+  ligne(pnj.map((p) => p.down.idle).concat(pnj.map((p) => p.right.walk[0])), 112, 19);
 </script>
 </body>
 </html>

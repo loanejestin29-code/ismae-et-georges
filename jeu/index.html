@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Ismae &amp; Georges">
+<meta name="apple-mobile-web-app-title" content="Juste un indice">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#151026">
+<meta name="theme-color" content="#120d22">
 <meta name="robots" content="noindex, nofollow">
 <link rel="apple-touch-icon" href="../icone.png">
 <link rel="icon" href="../icone.png">
-<title>Ismae et Georges</title>
+<title>Juste un indice…</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap">
 <style>
-  /* Ambiance unique (nuit parisienne) : fond nuit, encre crème, or des réverbères */
+  /* Nuit d'hiver : bleu nuit profond, crème, or des réverbères, rouge velours du club de jazz */
   :root {
-    --nuit: #151026; --nuit-2: #221a3a; --encre: #f6ead2; --encre-2: #c9b99a; --or: #e8b54a; --rouge: #c9483b;
+    --nuit: #120d22; --nuit-2: #221a3a; --nuit-3: #2e2450; --encre: #f6ead2; --encre-2: #c9b99a; --or: #e8b54a; --or-2: #9a6a20; --rouge: #c9483b;
     --pixel: 'Pixelify Sans', ui-monospace, Menlo, Consolas, monospace;
     color-scheme: dark;
   }
@@ -28,24 +28,38 @@
   body { position: fixed; inset: 0; font-family: var(--pixel); }
   #ecran { position: fixed; inset: 0; width: 100vw; height: 100%; display: block; outline: none; touch-action: none;
     image-rendering: pixelated; image-rendering: crisp-edges; }
+  canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
 
-  /* ---------- boîte de dialogue ---------- */
-  #dialogue { position: fixed; left: 50%; transform: translateX(-50%);
-    bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: min(600px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
-    box-sizing: border-box; padding: 14px 18px 16px; background: rgba(21, 16, 38, 0.94); border: 3px solid var(--or);
-    box-shadow: 0 0 0 3px var(--nuit), 0 0 0 6px rgba(232, 181, 74, 0.35), 0 10px 30px rgba(0, 0, 0, 0.5);
-    font-size: 19px; line-height: 1.35; min-height: 62px; cursor: pointer; z-index: 5; }
+  /* ---------- bulle de dialogue en pixel art (coins crantés) ---------- */
+  #dialogue { position: fixed; z-index: 5; box-sizing: border-box; cursor: pointer;
+    left: 50%; transform: translateX(-50%); bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+    width: min(620px, calc(100vw - 40px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+    display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px 14px;
+    background: var(--nuit-2); font-size: 18px; line-height: 1.35; min-height: 64px;
+    box-shadow:
+      0 -3px 0 0 var(--encre), 0 3px 0 0 var(--encre), -3px 0 0 0 var(--encre), 3px 0 0 0 var(--encre),
+      0 -6px 0 0 #0b0816, 0 6px 0 0 #0b0816, -6px 0 0 0 #0b0816, 6px 0 0 0 #0b0816,
+      -3px -3px 0 0 #0b0816, 3px -3px 0 0 #0b0816, -3px 3px 0 0 #0b0816, 3px 3px 0 0 #0b0816,
+      0 10px 0 2px rgba(0, 0, 0, 0.35); }
+  #dialogue::before { content: ""; position: absolute; inset: 3px; border: 2px solid var(--nuit-3); pointer-events: none; }
+  #dialogue.narration { background: #1a1430; font-style: normal; }
+  #dialogue.narration #dlg-texte { color: var(--encre-2); }
+  #dlg-portrait { flex: none; width: 68px; height: 60px; background: radial-gradient(circle at 50% 70%, #3a2f5e, #1a1430 70%);
+    box-shadow: 0 0 0 2px #0b0816, 0 0 0 4px var(--or-2); margin-top: 2px; object-fit: contain; object-position: 50% 100%; }
+  .dlg-corps { flex: 1; min-width: 0; }
+  #dlg-nom { position: absolute; top: -20px; left: 18px; padding: 2px 10px 1px; font-size: 14px; font-weight: 700; color: var(--nuit);
+    background: var(--teinte, var(--or)); box-shadow: 0 -2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816, 0 2px 0 0 #0b0816; letter-spacing: 0.04em; }
   #dlg-texte { margin: 0; text-wrap: pretty; }
   #dlg-suite { position: absolute; right: 12px; bottom: 6px; color: var(--or); animation: rebond 0.8s steps(2) infinite; }
   @keyframes rebond { 50% { transform: translateY(3px); } }
-  #dialogue { bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
   @media (orientation: landscape) and (max-height: 540px) {
-    #dialogue { left: calc(16px + env(safe-area-inset-left, 0px)); transform: none; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-      width: min(560px, calc(100vw - 230px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))); font-size: 17px; }
+    #dialogue { left: calc(18px + env(safe-area-inset-left, 0px)); transform: none; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      width: min(580px, calc(100vw - 236px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))); font-size: 16px; }
+    #dlg-portrait { width: 51px; height: 45px; }
     #aide { font-size: 12px; }
   }
 
-  /* ---------- commandes tactiles (le jeu se joue sur iPhone) ---------- */
+  /* ---------- commandes tactiles ---------- */
   .btn { position: fixed; font-family: var(--pixel); color: var(--encre); background: rgba(34, 26, 58, 0.72);
     border: 3px solid rgba(246, 234, 210, 0.55); border-radius: 50%; touch-action: none; -webkit-tap-highlight-color: transparent; z-index: 4; }
   #btn-a { right: calc(22px + env(safe-area-inset-right, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px));
@@ -55,6 +69,9 @@
   #btn-b { right: calc(110px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     width: 58px; height: 58px; font-size: 13px; }
   #btn-b.actif { border-color: var(--or); color: var(--nuit); background: var(--or); }
+  #btn-son { right: calc(16px + env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px));
+    width: 40px; height: 40px; border-radius: 8px; font-size: 20px; line-height: 1; padding: 0; }
+  #btn-son.coupe { opacity: 0.55; text-decoration: line-through; }
   #joy { position: fixed; width: 108px; height: 108px; margin: -54px 0 0 -54px; border-radius: 50%; pointer-events: none;
     background: rgba(246, 234, 210, 0.1); border: 3px solid rgba(246, 234, 210, 0.35); z-index: 3; }
   #joy-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border-radius: 50%;
@@ -62,37 +79,38 @@
 
   /* ---------- aide ---------- */
   #aide { position: fixed; left: calc(16px + env(safe-area-inset-left, 0px)); top: calc(14px + env(safe-area-inset-top, 0px));
-    font-size: 14px; line-height: 1.5; padding: 8px 12px; background: rgba(21, 16, 38, 0.8); border: 2px solid rgba(232, 181, 74, 0.6);
-    transition: opacity 1s; z-index: 4; max-width: calc(100vw - 64px); }
+    font-size: 14px; line-height: 1.5; padding: 8px 12px; background: rgba(18, 13, 34, 0.82);
+    box-shadow: 0 -2px 0 0 var(--or-2), 0 2px 0 0 var(--or-2), -2px 0 0 0 var(--or-2), 2px 0 0 0 var(--or-2);
+    transition: opacity 1s; z-index: 4; max-width: calc(100vw - 110px); }
   #aide.fini { opacity: 0; pointer-events: none; }
   #aide kbd { font-family: var(--pixel); color: var(--or); }
 
   /* ---------- écran titre ---------- */
-  #titre { position: fixed; inset: 0; display: grid; place-items: center; z-index: 10;
-    background: radial-gradient(ellipse at 50% 40%, rgba(21, 16, 38, 0.35), rgba(21, 16, 38, 0.9) 70%); transition: opacity 0.45s; }
+  #titre { position: fixed; inset: 0; z-index: 10; background: var(--nuit); transition: opacity 0.6s; }
   #titre.fini { opacity: 0; }
-  .carton { text-align: center; padding: 24px max(16px, env(safe-area-inset-left, 0px)); max-width: 560px; display: grid; gap: 14px; justify-items: center; }
-  .surtitre { font-size: 15px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--encre-2); margin: 0; }
-  h1 { font-size: clamp(40px, 9vw, 72px); line-height: 0.95; margin: 0; color: var(--encre); font-weight: 700; text-wrap: balance;
-    text-shadow: 4px 4px 0 var(--rouge), 8px 8px 0 rgba(0, 0, 0, 0.35); }
-  h1 em { font-style: normal; color: var(--or); }
-  .sous { font-size: 18px; color: var(--encre-2); margin: 0 0 6px; }
-  #btn-jouer { font-family: var(--pixel); font-size: 22px; font-weight: 600; padding: 12px 30px; color: var(--nuit); background: var(--or);
-    border: 0; box-shadow: 0 4px 0 #9a6a20, 0 0 0 3px var(--nuit), 0 0 0 6px var(--or); cursor: pointer; }
-  #btn-jouer:focus-visible { outline: 3px dashed var(--encre); outline-offset: 8px; }
-  #btn-jouer:active { transform: translateY(3px); box-shadow: 0 1px 0 #9a6a20, 0 0 0 3px var(--nuit), 0 0 0 6px var(--or); }
-  #btn-jouer:disabled { opacity: 0.6; }
-  .commandes { font-size: 14px; color: var(--encre-2); line-height: 1.6; margin: 6px 0 0; }
-  .commandes kbd { font-family: var(--pixel); color: var(--encre); background: var(--nuit-2); padding: 0 5px; border: 1px solid #4a3f66; }
+  #titre-scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .titre-haut { position: absolute; left: 0; right: 0; top: calc(6% + env(safe-area-inset-top, 0px)); display: grid; justify-items: center; gap: 6px;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)); text-align: center; pointer-events: none; }
+  .titre-sur { margin: 0; font-size: 14px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--encre-2); text-shadow: 0 2px 0 #0b0816; }
+  #titre-logo { display: block; width: min(86vw, 640px); height: auto; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)); }
+  .titre-bas { position: absolute; left: 0; right: 0; bottom: calc(7% + env(safe-area-inset-bottom, 0px)); display: grid; justify-items: center; gap: 12px;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)); text-align: center; }
+  #btn-jouer { font-family: var(--pixel); font-size: 21px; font-weight: 700; padding: 12px 28px 11px; color: var(--nuit); background: var(--or);
+    border: 0; cursor: pointer; letter-spacing: 0.02em;
+    box-shadow: 0 -3px 0 0 #fff1c0 inset, 0 -4px 0 0 #0b0816, 0 4px 0 0 #0b0816, -4px 0 0 0 #0b0816, 4px 0 0 0 #0b0816, 0 8px 0 0 var(--or-2), 0 10px 0 2px rgba(0, 0, 0, 0.4);
+    animation: appel 2.4s ease-in-out infinite; }
+  #btn-jouer:focus-visible { outline: 3px dashed var(--encre); outline-offset: 10px; }
+  #btn-jouer:active { transform: translateY(4px); box-shadow: 0 -3px 0 0 #fff1c0 inset, 0 -4px 0 0 #0b0816, 0 4px 0 0 #0b0816, -4px 0 0 0 #0b0816, 4px 0 0 0 #0b0816, 0 4px 0 0 var(--or-2); }
+  #btn-jouer:disabled { opacity: 0.6; animation: none; }
+  @keyframes appel { 50% { transform: translateY(-2px); } }
+  .commandes { margin: 0; font-size: 13px; color: var(--encre-2); text-shadow: 0 2px 0 #0b0816; }
+  .commandes kbd { font-family: var(--pixel); color: var(--encre); background: var(--nuit-2); padding: 0 5px; }
   #titre-erreur { color: #ff9a8a; font-size: 14px; }
-  /* écran titre sur un téléphone à l'horizontale (peu de hauteur) */
   @media (max-height: 460px) {
-    .carton { gap: 8px; padding-block: 10px; }
-    h1 { font-size: 50px; }
-    .surtitre { font-size: 13px; }
-    .sous { font-size: 15px; margin: 0; }
-    #btn-jouer { font-size: 19px; padding: 9px 26px; }
-    .commandes { font-size: 13px; margin: 2px 0 0; }
+    .titre-haut { top: calc(4% + env(safe-area-inset-top, 0px)); }
+    #titre-logo { width: min(64vw, 520px); }
+    .titre-bas { gap: 8px; bottom: calc(5% + env(safe-area-inset-bottom, 0px)); }
+    #btn-jouer { font-size: 18px; padding: 10px 22px 9px; }
   }
 
   /* ---------- le jeu se joue à l'horizontale ---------- */
@@ -105,19 +123,25 @@
   .telephone::after { content: ""; position: absolute; left: 50%; bottom: 4px; width: 8px; height: 3px; margin-left: -4px; background: var(--or); }
   @keyframes pivoter { 0%, 45% { transform: rotate(0deg); } 50%, 95% { transform: rotate(-90deg); } }
   @media (orientation: portrait) and (max-width: 900px) { #tourner { display: grid; } }
-  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
-<canvas id="ecran" tabindex="0" aria-label="Jeu : la rue parisienne"></canvas>
+<canvas id="ecran" tabindex="0" aria-label="Le jeu"></canvas>
 
 <div id="joy" hidden><div id="joy-knob"></div></div>
 <div id="tactile">
   <button class="btn" id="btn-b" type="button" aria-label="Courir">Courir</button>
   <button class="btn" id="btn-a" type="button" aria-label="Interagir">A</button>
+  <button class="btn" id="btn-son" type="button" aria-label="Couper la musique">♪</button>
 </div>
 
-<div id="dialogue" hidden role="status" aria-live="polite"><p id="dlg-texte"></p><span id="dlg-suite" aria-hidden="true">▼</span></div>
+<div id="dialogue" hidden role="status" aria-live="polite">
+  <span id="dlg-nom" hidden></span>
+  <canvas id="dlg-portrait" class="pixel" width="34" height="30" hidden></canvas>
+  <div class="dlg-corps"><p id="dlg-texte"></p></div>
+  <span id="dlg-suite" aria-hidden="true">▼</span>
+</div>
 
 <div id="aide" hidden>Pouce gauche sur l'écran pour marcher · <kbd>A</kbd> pour regarder et parler</div>
 
@@ -129,12 +153,14 @@
 </div>
 
 <div id="titre">
-  <div class="carton">
-    <p class="surtitre">Paris · un soir d'hiver</p>
-    <h1>Ismae <em>&amp;</em> Georges</h1>
-    <p class="sous">Une petite promenade dans le quartier</p>
-    <button id="btn-jouer" type="button" disabled>Commencer</button>
-    <p class="commandes">Pouce gauche : marcher · pouce droit : bouton <kbd>A</kbd> pour interagir</p>
+  <canvas id="titre-scene" class="pixel" aria-hidden="true"></canvas>
+  <div class="titre-haut">
+    <p class="titre-sur">Ismae &amp; Georges</p>
+    <canvas id="titre-logo" class="pixel" role="img" aria-label="Juste un indice…"></canvas>
+  </div>
+  <div class="titre-bas">
+    <button id="btn-jouer" type="button" disabled>Commencer l'aventure</button>
+    <p class="commandes">Pouce gauche : marcher · pouce droit : <kbd>A</kbd> pour interagir</p>
     <p id="titre-erreur" hidden></p>
   </div>
 </div>
@@ -146,10 +172,13 @@
 <script src="js/decor-objets.js"></script>
 <script src="js/sol.js"></script>
 <script src="js/carte.js"></script>
+<script src="js/musique.js"></script>
 <script src="js/entites.js"></script>
 <script src="js/moteur.js"></script>
+<script src="js/scenes.js"></script>
 <script src="js/carte-rue.js"></script>
 <script src="js/carte-superette.js"></script>
+<script src="js/titre.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

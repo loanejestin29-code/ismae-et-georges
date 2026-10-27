@@ -1,5 +1,5 @@
 // =====================================================================
-//  decor-batiments.js — génère les immeubles parisiens (façades en
+//  decor-batiments.js — génère les immeubles anciens (façades en
 //  pierre, balcons en fer forgé, toits en zinc, lucarnes, cheminées)
 //  et les devantures de boutiques. Tout est dessiné au pixel près.
 // =====================================================================
@@ -126,15 +126,27 @@ const Batiments = (() => {
 
   // ------------------------------------------------------------ logo Carrefour
   // Flèche rouge à gauche, flèche bleue à droite, « C » blanc entre les deux.
-  // Dessiné à la main en deux tailles (la moitié haute, la moitié basse est symétrique).
+  // Converti en pixels depuis le logo officiel (losange : petite flèche rouge, grand « C » bleu).
   const LOGO = {
-    petit: ['....RR.BB......', '...RR..BBBB....', '..RR..BBBBBB...', '.RR..BBBBBBBBB.', 'RRR..BBBBBBBBBB'],
-    grand: ['.....RRR..BB.........', '....RRR...BBB........', '...RRR...BBBBBB......', '..RRR...BBBBBBBB.....',
-      '.RRR...BBBBBBBBBBB...', 'RRRR...BBBBBBBBBBBB..', 'RRR....BBBBBBBBBBBBBB'],
+    petit: ['.........BBB........', '........BBBB..B.....', '....R...BBBB...B....', '...R...BBBBB...BB...', '..RR...BBBBB..BBBB..',
+      '.RRR...BBBBBBBBBBBB.', 'RRRR...BBBBBBBBBBBBB', '.RRR...BBBBBBBBBBBBB', '..RR...BBBBB..BBBB..', '...R...BBBBB...BB...',
+      '....R...BBBB...B....', '........BBBB..B.....', '.........BBB........'],
+    moyen: ['............BBB...........', '...........BBBBB..........', '......R...BBBBBB...B......', '.....R....BBBBB....BB.....',
+      '....RR....BBBBB....BBB....', '..RRR....BBBBBB....BBBBB..', '.RRRR....BBBBBBBB.BBBBBBB.', 'RRRRR....BBBBBBBBBBBBBBBBB',
+      'RRRRR....BBBBBBBBBBBBBBBBB', 'RRRRR....BBBBBBBBBBBBBBBBB', '.RRRR....BBBBBBBBBBBBBBBB.', '..RRR....BBBBBB....BBBBB..',
+      '...RRR....BBBBB....BBBB...', '.....R....BBBBB....BB.....', '......R...BBBBBB...B......', '...........BBBBB..........',
+      '............BBB...........'],
+    grand: ['...............BBBBB..............', '.........R....BBBBBBB...B.........', '........R.....BBBBBBB....B........',
+      '.......RR....BBBBBBBB....BB.......', '......RR.....BBBBBBB.....BBB......', '.....RRR.....BBBBBBB.....BBBB.....',
+      '....RRR.....BBBBBBBB.....BBBBB....', '...RRRR.....BBBBBBBB.....BBBBBB...', '..RRRRR.....BBBBBBBBBB.BBBBBBBBB..',
+      '.RRRRRR.....BBBBBBBBBBBBBBBBBBBBB.', 'RRRRRRR.....BBBBBBBBBBBBBBBBBBBBBB', 'RRRRRRR.....BBBBBBBBBBBBBBBBBBBBBB',
+      '.RRRRRR.....BBBBBBBBBBBBBBBBBBBBB.', '..RRRRR.....BBBBBBBBBBBBBBBBBBBB..', '...RRRR.....BBBBBBBB.....BBBBBB...',
+      '....RRR.....BBBBBBBB.....BBBBB....', '.....RRR.....BBBBBBB.....BBBB.....', '......RR.....BBBBBBB.....BBB......',
+      '.......RR....BBBBBBBB....BB.......', '........R.....BBBBBBB....B........', '.........R....BBBBBBB...B.........',
+      '...............BBBBB..............'],
   };
   function carrefourLogo(taille = 'petit', scale = 1) {
-    const half = LOGO[taille];
-    const rows = half.concat(half.slice(0, -1).reverse());
+    const rows = LOGO[taille] || LOGO.petit;
     const src = PX.fromRows(rows, { R: '#e1251b', B: '#1d4f9c' });
     if (scale === 1) return src;
     const c = PX.canvas(src.width * scale, src.height * scale);
@@ -214,6 +226,13 @@ const Batiments = (() => {
     } else if (type === 'pharmacie') {
       P.rect(x, y, w, h, '#d9f0e6'); P.rect(x, y, w, 3, '#f4fff8');
       for (let s = 0; s < 3; s++) { shelf(y + 4 + s * 4); for (let i = 0; i < w; i += 2) if (r.chance(0.7)) P.rect(x + i, y + 2 + s * 4, 1, 2, r.pick(['#ffffff', '#5fbf7a', '#e8e0f8'])); }
+    } else if (type === 'epicerie') {
+      shelf(y + 6); shelf(y + h - 3);
+      for (let i = 1; i < w - 2; i += 3) { P.rect(x + i, y + 2, 2, 4, r.pick(['#c9483b', '#3a6aa8', '#e8b54a', '#5a9a4a', '#f4ecd8'])); P.px(x + i, y + 2, '#fff4d8'); }
+      for (let i = 1; i < w - 3; i += 5) {
+        const f = r.pick(['#f08a24', '#d8303a', '#7cc04a', '#f2d040']);
+        P.ellipse(x + i + 1, y + h - 5, 1, 1, f); P.ellipse(x + i + 3, y + h - 5, 1, 1, f); P.ellipse(x + i + 2, y + h - 7, 1, 1, f);
+      }
     } else if (type === 'atelier') {
       P.rect(x, y, w, h, '#f2dcae');
       P.rect(x + 2, y + 2, 7, 6, '#4b6ea8'); P.rect(x + 3, y + 3, 5, 4, '#e9b45a'); P.px(x + 5, y + 5, '#222033');
@@ -259,6 +278,7 @@ const Batiments = (() => {
   function shopfront(P, type, x0, y0, w, h, pal, r, out) {
     if (type === 'porte' || type === 'hotel') return residence(P, type, x0, y0, w, h, pal, r, out);
     if (type === 'carrefour') return carrefour(P, x0, y0, w, h, pal, r, out);
+    if (type === 'jazzclub') return jazzclub(P, x0, y0, w, h, pal, r, out);
     const s = SHOPS[type];
     const wood = s.wood, wd = S(wood, -0.35), wl = S(wood, 0.22);
     const fx = x0 + 3, fw = w - 6;
@@ -323,47 +343,133 @@ const Batiments = (() => {
     }
   }
 
+  // petite épicerie rétro : devanture en bois peint bleu nuit, plaque émaillée avec le logo seul,
+  // store rayé, vitrines chaleureuses et une enseigne suspendue visible de loin
   function carrefour(P, x0, y0, w, h, pal, r, out) {
-    const AL = '#c9ccd3', ALd = '#8b909b', ALl = '#eef0f4', BLUE = '#1d4f9c';
-    P.rect(x0, y0, w, h, AL);
-    P.vline(x0, y0, h, ALl); P.vline(x0 + w - 1, y0, h, ALd);
-    // bandeau blanc avec le logo uniquement (pas de texte)
-    P.rect(x0 + 2, y0, w - 4, 15, '#f7f8fa');
-    P.hline(x0 + 2, y0, w - 4, '#ffffff');
-    P.hline(x0 + 2, y0 + 15, w - 4, BLUE); P.hline(x0 + 2, y0 + 16, w - 4, BLUE);
-    P.hline(x0 + 2, y0 + 17, w - 4, '#e1251b');
-    P.draw(carrefourLogo('grand'), Math.round(x0 + w / 2 - 10.5), y0 + 1);
-    // vitrines lumineuses (intérieur visible)
-    const ly = y0 + 19, lh = h - 19;
-    const dw = 22, dx = Math.round(x0 + w / 2 - dw / 2);
-    const inner = (x, y, ww, hh) => {
-      P.rect(x, y, ww, hh, '#e4eef2');
-      P.rect(x, y, ww, 2, '#ffffff');
-      for (let s = 0; s < 3; s++) {
-        const sy = y + 4 + s * 5;
-        if (sy + 3 > y + hh) break;
-        P.hline(x, sy + 3, ww, '#9aa4b0');
-        for (let i = 0; i < ww; i++) if (r.chance(0.8)) P.rect(x + i, sy, 1, 3, r.pick(['#e1251b', '#1d4f9c', '#f2c230', '#3fa055', '#f08a2a', '#ffffff', '#c04a8a']));
-      }
-      for (let k = 0; k < hh; k++) if (k % 6 < 2) P.px(x + ww - 2 - (k % 6) - Math.floor(k / 6) * 3, y + k, 'rgba(255,255,255,0.45)');
-    };
-    inner(x0 + 4, ly + 1, dx - x0 - 6, lh - 6);
-    inner(dx + dw + 2, ly + 1, x0 + w - (dx + dw + 2) - 4, lh - 6);
-    // petite affiche promo
-    P.rect(x0 + 7, ly + 3, 7, 8, '#f2c230'); P.rect(x0 + 8, ly + 4, 5, 3, '#e1251b'); P.hline(x0 + 8, ly + 9, 5, BLUE);
-    P.rect(x0 + 4, ly + lh - 5, w - 8, 4, ALd);
-    // ouverture des portes automatiques (les vantaux sont dessinés par le jeu)
-    P.rect(dx - 1, ly - 1, dw + 2, lh + 1, ALd);
-    P.rect(dx, ly, dw, lh, '#f0f6f8');
-    P.rect(dx, ly, dw, 2, '#ffffff');
-    for (let i = 0; i < dw; i += 4) P.rect(dx + i, ly + 6, 2, 8, r.pick(['#e1251b', '#1d4f9c', '#3fa055', '#f2c230']));
-    P.rect(dx, ly + lh - 4, dw, 4, '#b8c2cc');
-    out.door = { x: dx, y: ly, w: dw, h: lh };
-    out.lights.push({ x: x0 + w / 2, y: y0 + h + 6, r: 54, k: 'neon' });
+    const BL = '#22407a', BLc = '#3a60a6', BLs = '#142a54', ROUGE = '#d8322c', CREME = '#f4ecd8';
+    P.rect(x0, y0, w, h, BL);
+    P.rect(x0, y0, 3, h, pal.mid); P.rect(x0 + w - 3, y0, 3, h, pal.mid);
+    P.vline(x0, y0, h, pal.base); P.vline(x0 + w - 1, y0, h, pal.lo);
+    // bandeau : plaque émaillée crème avec le logo (aucun texte)
+    P.rect(x0 + 3, y0, w - 6, 21, BL); P.hline(x0 + 3, y0, w - 6, BLc); P.hline(x0 + 3, y0 + 20, w - 6, BLs);
+    for (let i = x0 + 5; i < x0 + w - 5; i += 2) { P.px(i, y0 + 2, ROUGE); P.px(i, y0 + 18, ROUGE); }
+    const pw = 34, px0 = Math.round(x0 + w / 2 - pw / 2);
+    P.rect(px0, y0 + 1, pw, 19, '#1b1630'); P.rect(px0 + 1, y0 + 2, pw - 2, 17, CREME); P.hline(px0 + 2, y0 + 2, pw - 4, '#ffffff');
+    P.px(px0 + 1, y0 + 2, '#1b1630'); P.px(px0 + pw - 2, y0 + 2, '#1b1630'); P.px(px0 + 1, y0 + 18, '#1b1630'); P.px(px0 + pw - 2, y0 + 18, '#1b1630');
+    P.draw(carrefourLogo('moyen'), px0 + 4, y0 + 2);
+    // vitrines d'épicerie (bocaux, conserves, fruits) et porte vitrée au centre
+    const ly = y0 + 21, lh = h - 21;
+    const dw = 20, dx = Math.round(x0 + w / 2 - dw / 2);
+    const wy = ly + 3, wh = lh - 9;
+    display(P, 'epicerie', x0 + 6, wy, dx - x0 - 10, wh, r);
+    display(P, 'epicerie', dx + dw + 4, wy, x0 + w - (dx + dw + 4) - 6, wh, r);
+    for (const [ax, aw] of [[x0 + 5, dx - x0 - 8], [dx + dw + 3, x0 + w - (dx + dw + 3) - 5]]) {
+      P.rect(ax, wy - 1, aw, 1, ROUGE); P.rect(ax, wy + wh, aw, 1, ROUGE);
+    }
+    P.rect(x0 + 5, ly + lh - 5, w - 10, 4, BLs); P.hline(x0 + 5, ly + lh - 5, w - 10, BLc);
+    // embrasure de la porte (les vantaux vitrés sont dessinés par le jeu et s'ouvrent)
+    P.rect(dx - 2, ly, dw + 4, lh, BLs);
+    P.rect(dx, ly + 1, dw, lh - 1, '#f6d89a');
+    P.rect(dx, ly + 1, dw, 3, '#fff0c8');
+    for (let i = 1; i < dw - 1; i += 3) P.rect(dx + i, ly + 7, 2, 6, r.pick(['#e1251b', '#1d4f9c', '#3fa055', '#f2c230', '#f08a2a']));
+    P.hline(dx, ly + 13, dw, '#8a5634');
+    out.door = { x: dx, y: ly + 1, w: dw, h: lh - 1 };
+    // store rayé bleu et blanc
+    awning(P, x0 + 3, ly, w - 6, '#2a52a0', '#f2ecdc');
+    // enseigne suspendue (potence en fer forgé + plaque ronde avec le logo)
+    const ex = x0 + 10, ey = y0 - 26;
+    P.rect(x0 + 3, ey, 2, 9, IRON.a); P.rect(x0 + 3, ey, 26, 2, IRON.a); P.hline(x0 + 3, ey, 26, IRON.hi);
+    P.px(x0 + 7, ey + 2, IRON.a); P.px(x0 + 8, ey + 3, IRON.a); P.px(x0 + 9, ey + 3, IRON.a);
+    P.vline(ex + 2, ey + 2, 3, IRON.b); P.vline(ex + 21, ey + 2, 3, IRON.b);
+    P.rect(ex - 1, ey + 4, 26, 19, '#1b1630'); P.rect(ex, ey + 5, 24, 17, CREME); P.rect(ex, ey + 5, 24, 1, '#ffffff');
+    P.draw(carrefourLogo('petit'), ex + 2, ey + 7);
+    out.lights.push({ x: ex + 12, y: ey + 13, r: 14, k: 'neon' });
+    out.lights.push({ x: x0 + w / 2, y: y0 + h + 6, r: 50, k: 'shop' });
+  }
+
+  // club de jazz : porte rouge, marquise lumineuse, néon en forme de note, affiches
+  function jazzclub(P, x0, y0, w, h, pal, r, out) {
+    P.rect(x0, y0, w, h, '#2a1c26');
+    P.rect(x0, y0, 3, h, pal.mid); P.rect(x0 + w - 3, y0, 3, h, pal.mid);
+    const dw = 16, dx = Math.round(x0 + w / 2 - dw / 2);
+    // marquise avec ampoules
+    P.rect(x0 + 2, y0 + 1, w - 4, 6, '#7a1e2a'); P.hline(x0 + 2, y0 + 1, w - 4, '#b8343a'); P.hline(x0 + 2, y0 + 6, w - 4, '#3a0e16');
+    for (let i = x0 + 4; i < x0 + w - 4; i += 3) out.ampoules.push([i, y0 + 3]);
+    // néon : une croche rose
+    const nx = dx + 4, ny = y0 + 9;
+    const ne = '#ff6ab0';
+    P.vline(nx + 6, ny, 9, ne); P.rect(nx + 3, ny + 7, 4, 3, ne); P.px(nx + 7, ny + 1, ne); P.px(nx + 8, ny + 2, ne); P.px(nx + 8, ny + 3, ne);
+    out.lights.push({ x: nx + 6, y: ny + 5, r: 16, k: 'rose' });
+    // porte capitonnée rouge
+    P.rect(dx, y0 + 20, dw, h - 20, '#5a1220'); P.rect(dx + 1, y0 + 21, dw - 2, h - 22, '#8a2232');
+    for (let yy = y0 + 23; yy < y0 + h - 2; yy += 4) for (let xx = dx + 3; xx < dx + dw - 2; xx += 4) P.px(xx, yy, '#c9a040');
+    P.vline(dx + dw / 2, y0 + 21, h - 22, '#3a0a14');
+    P.rect(dx - 2, y0 + h - 2, dw + 4, 2, '#4a3a3a');
+    // affiches de concert de part et d'autre
+    P.draw(affiche(r.int(1000), 'JAZZ'), x0 + 3, y0 + 14);
+    P.draw(affiche(r.int(1000), 'CLUB'), x0 + w - 3 - 17, y0 + 14);
+    out.lights.push({ x: x0 + w / 2, y: y0 + h + 4, r: 34, k: 'shop' });
+  }
+
+  // ------------------------------------------------------------ affiches de jazz
+  // petite police 3x5 pour quelques mots
+  const FONTE = {
+    A: ['.#.', '#.#', '###', '#.#', '#.#'], B: ['##.', '#.#', '##.', '#.#', '##.'], C: ['.##', '#..', '#..', '#..', '.##'],
+    E: ['###', '#..', '##.', '#..', '###'], H: ['#.#', '#.#', '###', '#.#', '#.#'], I: ['###', '.#.', '.#.', '.#.', '###'],
+    J: ['..#', '..#', '..#', '#.#', '.#.'], L: ['#..', '#..', '#..', '#..', '###'], O: ['.#.', '#.#', '#.#', '#.#', '.#.'],
+    S: ['.##', '#..', '.#.', '..#', '##.'], T: ['###', '.#.', '.#.', '.#.', '.#.'], U: ['#.#', '#.#', '#.#', '#.#', '.#.'],
+    W: ['#.#', '#.#', '#.#', '###', '#.#'], Z: ['###', '..#', '.#.', '#..', '###'], N: ['##.', '#.#', '#.#', '#.#', '#.#'],
+    M: ['#.#', '###', '#.#', '#.#', '#.#'], ' ': ['...', '...', '...', '...', '...'],
+    G: ['.##', '#..', '#.#', '#.#', '.##'], R: ['##.', '#.#', '##.', '#.#', '#.#'],
+  };
+  function texte(P, mot, x, y, col) {
+    [...mot].forEach((ch, k) => {
+      const g = FONTE[ch];
+      if (g) g.forEach((row, j) => [...row].forEach((c, i) => { if (c === '#') P.px(x + k * 4 + i, y + j, col); }));
+    });
+  }
+  const AFF = [
+    { fond: '#efe2c4', bord: '#8a5a3a', txt: '#b8343a', ill: '#1d1626', acc: '#e8b54a' },
+    { fond: '#b8343a', bord: '#5a1220', txt: '#f6ead2', ill: '#1d1626', acc: '#f2c230' },
+    { fond: '#26365e', bord: '#141c38', txt: '#e8b54a', ill: '#f6ead2', acc: '#ff8ab0' },
+    { fond: '#2f6a62', bord: '#163a36', txt: '#f6ead2', ill: '#1d1626', acc: '#e8b54a' },
+    { fond: '#e8b54a', bord: '#8a5a1e', txt: '#26365e', ill: '#1d1626', acc: '#b8343a' },
+  ];
+  const cacheAffiches = {};
+  function affiche(seed, mot = 'JAZZ') {
+    const cle = seed + mot;
+    if (cacheAffiches[cle]) return cacheAffiches[cle];
+    const r = PX.rng(seed + 7);
+    const st = AFF[seed % AFF.length];
+    const W = 17, H = 23, c = PX.canvas(W, H), P = PX.painter(c);
+    P.rect(0, 0, W, H, st.bord); P.rect(1, 1, W - 2, H - 2, st.fond);
+    texte(P, mot, Math.round((W - (mot.length * 4 - 1)) / 2), 2, st.txt);
+    const motif = seed % 4;
+    if (motif === 0) {
+      // chat qui joue de la trompette
+      P.rect(4, 11, 5, 7, st.ill); P.rect(4, 9, 5, 3, st.ill); P.px(4, 8, st.ill); P.px(8, 8, st.ill);
+      P.px(5, 10, st.acc); P.px(7, 10, st.acc); P.rect(3, 18, 7, 1, st.ill); P.px(2, 15, st.ill); P.px(2, 16, st.ill); P.px(3, 17, st.ill);
+      P.hline(9, 12, 4, st.acc); P.rect(13, 11, 2, 3, st.acc);
+    } else if (motif === 1) {
+      // grande croche
+      P.rect(9, 8, 2, 9, st.ill); P.rect(6, 15, 4, 3, st.ill); P.rect(11, 8, 3, 2, st.ill); P.px(13, 10, st.ill);
+      P.px(4, 10, st.acc); P.px(13, 15, st.acc); P.px(3, 17, st.acc);
+    } else if (motif === 2) {
+      // lune et chat sur un toit
+      P.ellipse(11, 11, 3, 3, st.acc); P.ellipse(12, 10, 2, 2, st.fond);
+      P.rect(1, 17, W - 2, 3, st.ill); P.rect(4, 14, 3, 3, st.ill); P.px(4, 13, st.ill); P.px(6, 13, st.ill); P.px(8, 15, st.ill); P.px(9, 14, st.ill);
+    } else {
+      // saxophone
+      P.vline(9, 8, 7, st.acc); P.vline(10, 8, 7, st.acc); P.rect(6, 14, 5, 3, st.acc); P.rect(5, 12, 2, 3, st.acc); P.px(8, 7, st.acc); P.px(7, 6, st.acc);
+      P.px(9, 10, st.ill); P.px(9, 12, st.ill); P.px(4, 9, st.ill); P.px(13, 13, st.ill);
+    }
+    for (let x = 2; x < W - 2; x += 2) P.px(x, H - 3, st.txt);
+    void r;
+    return (cacheAffiches[cle] = c);
   }
 
   // ------------------------------------------------------------ immeuble
-  // o = { w, etages, facade, style:'haussmann'|'ancien', boutique, seed, lierre, volets, cheminees }
+  // o = { w, etages, facade, style:'classique'|'ancien', boutique, seed, lierre, volets, cheminees }
   function building(o) {
     const r = PX.rng(o.seed || 7);
     const pal = STONE[o.facade || 'creme'];
@@ -376,7 +482,7 @@ const Batiments = (() => {
     const H = CH + RP + MANS + TILE + CORN + floorsH + GF;
     const c = PX.canvas(W, H);
     const P = PX.painter(c);
-    const out = { lights: [], smoke: [], door: null };
+    const out = { lights: [], smoke: [], door: null, fenetres: [], ampoules: [] };
     const nb = Math.max(2, Math.floor((W - 6) / 19));
     const bw = (W - 6) / nb;
     const bays = Array.from({ length: nb }, (_, i) => Math.round(3 + bw * (i + 0.5)));
@@ -454,6 +560,7 @@ const Batiments = (() => {
         if (level === 2 && !old) { P.rect(wx - 2, wy - 4, 13, 1, pal.hi); P.hline(wx - 2, wy - 3, 13, pal.mid); }
         const lit = nightLit(0.3);
         windowFr(P, wx, wy, 9, wh, lit);
+        out.fenetres.push({ x: bx, y: wy + wh, lit, niveau: level, balcon: balconFilant });
         if (lit) out.lights.push({ x: bx, y: wy + wh / 2 + (H - c.height), r: 12, k: 'win', yRel: wy + wh / 2 });
         if (voletCol) { shutters(P, wx - 4, wy, wh, voletCol); shutters(P, wx + 10, wy, wh, voletCol); }
         P.hline(wx - 1, wy + wh, 11, pal.hi);
@@ -493,8 +600,8 @@ const Batiments = (() => {
     P.vline(W - 1, CH, H - CH, S(pal.base, -0.55));
     P.vline(W - 2, top, floorsH, pal.mid);
     for (const l of out.lights) if (l.yRel !== undefined) l.y = l.yRel;
-    return { img: c, w: W, h: H, roofY: CH, lights: out.lights, smoke: out.smoke, door: out.door };
+    return { img: c, w: W, h: H, roofY: CH, lights: out.lights, smoke: out.smoke, door: out.door, fenetres: out.fenetres, ampoules: out.ampoules };
   }
 
-  return { building, carrefourLogo, windowFr, railing, stoneWall, STONE, ZINC, GLASS, LIT, IRON, FRAME, TUILE, chimney, dormer, flowerBox, shutters, awning };
+  return { building, carrefourLogo, affiche, texte, windowFr, railing, stoneWall, STONE, ZINC, GLASS, LIT, IRON, FRAME, TUILE, chimney, dormer, flowerBox, shutters, awning };
 })();

@@ -1,4 +1,4 @@
-/* Nuit parisienne : fond nuit, encre crème, or des réverbères, rouge des auvents */
+/* Nuit d'hiver : fond nuit, encre crème, or des réverbères, rouge des auvents */
 :root {
   --nuit: #151026;
   --nuit-2: #221a3a;
@@ -59,7 +59,7 @@ h1 {
   text-shadow: 4px 4px 0 var(--rouge), 8px 8px 0 rgba(0, 0, 0, 0.35);
 }
 
-h1 em { font-style: normal; color: var(--or); }
+h1 em { font-style: normal; color: var(--or); white-space: nowrap; }
 
 .sous {
   margin: 0;

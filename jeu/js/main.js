@@ -1,5 +1,5 @@
 // =====================================================================
-//  main.js — démarrage : écran titre, détection du tactile, aide
+//  main.js — démarrage : écran titre, orientation, musique, intro
 // =====================================================================
 'use strict';
 
@@ -16,6 +16,8 @@
 
   function lancer() {
     try {
+      Titre.demarrer();
+      Scenes.init(Jeu);
       Jeu.init('rue', 'depart');
     } catch (err) {
       $('titre-erreur').hidden = false;
@@ -27,12 +29,12 @@
     jouer.disabled = false;
     jouer.focus();
     jouer.addEventListener('click', () => {
+      Musique.demarrer();
       $('titre').classList.add('fini');
-      setTimeout(() => { $('titre').hidden = true; }, 450);
+      setTimeout(() => { $('titre').hidden = true; Titre.arreter(); }, 650);
       Jeu.demarrer();
       $('aide').hidden = false;
-      setTimeout(() => $('aide').classList.add('fini'), 7000);
-      setTimeout(() => Jeu.dire('intro'), 500);
+      setTimeout(() => $('aide').classList.add('fini'), 6500);
     });
   }
   if (document.readyState === 'complete') lancer();

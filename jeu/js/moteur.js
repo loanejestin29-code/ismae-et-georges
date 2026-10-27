@@ -14,6 +14,8 @@ const Jeu = (() => {
   let ecran, eg, buf, bg, lum, lg, vignette;
   let carte = null, dialogue = null, transition = null, cible = null, t = 0, last = 0, actif = false;
   const debug = location.hash === '#debug';
+  // #test : la boucle continue même quand la page est en arrière-plan (sert aux vérifications)
+  const image = location.hash === '#test' ? (f) => setTimeout(() => f(performance.now()), 16) : (f) => requestAnimationFrame(f);
   const $ = (id) => document.getElementById(id);
 
   // ------------------------------------------------------------ écran
@@ -80,6 +82,10 @@ const Jeu = (() => {
     btnA.addEventListener('pointerleave', () => btnA.classList.remove('appui'));
     btnB.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); touch.run = !touch.run; btnB.classList.toggle('actif', touch.run); });
     $('dialogue').addEventListener('pointerdown', (e) => { e.preventDefault(); action(); });
+    const son = $('btn-son');
+    const majSon = () => { son.classList.toggle('coupe', !Musique.actif()); son.setAttribute('aria-label', Musique.actif() ? 'Couper la musique' : 'Remettre la musique'); };
+    son.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); Musique.basculer(); majSon(); });
+    majSon();
   }
   function lireCommandes() {
     const k = (n) => KEYMAP[n].some((c) => keys.has(c));
@@ -90,12 +96,17 @@ const Jeu = (() => {
   }
 
   // ------------------------------------------------------------ collisions
-  function bloqueRect(x, y, w, h) {
+  function bloqueRect(x, y, w, h, ent) {
     if (x < 0 || y < 0 || x + w > carte.w || y + h > carte.h) return true;
     for (const s of carte.solides) if (x < s.x + s.w && x + w > s.x && y < s.y + s.h && y + h > s.y) return true;
+    // les habitants bloquent le passage d'Ismae (pas celui de Georges)
+    if (ent === J.joueur) for (const e of J.pnj) {
+      if (!e.bloquant) continue;
+      if (x < e.x + 5 && x + w > e.x - 5 && y < e.y + 1 && y + h > e.y - 4) return true;
+    }
     return false;
   }
-  const bloqueEnt = (e, x, y) => bloqueRect(x - e.hb.w / 2, y - e.hb.h + 1, e.hb.w, e.hb.h);
+  const bloqueEnt = (e, x, y) => bloqueRect(x - e.hb.w / 2, y - e.hb.h + 1, e.hb.w, e.hb.h, e);
   J.deplacer = (e, dx, dy) => {
     if (dx) {
       if (!bloqueEnt(e, e.x + dx, e.y)) e.x += dx;
@@ -112,42 +123,97 @@ const Jeu = (() => {
       }
     }
   };
-  J.bloque = () => !!dialogue || !!transition;
+  J.bloque = () => !!dialogue || !!transition || !!script || !!J.cinematique;
   J.surEscalier = (e) => (carte.escaliers || []).some((s) => e.x > s.x && e.x < s.x + s.w && e.y > s.y && e.y < s.y + s.h);
   J.particule = (type, x, y, o = {}) => J.particules.push(Object.assign({ type, x, y, vx: 0, vy: 0, life: 0, max: 1.5 }, o));
 
   // ------------------------------------------------------------ dialogues
-  function ouvrirDialogue(cle) {
-    const lignes = CONFIG.textes[cle] || [String(cle)];
-    dialogue = { lignes, i: 0, n: 0 };
+  // src : clé de CONFIG.textes, ou tableau de lignes ('texte' ou ['qui', 'texte'])
+  function ouvrirDialogue(src, fin) {
+    let lignes = typeof src === 'string' ? CONFIG.textes[src] : src;
+    if (!lignes || !lignes.length) { if (fin) fin(); return; }
+    lignes = lignes.map((l) => (Array.isArray(l) ? { qui: l[0], texte: l[1] } : { qui: null, texte: l }));
+    dialogue = { lignes, i: 0, n: 0, fin };
     $('dialogue').hidden = false;
+    majLigne();
+  }
+  function majLigne() {
+    const l = dialogue.lignes[dialogue.i];
+    const p = l.qui && CONFIG.personnages[l.qui];
+    const nom = $('dlg-nom'), por = $('dlg-portrait');
+    nom.hidden = !p;
+    if (p) { nom.textContent = p.nom; nom.style.setProperty('--teinte', p.couleur); }
+    const img = l.qui && Entites.portrait(l.qui);
+    por.hidden = !img;
+    if (img) {
+      // on cadre la tête et le buste (le haut de l'image) et on remplit le cadre
+      const grand = img.height > 24;
+      const sy = grand ? Math.max(0, img.height - 30) : 0, h = grand ? Math.min(20, img.height - sy) : img.height;
+      const marge = 2;
+      por.width = img.width + marge * 2; por.height = Math.round((img.width + marge * 2) * 0.88);
+      const g = por.getContext('2d');
+      g.imageSmoothingEnabled = false;
+      g.clearRect(0, 0, por.width, por.height);
+      g.drawImage(img, 0, sy, img.width, h, marge, por.height - h, img.width, h);
+    }
+    $('dialogue').classList.toggle('narration', !p);
+    dialogue.qui = l.qui;
     majDialogue();
   }
   function majDialogue() {
-    const l = dialogue.lignes[dialogue.i];
+    const l = dialogue.lignes[dialogue.i].texte;
     $('dlg-texte').textContent = l.slice(0, Math.floor(dialogue.n));
     $('dlg-suite').hidden = dialogue.n < l.length;
+  }
+  function fermerDialogue() {
+    const f = dialogue.fin;
+    dialogue = null;
+    $('dialogue').hidden = true;
+    if (f) f();
   }
   function action() {
     if (!actif || transition) return;
     if (dialogue) {
-      const l = dialogue.lignes[dialogue.i];
+      const l = dialogue.lignes[dialogue.i].texte;
       if (dialogue.n < l.length) dialogue.n = l.length;
-      else if (++dialogue.i >= dialogue.lignes.length) { dialogue = null; $('dialogue').hidden = true; return; }
-      else dialogue.n = 0;
+      else if (++dialogue.i >= dialogue.lignes.length) { fermerDialogue(); return; }
+      else { dialogue.n = 0; majLigne(); return; }
       majDialogue();
       return;
     }
+    if (script || J.cinematique) return;
     if (cible) {
       if (cible.chat) {
         for (let k = 0; k < 3; k++) J.particule('coeur', cible.chat.x + (k - 1) * 5, cible.chat.y - 14, { vy: -14 - k * 3, max: 1.2 });
         if (cible.chat === J.georges) J.georges.reaction = 1.5;
+        Musique.miaou(cible.chat.aigu || 1);
       }
       if (cible.action) cible.action(J);
-      if (cible.texte) ouvrirDialogue(cible.texte);
+      const lignes = cible.dialogue ? cible.dialogue(J) : cible.texte;
+      if (lignes) ouvrirDialogue(lignes);
     }
   }
   J.dire = ouvrirDialogue;
+
+  // ------------------------------------------------------------ scènes scriptées
+  // étapes : { dire: lignes } { attendre: secondes } { faire: fn } { jusqua: fn -> bool }
+  let script = null;
+  J.jouerScript = (etapes, fin) => { script = { etapes, i: 0, t: 0, fin, attente: false }; };
+  function majScript(dt) {
+    while (script) {
+      const e = script.etapes[script.i];
+      if (!e) { const f = script.fin; script = null; if (f) f(J); return; }
+      if (e.dire) {
+        if (!script.attente) { script.attente = true; const s = script; ouvrirDialogue(e.dire, () => { s.attente = false; s.i++; }); }
+        return;
+      }
+      if (e.attendre !== undefined) { script.t += dt; if (script.t < e.attendre) return; script.t = 0; script.i++; continue; }
+      if (e.faire) { e.faire(J); script.i++; continue; }
+      if (e.jusqua) { if (!e.jusqua(J)) return; script.i++; continue; }
+      script.i++;
+    }
+  }
+  J.systemes = [];
 
   // ------------------------------------------------------------ cartes et portes
   J.enregistrerCarte = (id, fn) => { fabriques[id] = fn; };
@@ -165,7 +231,10 @@ const Jeu = (() => {
     J.trace = [{ x: gx, y: gy }, { x: a.x, y: a.y }];
     J.pnj = carte.pnj;
     J.particules = [];
+    Musique.etouffer(carte.ambiance === 'interieur');
     camera(true);
+    if (J.onCarte) J.onCarte(carte);
+    if (carte.onEntree) carte.onEntree(J);
   }
   J.allerA = (id, arrivee) => {
     if (transition) return;
@@ -206,10 +275,22 @@ const Jeu = (() => {
     J.georges.update(dt, J);
     for (const e of J.pnj) e.update && e.update(dt, J);
     for (const d of carte.dynamiques) d.update && d.update(dt, J);
+    for (const s of J.systemes) s(dt, J);
+    majScript(dt);
     if (dialogue) {
-      const l = dialogue.lignes[dialogue.i];
-      if (dialogue.n < l.length) { dialogue.n = Math.min(l.length, dialogue.n + dt * 48); majDialogue(); }
+      const l = dialogue.lignes[dialogue.i].texte;
+      if (dialogue.n < l.length) {
+        const avant = Math.floor(dialogue.n);
+        dialogue.n = Math.min(l.length, dialogue.n + dt * 46);
+        if (Math.floor(dialogue.n / 3) > Math.floor(avant / 3)) Musique.bip(dialogue.qui ? (CONFIG.personnages[dialogue.qui] || {}).bip || 620 : 480);
+        majDialogue();
+      }
     }
+    // la musique est plus forte près de la scène des chats musiciens
+    if (carte.sourceMusique) {
+      const d = Math.hypot(p.x - carte.sourceMusique.x, p.y - carte.sourceMusique.y);
+      Musique.proximite(Math.max(0, Math.min(1, 1 - (d - 60) / 380)));
+    } else Musique.proximite(0);
     if (!J.bloque()) verifierPortes();
     if (transition) {
       transition.t += dt;
@@ -218,11 +299,11 @@ const Jeu = (() => {
     }
     // cible d'interaction devant Ismae
     cible = null;
-    if (!dialogue) {
+    if (!J.bloque()) {
       const f = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] }[p.dir];
       const pr = { x: p.x + f[0] * 9 - 7, y: p.y + f[1] * 8 - 9, w: 14, h: 14 };
       let best = 1e9;
-      const zones = carte.zones.concat(J.pnj.filter((e) => e.texte).map((e) => e.zone()), [J.georges.zone()]);
+      const zones = carte.zones.concat(J.pnj.filter((e) => (e.texte || e.dialogue) && e.zone).map((e) => e.zone()), [J.georges.zone()]).filter(Boolean);
       for (const z of zones) {
         if (pr.x < z.x + z.w && pr.x + pr.w > z.x && pr.y < z.y + z.h && pr.y + pr.h > z.y) {
           const d = Math.hypot(z.x + z.w / 2 - p.x, z.y + z.h / 2 - p.y);
@@ -246,7 +327,7 @@ const Jeu = (() => {
 
   // ------------------------------------------------------------ dessin
   const LUM = {
-    lamp: '#ffc874', halo: '#ffe2a0', shop: '#ffb05a', win: '#ffc66a', neon: '#cfe6ff', tree: '#ffd58a', xmas: '#ffdf9a', boat: '#ffc870',
+    lamp: '#ffc874', halo: '#ffe2a0', shop: '#ffb05a', win: '#ffc66a', neon: '#cfe6ff', tree: '#ffd58a', xmas: '#ffdf9a', boat: '#ffc870', rose: '#ff7ab8',
   };
   const lumCache = {};
   function sprLum(r, k) {
@@ -315,6 +396,9 @@ const Jeu = (() => {
     for (const q of J.particules) {
       const a = 1 - q.life / q.max;
       if (q.type === 'coeur') { g.globalAlpha = Math.min(1, a * 2); Entites.poser(g, Entites.SPR.coeur, q.x, q.y); }
+      else if (q.type === 'note') { g.globalAlpha = Math.min(1, a * 2.5); g.drawImage(Entites.SPR.notes[q.v || 0], Math.round(q.x + Math.sin(q.life * 4 + q.y) * 2), Math.round(q.y)); }
+      else if (q.type === 'etoile') { g.globalAlpha = a; g.drawImage(Entites.SPR.etoile, Math.round(q.x + Math.cos(q.life * 9) * 6), Math.round(q.y + Math.sin(q.life * 9) * 2)); }
+      else if (q.type === 'goutte') { g.globalAlpha = a; g.fillStyle = '#bfe6f4'; g.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); }
       else if (q.type === 'z') { g.globalAlpha = a; g.drawImage(Entites.SPR.z, Math.round(q.x + Math.sin(q.life * 3) * 2), Math.round(q.y - q.life * 8)); }
       else if (q.type === 'fumee') {
         g.globalAlpha = a * 0.55; g.fillStyle = '#c9c4d6';
@@ -347,7 +431,7 @@ const Jeu = (() => {
       g.globalCompositeOperation = 'lighter';
       g.setTransform(1, 0, 0, 1, -cx, -cy);
       for (const L of carte.lumieres) {
-        if (L.k !== 'halo' && L.k !== 'neon' && L.k !== 'xmas') continue;
+        if (L.k !== 'halo' && L.k !== 'neon' && L.k !== 'xmas' && L.k !== 'rose') continue;
         if (Math.abs(L.x - cx - V.w / 2) > V.w || Math.abs(L.y - cy - V.h / 2) > V.h) continue;
         g.globalAlpha = 0.28; const r = L.k === 'halo' ? 12 : 16;
         g.drawImage(sprLum(r, L.k), Math.round(L.x - r), Math.round(L.y - r));
@@ -376,7 +460,7 @@ const Jeu = (() => {
     if (amb !== 'interieur') g.drawImage(vignette, 0, 0);
     // bulle « ! » au-dessus d'Ismae quand on peut interagir
     g.setTransform(1, 0, 0, 1, -cx, -cy);
-    if (cible && !dialogue) Entites.poser(g, Entites.SPR.bulle, J.joueur.x, J.joueur.y - 27 - Math.round(Math.abs(Math.sin(t * 4)) * 2));
+    if (cible && !J.bloque()) Entites.poser(g, Entites.SPR.bulle, J.joueur.x, J.joueur.y - 33 - Math.round(Math.abs(Math.sin(t * 4)) * 2));
     if (debug) {
       g.lineWidth = 1;
       g.strokeStyle = 'rgba(255,60,60,0.8)'; carte.solides.forEach((s) => g.strokeRect(s.x + 0.5, s.y + 0.5, s.w - 1, s.h - 1));
@@ -396,7 +480,7 @@ const Jeu = (() => {
     last = now;
     if (actif && !J.enPause) update(dt);
     if (!J.enPause) render();
-    requestAnimationFrame(boucle);
+    image(boucle);
   }
 
   // ------------------------------------------------------------ démarrage
@@ -411,7 +495,7 @@ const Jeu = (() => {
     addEventListener('resize', resize);
     initCommandes();
     placer(carteId, arrivee);
-    requestAnimationFrame((n) => { last = n; requestAnimationFrame(boucle); });
+    image((n) => { last = n; image(boucle); });
   };
   J.demarrer = () => { actif = true; ecran.focus && ecran.focus(); };
   J.enPause = false;
