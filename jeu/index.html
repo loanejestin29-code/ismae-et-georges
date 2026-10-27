@@ -14,12 +14,13 @@
 <title>Juste un indice…</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap">
 <style>
   /* Nuit d'hiver : bleu nuit profond, crème, or des réverbères, rouge velours du club de jazz */
   :root {
     --nuit: #120d22; --nuit-2: #221a3a; --nuit-3: #2e2450; --encre: #f6ead2; --encre-2: #c9b99a; --or: #e8b54a; --or-2: #9a6a20; --rouge: #c9483b;
     --pixel: 'Pixelify Sans', ui-monospace, Menlo, Consolas, monospace;
+    --titre: 'Press Start 2P', 'Pixelify Sans', ui-monospace, monospace; /* lettres très ouvertes, lisibles en gros */
     color-scheme: dark;
   }
   [hidden] { display: none !important; }
@@ -92,11 +93,13 @@
   .titre-haut { position: absolute; left: 0; right: 0; top: calc(6% + env(safe-area-inset-top, 0px)); display: grid; justify-items: center; gap: 6px;
     padding-inline: max(16px, env(safe-area-inset-left, 0px)); text-align: center; pointer-events: none; }
   .titre-sur { margin: 0; font-size: 14px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--encre-2); text-shadow: 0 2px 0 #0b0816; }
-  #titre-logo { display: block; width: min(86vw, 640px); height: auto; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)); }
+  #titre-logo { margin: 0; font-family: var(--titre); font-weight: 400; font-size: clamp(24px, 5.2vw, 58px); line-height: 1.2; color: #f6d27a; white-space: nowrap;
+    text-shadow: 3px 0 0 #0b0816, -3px 0 0 #0b0816, 0 3px 0 #0b0816, 0 -3px 0 #0b0816, 3px 3px 0 #0b0816, -3px -3px 0 #0b0816, 3px -3px 0 #0b0816, -3px 3px 0 #0b0816, 6px 6px 0 #6a1e32, 8px 8px 0 #0b0816; }
+  #titre-logo span { color: #ffe9b0; }
   .titre-bas { position: absolute; left: 0; right: 0; bottom: calc(7% + env(safe-area-inset-bottom, 0px)); display: grid; justify-items: center; gap: 12px;
     padding-inline: max(16px, env(safe-area-inset-left, 0px)); text-align: center; }
-  #btn-jouer { font-family: var(--pixel); font-size: 21px; font-weight: 700; padding: 12px 28px 11px; color: var(--nuit); background: var(--or);
-    border: 0; cursor: pointer; letter-spacing: 0.02em;
+  #btn-jouer { font-family: var(--titre); font-size: 15px; font-weight: 400; line-height: 1.2; padding: 14px 24px 12px; color: var(--nuit); background: var(--or);
+    border: 0; cursor: pointer;
     box-shadow: 0 -3px 0 0 #fff1c0 inset, 0 -4px 0 0 #0b0816, 0 4px 0 0 #0b0816, -4px 0 0 0 #0b0816, 4px 0 0 0 #0b0816, 0 8px 0 0 var(--or-2), 0 10px 0 2px rgba(0, 0, 0, 0.4);
     animation: appel 2.4s ease-in-out infinite; }
   #btn-jouer:focus-visible { outline: 3px dashed var(--encre); outline-offset: 10px; }
@@ -108,9 +111,9 @@
   #titre-erreur { color: #ff9a8a; font-size: 14px; }
   @media (max-height: 460px) {
     .titre-haut { top: calc(4% + env(safe-area-inset-top, 0px)); }
-    #titre-logo { width: min(64vw, 520px); }
+    #titre-logo { font-size: clamp(24px, 5vw, 46px); }
     .titre-bas { gap: 8px; bottom: calc(5% + env(safe-area-inset-bottom, 0px)); }
-    #btn-jouer { font-size: 18px; padding: 10px 22px 9px; }
+    #btn-jouer { font-size: 13px; padding: 12px 20px 10px; }
   }
 
   /* ---------- le jeu se joue à l'horizontale ---------- */
@@ -156,7 +159,7 @@
   <canvas id="titre-scene" class="pixel" aria-hidden="true"></canvas>
   <div class="titre-haut">
     <p class="titre-sur">Ismae &amp; Georges</p>
-    <canvas id="titre-logo" class="pixel" role="img" aria-label="Juste un indice…"></canvas>
+    <h1 id="titre-logo">Juste un <span>indice…</span></h1>
   </div>
   <div class="titre-bas">
     <button id="btn-jouer" type="button" disabled>Commencer l'aventure</button>
@@ -167,6 +170,7 @@
 
 <script src="js/pixel.js"></script>
 <script src="js/config.js"></script>
+<script src="js/sprite-ismae.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/decor-batiments.js"></script>
 <script src="js/decor-objets.js"></script>

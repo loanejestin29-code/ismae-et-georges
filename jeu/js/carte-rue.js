@@ -109,14 +109,16 @@ Jeu.enregistrerCarte('rue', () => {
   poser('cour1', B({ w: 120, facade: 'ocre', style: 'ancien', etages: 3, boutique: 'porte', volets: '#5f7f5a', seed: 41, cheminees: 1 }), 520, 162);
   poser('cour2', B({ w: 120, facade: 'rose', style: 'ancien', etages: 3, boutique: 'porte', volets: '#8a5a5a', lierre: 'droite', seed: 43, cheminees: 1 }), 640, 162);
   // la rue (de l'ouest vers l'est)
+  // la supérette est tout au bout, à côté de la place où jouent les chats musiciens ;
+  // Ismae arrive par l'autre bout et traverse le quartier pour la trouver
   const rue = [
-    ['fromagerie', 300, 120, { facade: 'creme', seed: 51 }],
-    ['cafe', 420, 180, { facade: 'ocre', seed: 53 }],
+    ['carrefour', 300, 130, { facade: 'gris', seed: 57 }],
+    ['jazzclub', 430, 60, { facade: 'rose', style: 'ancien', etages: 4, volets: '#7a2a34', seed: 58, cheminees: 1 }],
+    ['cafe', 490, 110, { facade: 'ocre', seed: 53 }],
     ['fleuriste', 640, 130, { facade: 'rose', seed: 55, etages: 4, lierre: 'droite' }],
-    ['carrefour', 770, 130, { facade: 'gris', seed: 57 }],
-    ['jazzclub', 900, 60, { facade: 'rose', style: 'ancien', etages: 4, volets: '#7a2a34', seed: 58, cheminees: 1 }],
-    ['boulangerie', 960, 120, { facade: 'creme', seed: 59 }],
-    ['librairie', 1080, 100, { facade: 'ocre', style: 'ancien', etages: 4, volets: '#4c6f96', seed: 61 }],
+    ['fromagerie', 770, 130, { facade: 'creme', seed: 51 }],
+    ['boulangerie', 900, 140, { facade: 'creme', seed: 59 }],
+    ['librairie', 1040, 140, { facade: 'ocre', style: 'ancien', etages: 4, volets: '#4c6f96', seed: 61 }],
     ['hotel', 1220, 140, { facade: 'blanc', seed: 63 }],
     ['patisserie', 1360, 120, { facade: 'rose', seed: 65, etages: 4 }],
     ['antiquaire', 1480, 120, { facade: 'vert', style: 'ancien', etages: 4, volets: '#2f5a46', seed: 67, lierre: 'gauche' }],
@@ -208,16 +210,16 @@ Jeu.enregistrerCarte('rue', () => {
   C.objet(Objets.pot(3, 'sapin'), 46, 300, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
 
   // ---------------------------------------------------------------- DEVANTURES
-  [[440, 478], [482, 476], [528, 478], [570, 476]].forEach(([x, y], i) => {
+  [[508, 478], [548, 476], [586, 478]].forEach(([x, y], i) => {
     C.objet(Objets.chaiseBistrot(), x - 8, y - 1, { solide: [-3, -2, 6, 3] });
     C.objet(Objets.tableCafe(), x, y, { solide: [-4, -2, 8, 3], ombre: [5, 2], texte: i === 1 ? 'terrasse' : null, zw: 18 });
     C.objet(Objets.chaiseBistrot(), x + 8, y + 1, { solide: [-3, -2, 6, 3] });
   });
   C.objet(Objets.etalFleurs(7), 700, 479, { solide: [-15, -6, 30, 7], ombre: [15, 2], texte: 'fleuriste', zw: 30 });
   C.objet(Objets.pot(8), 652, 476, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
-  C.objet(Objets.caisses(11), 786, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
-  C.objet(Objets.caisses(12), 884, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
-  C.objet(Objets.chevaletAffiche(8, 'CLUB'), 944, 482, { solide: [-9, -3, 18, 4], ombre: [9, 2], texte: 'jazzclub', zw: 20 });
+  C.objet(Objets.caisses(11), 316, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
+  C.objet(Objets.caisses(12), 414, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
+  C.objet(Objets.chevaletAffiche(8, 'CLUB'), 478, 486, { solide: [-9, -3, 18, 4], ombre: [9, 2], texte: 'jazzclub', zw: 20 });
   C.objet(Objets.velo(), 1146, 480, { solide: [-11, -3, 22, 4], ombre: [11, 2], texte: 'velo', zw: 24 });
   C.objet(Objets.pot(13, 'sapin'), 1272, 474, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
   C.objet(Objets.pot(14, 'sapin'), 1308, 474, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
@@ -259,10 +261,7 @@ Jeu.enregistrerCarte('rue', () => {
   C.objet(Objets.poubelles(), 728, 192, { solide: [-12, -5, 24, 6], ombre: [12, 2], texte: 'poubelles', zw: 26 });
   C.objet(Objets.pot(21), 540, 172, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
   C.objet(Objets.pot(22), 698, 172, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
-  C.objet(Objets.tableCafe(), 690, 252, { solide: [-4, -2, 8, 3], ombre: [5, 2] });
-  C.objet(Objets.chaiseBistrot(), 682, 251, { solide: [-3, -2, 6, 3] });
-  C.objet(Objets.chaiseBistrot(), 698, 253, { solide: [-3, -2, 6, 3] });
-  C.objet(Objets.chevaletPeintre(), 612, 200, { solide: [-6, -3, 12, 4], ombre: [7, 2] });
+  C.objet(Objets.chevaletPeintre(), 702, 236, { solide: [-6, -3, 12, 4], ombre: [7, 2] });
   for (const [x, mot, seed] of [[586, 'JAZZ', 21], [668, 'BLUES', 22]]) C.objet({ img: Batiments.affiche(seed, mot === 'BLUES' ? 'CHAT' : mot), ax: 8, ay: 22 }, x, 150, { dy: 13, texte: 'affiche', zw: 18, zh: 30 });
   const linge1 = Objets.linge(240, 3), linge2 = Objets.linge(40, 4), linge3 = Objets.linge(40, 6);
   C.dessusImg(linge1.img, 520, 88); C.dessusImg(linge2.img, 600, 316); C.dessusImg(linge3.img, 600, 372);
@@ -276,7 +275,7 @@ Jeu.enregistrerCarte('rue', () => {
   C.lumiere(1210, 220, 70, 'xmas'); C.lumiere(1205, 140, 30, 'lamp');
   C.objet(Objets.lanterneMurale(), 1218, 130, { dy: 40 });
   for (const ax of [600, 1180]) { C.objet(Objets.lanterneMurale(), ax + 4, 330, { dy: 140 }); C.lumiere(ax + 6, 330, 40, 'lamp'); C.lumiere(ax + 4, 326, 6, 'halo'); }
-  C.zoneJardin = { x: 1100, y: 160, w: 220, h: 128 };
+  C.zoneRencontre = { x: 520, y: 162, w: 240, h: 128 }; // la cour intérieure
 
   // ---------------------------------------------------------------- CHATS AUX FENÊTRES ET SUR LES TOITS
   const robes = ['blanc', 'roux', 'gris', 'tigre', 'siamois', 'smoking', 'matou'];
@@ -298,15 +297,15 @@ Jeu.enregistrerCarte('rue', () => {
   // promeneurs sur les toits (on les voit surtout depuis la cour, le jardin et la place)
   const toit = (cle) => bats[cle].top + 16 + (bats[cle].b.h > 200 ? 9 : 6);
   C.pnj.push(
-    new Entites.ChatPNJ({ nom: 'gris', x: 460, y: toit('cafe'), mode: 'promeneur', x1: 430, x2: 590, texte: 'chatToits', sortYFixe: BASE + 1, zoneFixe: [0, 0, 0, 0] }),
-    new Entites.ChatPNJ({ nom: 'roux', x: 800, y: toit('carrefour'), mode: 'promeneur', x1: 780, x2: 890, sortYFixe: BASE + 1 }),
+    new Entites.ChatPNJ({ nom: 'gris', x: 540, y: toit('cafe'), mode: 'promeneur', x1: 500, x2: 590, texte: 'chatToits', sortYFixe: BASE + 1, zoneFixe: [0, 0, 0, 0] }),
+    new Entites.ChatPNJ({ nom: 'roux', x: 340, y: toit('carrefour'), mode: 'promeneur', x1: 310, x2: 420, sortYFixe: BASE + 1 }),
     new Entites.ChatPNJ({ nom: 'smoking', x: 1300, y: toit('hotel'), mode: 'promeneur', x1: 1230, x2: 1350, sortYFixe: BASE + 1 }),
     new Entites.ChatPNJ({ nom: 'blanc', x: 60, y: bats.pharmacie.top + 25, mode: 'cote', sortYFixe: 291 }),
     new Entites.ChatPNJ({ nom: 'tigre', x: 1010, y: toit('boulangerie'), mode: 'dort', sortYFixe: BASE + 1 }),
   );
   // chats des recoins
   C.pnj.push(
-    new Entites.ChatPNJ({ nom: 'gris', x: 620, y: 238, mode: 'joueur', texte: 'chatGris', rx: 70, ry: 40 }),
+    new Entites.ChatPNJ({ nom: 'gris', x: 1236, y: 262, mode: 'joueur', texte: 'chatGris', rx: 60, ry: 26 }),
     new Entites.ChatPNJ({ nom: 'tigre', x: 1160, y: 203, mode: 'dort', texte: 'chatTigre', sortYFixe: 207, sansOmbre: true }),
     new Entites.ChatPNJ({ nom: 'roux', x: 1086, y: 846, mode: 'cote', texte: 'chatPecheur' }),
     new Entites.ChatPNJ({ nom: 'siamois', x: 1436, y: 472, mode: 'assis' }),
@@ -328,31 +327,31 @@ Jeu.enregistrerCarte('rue', () => {
 
   // ---------------------------------------------------------------- HABITANTS
   const habitant = (o) => { const h = new Entites.Passant(Object.assign({ dialogue: (J) => Scenes.repliques(o.id, J) }, o)); C.pnj.push(h); return h; };
-  habitant({ id: 'boulangere', x: 1022, y: 478, regardeDefaut: 'down',
-    cfg: { peau: '#f0c4a0', cheveux: '#8a5a3a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a2a2e', veste: '#a8484a', tablier: '#f4efe6', coupe: 'robe', pantalon: '#7a3a3a', chaussures: '#3a2a2a' } });
+  habitant({ id: 'boulangere', x: 970, y: 478, regardeDefaut: 'down',
+    cfg: { modele: 'planche', peau: '#f0c4a0', cheveux: '#8a5a3a', coiffure: 'chignon', veste: '#a8484a', details: '#f4efe6', tablier: '#f4efe6', coupe: 'robe', pantalon: '#7a3a3a', semelles: '#3a2a2a' } });
   habitant({ id: 'livreur', x: 340, y: 498, vitesse: 26,
     chemin: [{ x: 700, y: 498, pause: 2, regard: 'up' }, { x: 1040, y: 498, pause: 1.5, regard: 'up' }, { x: 340, y: 498, pause: 2, regard: 'left' }],
-    cfg: { peau: '#d8a07a', cheveux: '#2a2020', coiffure: 'court', barbe: 'aucune', yeux: '#2a1d2e', chapeau: 'casquette', couleurChapeau: '#4a5a7a', ruban: '#2a3a5a', veste: '#5a7a5a', echarpe: '#e8c84a', pantalon: '#4a4a5a', chaussures: '#3a2a22' } });
+    cfg: { modele: 'planche', peau: '#d8a07a', cheveux: '#2a2020', chapeau: 'casquette', couleurChapeau: '#4a5a7a', veste: '#4f6e52', details: '#e8c84a', pantalon: '#3e4252', semelles: '#d8d0c0' } });
   habitant({ id: 'colette', x: 140, y: 614, vitesse: 18,
     chemin: [{ x: 560, y: 614, pause: 3, regard: 'up' }, { x: 820, y: 614, pause: 2.5, regard: 'up' }, { x: 1450, y: 614, pause: 2, regard: 'down' }, { x: 140, y: 614, pause: 2, regard: 'down' }],
-    cfg: { peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a5a8a', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', echarpe: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', chaussures: '#2a2026' } });
+    cfg: { modele: 'planche', peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', details: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', semelles: '#2a2026' } });
   habitant({ id: 'fernand', x: 1110, y: 514, vitesse: 11,
     chemin: [{ x: 1380, y: 514, pause: 4, regard: 'up' }, { x: 1110, y: 514, pause: 4, regard: 'up' }],
-    cfg: { peau: '#e8c0a0', cheveux: '#dcd8e2', coiffure: 'court', barbe: 'pleine', couleurBarbe: '#ecebf0', lunettes: true, yeux: '#2a1d2e', chapeau: 'melon', couleurChapeau: '#2a2630', ruban: '#4a3a3a', veste: '#5e4a3a', echarpe: '#8a2a3a', pantalon: '#3a3440', chaussures: '#2a2026' } });
-  habitant({ id: 'peintre', x: 630, y: 202, regardeDefaut: 'left',
-    cfg: { peau: '#e0b08a', cheveux: '#3a2a24', coiffure: 'boucles', barbe: 'courte', yeux: '#2a1d2e', chapeau: 'beret', couleurChapeau: '#2a2a3a', veste: '#e8e0d0', echarpe: '#c9483b', pantalon: '#4a5a7a', chaussures: '#3a2a22' } });
+    cfg: { modele: 'planche', peau: '#e8c0a0', cheveux: '#dcd8e2', barbe: 'blanche', couleurBarbe: '#eceaf2', chapeau: 'melon', couleurChapeau: '#2a2630', ruban: '#4a3a3a', veste: '#5e4a3a', details: '#c9a040', pantalon: '#3a3440', semelles: '#2a2026' } });
+  habitant({ id: 'peintre', x: 718, y: 240, regardeDefaut: 'left',
+    cfg: { modele: 'planche', peau: '#e0b08a', cheveux: '#3a2a24', chapeau: 'beret', couleurChapeau: '#2a2a3a', veste: '#d8d0c0', details: '#c9483b', pantalon: '#4a5a7a', semelles: '#e0d8c8' } });
 
   // ---------------------------------------------------------------- DUCHESSE ET LES CHATONS (cachés jusqu'à l'intro)
   const aristo = (o) => { const c = new Entites.ChatScript(Object.assign({ visible: false }, o)); C.pnj.push(c); return c; };
   C.aristochats = {
-    duchesse: aristo({ nom: 'duchesse', adulte: true, x: 1205, y: 166, dir: 'down', vitesse: 30 }),
+    duchesse: aristo({ nom: 'duchesse', adulte: true, x: 580, y: 166, dir: 'down', vitesse: 30 }),
     marie: aristo({ nom: 'marie', x: 0, y: 0 }),
     toulouse: aristo({ nom: 'toulouse', x: 0, y: 0 }),
     berlioz: aristo({ nom: 'berlioz', x: 0, y: 0 }),
   };
 
   // ---------------------------------------------------------------- ARRIVÉES
-  C.arrivees.depart = { x: 200, y: 520, dir: 'right' };
+  C.arrivees.depart = { x: 1440, y: 520, dir: 'left' };
   C.finaliser();
   return C;
 });

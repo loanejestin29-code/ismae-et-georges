@@ -174,8 +174,8 @@ Jeu.enregistrerCarte('superette', () => {
 
   // ---------------------------------------------------------------- personnages
   const spr = Sprites.person({
-    peau: '#c48d6c', cheveux: '#2a1e1a', coiffure: 'boucles', barbe: 'courte', lunettes: true,
-    couleurLunettes: '#2a2233', yeux: '#2a1d2e', veste: '#1d4f9c', pantalon: '#2a2a3a', chaussures: '#24222a',
+    modele: 'planche', peau: '#c48d6c', cheveux: '#2a1e1a', veste: '#1d4f9c', details: '#e1251b',
+    pantalon: '#2a2a3a', semelles: '#e8e4ec',
   });
   Entites.portraits.caissier = spr.down.idle;
   C.pnj.push({
@@ -185,8 +185,8 @@ Jeu.enregistrerCarte('superette', () => {
   });
   C.zones[C.zones.findIndex((z) => z.texte === 'caissier')].dialogue = (J) => Scenes.repliques('caissier', J);
   const dame = Sprites.person({
-    peau: '#f0c8a8', cheveux: '#dcd8e2', coiffure: 'chignon', barbe: 'aucune', lunettes: true, couleurLunettes: '#6a4a3a',
-    yeux: '#2a1d2e', veste: '#a83a4a', echarpe: '#e8d8a0', coupe: 'robe', pantalon: '#5a2a3a', chaussures: '#2a2026',
+    modele: 'planche', peau: '#f0c8a8', cheveux: '#dcd8e2', coiffure: 'chignon', veste: '#a83a4a', details: '#e8d8a0',
+    coupe: 'robe', pantalon: '#5a2a3a', semelles: '#2a2026',
   });
   Entites.portraits.cliente = dame.down.idle;
   C.pnj.push({

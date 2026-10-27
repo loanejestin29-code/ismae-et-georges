@@ -297,8 +297,127 @@ const Sprites = (() => {
     return PX.outline(PX.fromRows(grid.map((r) => r.join('')), pal), '#1d1626');
   }
 
+  // ------------------------------------------------------------ PERSONNAGES « PLANCHE »
+  // Silhouette tirée de la planche d'Ismae (52 px). Les habitants reprennent la même
+  // silhouette avec leurs couleurs et quelques accessoires (chapeau, jupe, tablier…).
+  function rampe(base, clair = 0.16, sombre = -0.3) { return { L2: PX.shade(base, clair + 0.18), L1: PX.shade(base, clair), m: base, d: PX.shade(base, sombre) }; }
+  function palettesPlanche(c) {
+    const P0 = PLANCHE_ISMAE.palette;
+    if (c.couleursOrigine) return { haut: P0, bas: P0 };
+    const commun = {
+      o: '#120e18', H: PX.shade(c.cheveux, 0.16), h: c.cheveux, i: PX.shade(c.cheveux, -0.3),
+      K: PX.shade(c.peau, 0.12), k: c.peau, s: c.couleurBarbe || PX.shade(c.peau, -0.3),
+      W: c.semelles || '#e8e4ec', w: PX.shade(c.semelles || '#e8e4ec', -0.3),
+    };
+    const tissu = (base, detail) => { const r = rampe(base); return { d: r.d, m: r.m, l: PX.shade(base, 0.08), L: r.L1, M: r.L2, Z: detail || PX.shade(base, 0.5) }; };
+    return { haut: Object.assign({}, commun, tissu(c.veste, c.details)), bas: Object.assign({}, commun, tissu(c.pantalon)) };
+  }
+  const SOMBRE = { m: 'd', l: 'm', L: 'l', M: 'L', W: 'w', Z: 'M', K: 'k', k: 's' };
+  function composePlanche(c, vue, pas) {
+    const src = PLANCHE_ISMAE[vue], taille = PLANCHE_ISMAE.taille[vue];
+    const Hh = src.length, Ww = Math.max(...src.map((r) => r.length));
+    let g = src.map((r) => { const a = [...r]; while (a.length < Ww) a.push('.'); return a; });
+    const cx = Math.floor(Ww / 2);
+    if (pas && (vue === 'down' || vue === 'up')) {
+      // de face / de dos : un pied se lève (moitié droite ou gauche du bas du corps)
+      const n = g.map((r) => r.slice());
+      const droite = (pas === 1) === (vue === 'down');
+      for (let y = Hh - 10; y < Hh; y++) for (let x = 0; x < Ww; x++) {
+        if ((x >= cx) !== droite) continue;
+        n[y][x] = '.';
+      }
+      for (let y = Hh - 10; y < Hh; y++) for (let x = 0; x < Ww; x++) {
+        if ((x >= cx) !== droite) continue;
+        if (g[y][x] !== '.') n[y - 2][x] = g[y][x];
+      }
+      g = n;
+    } else if (pas) {
+      // de profil : jambes en ciseaux (la jambe éloignée est plus sombre)
+      const sens = vue === 'right' ? 1 : -1, ampl = pas === 1 ? 3 : 2;
+      const jambes = g.slice(taille), nl = jambes.length;
+      const cisaille = (k, fonce) => jambes.map((r, j) => {
+        const off = Math.round((k * (j + 1)) / nl), out = Array(Ww).fill('.');
+        r.forEach((ch, x) => { const nx = x + off; if (ch !== '.' && nx >= 0 && nx < Ww) out[nx] = fonce ? (SOMBRE[ch] || ch) : ch; });
+        return out;
+      });
+      const avant = cisaille(ampl * sens, pas === 2), arriere = cisaille(-ampl * sens, pas === 1);
+      for (let j = 0; j < nl; j++) for (let x = 0; x < Ww; x++) g[taille + j][x] = avant[j][x] !== '.' ? avant[j][x] : arriere[j][x];
+    }
+    const pals = palettesPlanche(c);
+    const cv = PX.canvas(Ww, Hh), Q = PX.painter(cv);
+    for (let y = 0; y < Hh; y++) for (let x = 0; x < Ww; x++) {
+      const ch = g[y][x];
+      if (ch === '.') continue;
+      Q.px(x, y, (y < taille ? pals.haut : pals.bas)[ch] || '#ff00ff');
+    }
+    accessoires(Q, c, vue, g, taille, Ww, Hh);
+    return PX.outline(cv, '#120e18');
+  }
+  // chapeaux, chignon, jupe, tablier, barbe blanche, dessinés par-dessus la silhouette
+  function accessoires(Q, c, vue, g, taille, Ww, Hh) {
+    let x0 = Ww, x1 = 0, y0 = Hh;
+    for (let y = 0; y < 13; y++) for (let x = 0; x < Ww; x++) if ('Hhi'.includes(g[y][x])) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); }
+    const lw = x1 - x0 + 1, mx = Math.round((x0 + x1) / 2);
+    const cote = vue === 'right' ? 1 : vue === 'left' ? -1 : 0;
+    if (c.barbe === 'blanche' && vue !== 'up') for (let y = 8; y < 13; y++) for (let x = 0; x < Ww; x++) if ('kKs'.includes(g[y][x]) && (y > 9 || g[y][x] === 's')) Q.px(x, y, c.couleurBarbe || '#eceaf2');
+    if (c.coupe === 'robe') {
+      const r = rampe(c.pantalon);
+      let a = Ww, b = 0;
+      for (let x = 0; x < Ww; x++) if (g[taille][x] !== '.') { a = Math.min(a, x); b = Math.max(b, x); }
+      const hauteur = Hh - 3 - taille;
+      for (let j = 0; j <= hauteur; j++) {
+        const t = j / hauteur, ga = Math.round(a - 1 - t * 2), dr = Math.round(b + 1 + t * 2);
+        for (let x = ga; x <= dr; x++) Q.px(x, taille + j, x === ga || x === dr ? r.d : t > 0.35 && (x - ga) % 6 === 2 ? r.L1 : t > 0.35 && (x - ga) % 6 === 5 ? r.d : r.m);
+      }
+      for (let x = 0; x < Ww; x++) for (let y = Hh - 2; y < Hh; y++) if (g[y][x] !== '.') Q.px(x, y, '#2a2026');
+    }
+    if (c.tablier && vue !== 'up') {
+      const tx = vue === 'down' ? mx - 3 : mx + cote * 3 - 1, tw = vue === 'down' ? 7 : 3, ty = taille - 9, th = Hh - 12 - ty;
+      Q.rect(tx + 1, ty, tw - 2, 4, c.tablier); Q.rect(tx, ty + 4, tw, th - 4, c.tablier);
+      Q.hline(tx, ty + 9, tw, PX.shade(c.tablier, -0.2)); Q.rect(tx + tw - 1, ty + 4, 1, th - 4, PX.shade(c.tablier, -0.18));
+    }
+    if (c.coiffure === 'chignon') {
+      const bx = vue === 'down' || vue === 'up' ? mx : mx - cote * (lw / 2 - 1);
+      Q.ellipse(bx, y0 - 1, 3, 2, PX.shade(c.cheveux, -0.1)); Q.px(bx - 1, y0 - 2, PX.shade(c.cheveux, 0.2));
+    }
+    const A = c.couleurChapeau || '#2a2630', Ad = PX.shade(A, -0.35), Al = PX.shade(A, 0.2), Y = c.ruban || '#7a2a34';
+    if (c.chapeau === 'melon') {
+      Q.ellipse(mx, y0 - 1, Math.ceil(lw / 2) - 1, 3, A); Q.rect(mx - Math.ceil(lw / 2) + 2, y0 - 4, lw - 3, 3, A);
+      Q.rect(x0 - 1, y0 + 1, lw + 2, 2, Ad); Q.hline(mx - Math.ceil(lw / 2) + 2, y0, lw - 3, Y); Q.hline(mx - 2, y0 - 4, 4, Al);
+    } else if (c.chapeau === 'casquette') {
+      Q.rect(x0, y0 - 2, lw, 4, A); Q.hline(x0 + 1, y0 - 3, lw - 2, A); Q.hline(x0 + 2, y0 - 3, lw - 4, Al);
+      if (cote) Q.rect(cote > 0 ? x1 - 1 : x0 - 4, y0 + 1, 5, 2, Ad); else Q.rect(mx - 4, y0 + 2, 9, 2, Ad);
+    } else if (c.chapeau === 'beret') {
+      Q.ellipse(mx + 1, y0, Math.ceil(lw / 2), 2, A); Q.hline(mx - 2, y0 - 2, 5, Al); Q.px(mx + 1, y0 - 3, A);
+    } else if (c.chapeau === 'capeline') {
+      Q.ellipse(mx, y0 + 2, Math.ceil(lw / 2) + 4, 2, Ad); Q.ellipse(mx, y0 - 1, Math.ceil(lw / 2) - 1, 3, A);
+      Q.hline(mx - Math.ceil(lw / 2) + 2, y0 + 1, lw - 3, Y); Q.rect(mx + 3, y0 - 1, 2, 2, c.fleur || '#ff9ac0');
+    }
+  }
+  const cachePlanche = {};
+  function personPlanche(c) {
+    const out = {};
+    for (const vue of ['down', 'up', 'right', 'left']) {
+      const idle = composePlanche(c, vue, 0);
+      const a = composePlanche(c, vue, 1), b = composePlanche(c, vue, 2);
+      // la silhouette remonte d'un pixel entre deux pas (petit rebond)
+      const haut = (img) => { const cv = PX.canvas(img.width, img.height + 1); cv.getContext('2d').drawImage(img, 0, 0); return cv; };
+      const bas = (img) => { const cv = PX.canvas(img.width, img.height + 1); cv.getContext('2d').drawImage(img, 0, 1); return cv; };
+      const repos = bas(idle);
+      out[vue] = { idle: repos, blink: repos, walk: [bas(a), haut(idle), bas(b), haut(idle)] };
+    }
+    return out;
+  }
+  function portraitIsmae() {
+    if (cachePlanche.portrait) return cachePlanche.portrait;
+    const cv = PX.fromRows(PORTRAIT_ISMAE.rows, PORTRAIT_ISMAE.palette);
+    cv.buste = true;
+    return (cachePlanche.portrait = cv);
+  }
+
   // Renvoie { down, up, left, right } -> { idle, blink, walk:[4] }
   function person(c) {
+    if (c.modele === 'planche') return personPlanche(c);
     if (c.modele === 'detaille') {
       const out = {};
       for (const dir of ['down', 'up', 'side']) {
@@ -570,5 +689,5 @@ const Sprites = (() => {
     return o;
   }
 
-  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS };
+  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS, portraitIsmae };
 })();

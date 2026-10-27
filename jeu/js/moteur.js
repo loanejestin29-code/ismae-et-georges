@@ -146,15 +146,22 @@ const Jeu = (() => {
     const img = l.qui && Entites.portrait(l.qui);
     por.hidden = !img;
     if (img) {
-      // on cadre la tête et le buste (le haut de l'image) et on remplit le cadre
-      const grand = img.height > 24;
-      const sy = grand ? Math.max(0, img.height - 30) : 0, h = grand ? Math.min(20, img.height - sy) : img.height;
-      const marge = 2;
-      por.width = img.width + marge * 2; por.height = Math.round((img.width + marge * 2) * 0.88);
+      // portrait dessiné (buste) : affiché en entier ; sinon on cadre la tête et les épaules du sprite
       const g = por.getContext('2d');
-      g.imageSmoothingEnabled = false;
-      g.clearRect(0, 0, por.width, por.height);
-      g.drawImage(img, 0, sy, img.width, h, marge, por.height - h, img.width, h);
+      if (img.buste) {
+        por.width = img.width; por.height = img.height;
+        g.imageSmoothingEnabled = false; g.clearRect(0, 0, por.width, por.height); g.drawImage(img, 0, 0);
+      } else {
+        const humain = img.height > 34;
+        const grand = !humain && img.height > 24;
+        const sy = humain ? 0 : grand ? Math.max(0, img.height - 30) : 0;
+        const h = humain ? 22 : grand ? Math.min(20, img.height - sy) : img.height;
+        const marge = 2;
+        por.width = img.width + marge * 2; por.height = Math.round((img.width + marge * 2) * 0.88);
+        g.imageSmoothingEnabled = false;
+        g.clearRect(0, 0, por.width, por.height);
+        g.drawImage(img, 0, sy, img.width, h, marge, por.height - h, img.width, h);
+      }
     }
     $('dialogue').classList.toggle('narration', !p);
     dialogue.qui = l.qui;
@@ -254,7 +261,7 @@ const Jeu = (() => {
   // ------------------------------------------------------------ caméra
   function camera(snap) {
     const p = J.joueur;
-    let tx = p.x - V.w / 2, ty = p.y - 14 - V.h / 2;
+    let tx = p.x - V.w / 2, ty = p.y - 24 - V.h / 2;
     tx = carte.w <= V.w ? (carte.w - V.w) / 2 : Math.max(0, Math.min(carte.w - V.w, tx));
     ty = carte.h <= V.h ? (carte.h - V.h) / 2 : Math.max(0, Math.min(carte.h - V.h, ty));
     if (snap) { cam.x = tx; cam.y = ty; return; }
@@ -460,7 +467,7 @@ const Jeu = (() => {
     if (amb !== 'interieur') g.drawImage(vignette, 0, 0);
     // bulle « ! » au-dessus d'Ismae quand on peut interagir
     g.setTransform(1, 0, 0, 1, -cx, -cy);
-    if (cible && !J.bloque()) Entites.poser(g, Entites.SPR.bulle, J.joueur.x, J.joueur.y - 33 - Math.round(Math.abs(Math.sin(t * 4)) * 2));
+    if (cible && !J.bloque()) Entites.poser(g, Entites.SPR.bulle, J.joueur.x, J.joueur.y - Entites.SPR.ismae.down.idle.height + 1 - Math.round(Math.abs(Math.sin(t * 4)) * 2));
     if (debug) {
       g.lineWidth = 1;
       g.strokeStyle = 'rgba(255,60,60,0.8)'; carte.solides.forEach((s) => g.strokeRect(s.x + 0.5, s.y + 0.5, s.w - 1, s.h - 1));

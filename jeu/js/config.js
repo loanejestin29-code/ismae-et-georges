@@ -13,7 +13,9 @@ const CONFIG = {
   //  ISMAE — apparence
   // ------------------------------------------------------------------
   ismae: {
-    modele: 'detaille',       // 'detaille' (grand sprite dessiné à la main) | 'simple' (ancien modèle)
+    modele: 'planche',        // 'planche' (d'après ta planche de référence, voir sprite-ismae.js)
+    couleursOrigine: true,    // garde exactement les couleurs de la planche
+    // (les réglages ci-dessous ne servent qu'aux anciens modèles 'detaille' et 'simple')
     peau: '#ecb994',          // teint
     cheveux: '#6e4a31',       // brun
     coiffure: 'degrade',      // 'degrade' | 'court' | 'boucles' | 'meche' | 'rase'
@@ -54,7 +56,7 @@ const CONFIG = {
   vitesseMarche: 62,          // pixels par seconde
   vitesseCourse: 104,
   distanceGeorges: 17,        // distance à laquelle Georges suit Ismae
-  vitesseChatons: 52,         // vitesse de Georges pendant la poursuite (plus lent qu'Ismae)
+  vitesseChatons: 120,        // vitesse de Georges pendant la poursuite (plus rapide qu'Ismae qui court ; les chatons encore plus)
 
   // ------------------------------------------------------------------
   //  PERSONNAGES QUI PARLENT (nom affiché + couleur de l'étiquette)
@@ -95,7 +97,7 @@ const CONFIG = {
       ['marie', 'Berlioz ! Sois gentil.'],
       ['ismae', 'Il débute. Dites… vous n\'auriez pas vu Tom, par hasard ?'],
       ['duchesse', 'Tom ? Il me semble l\'avoir vu partir travailler ce matin.'],
-      ['toulouse', 'Je l\'ai vu entrer dans une petite boutique au logo bleu et rouge, un peu plus loin !'],
+      ['toulouse', 'Je l\'ai vu entrer dans une petite boutique au logo bleu et rouge, tout au bout de la rue… là où les chats jouent du jazz !'],
       ['duchesse', 'Allons, les enfants. Laissons ce jeune homme à ses recherches.'],
     ],
   },
@@ -105,13 +107,13 @@ const CONFIG = {
   //  avant = avant la rencontre avec Duchesse, apres = une fois la piste de Tom connue
   // ------------------------------------------------------------------
   repliques: {
-    duchesse: { apres: [['duchesse', 'La boutique au logo bleu et rouge ? En redescendant la rue, à côté de la boulangerie.']] },
+    duchesse: { apres: [['duchesse', 'La boutique au logo bleu et rouge ? Tout au bout de la rue, près de la petite scène des musiciens.']] },
     marie: { apres: [['marie', 'Georges, reviens jouer quand tu veux !']] },
     toulouse: { apres: [['toulouse', 'Je m\'entraîne encore. Fffft !']] },
     berlioz: { apres: [['berlioz', 'Le dos plat… Je la ressortirai, celle-là.']] },
     charlie: {
       avant: [['charlie', 'Yeah ! Ce soir, la rue swingue, mon pote !'], ['charlie', 'Approche, les matous ne mordent pas. Enfin, pas trop.']],
-      apres: [['charlie', 'Tom ? Le gars qui fredonne faux en allant bosser ?'], ['charlie', 'Il file tous les matins vers la boutique au logo bleu et rouge. Yeah !']],
+      apres: [['charlie', 'Tom ? Le gars qui fredonne faux en allant bosser ?'], ['charlie', 'Sa boutique, c\'est juste là, à côté de notre scène. Le logo bleu et rouge. Yeah !']],
     },
     pianiste: { avant: [['pianiste', 'Do, mi, sol… et un petit miaou pour finir.']] },
     contrebasse: { avant: [['contrebasse', 'Moi, je tiens le rythme. Le reste, c\'est du détail.']] },
@@ -119,17 +121,17 @@ const CONFIG = {
     clarinette: { avant: [['clarinette', 'Chut… mon solo arrive dans huit mesures.']] },
     boulangere: {
       avant: [['boulangere', 'Bonsoir mon grand ! Il est tard pour les croissants, hein.']],
-      apres: [['boulangere', 'Tom ? Il passe chaque matin prendre un croissant…'], ['boulangere', '…puis il file à la petite supérette, juste à côté.']],
+      apres: [['boulangere', 'Tom ? Il passe chaque matin prendre un croissant…'], ['boulangere', '…puis il file à la petite supérette, tout au bout de la rue, à côté des musiciens.']],
     },
     livreur: {
       avant: [['livreur', 'Attention, ça passe ! Livraison urgente de baguettes !']],
-      apres: [['livreur', 'Tom ? Il travaille dans la petite supérette au bout de la rue.'], ['livreur', 'Enfin… plutôt au milieu. Celle avec le logo bleu et rouge !']],
+      apres: [['livreur', 'Tom ? Il travaille dans la petite supérette au bout de la rue.'], ['livreur', 'Suis la musique : elle est juste à côté du concert de chats !']],
     },
     colette: {
       avant: [['colette', 'Quel joli chat noir ! Il s\'appelle comment ?'], ['ismae', 'Georges.'], ['colette', 'Georges ! Ça lui va à merveille.']],
     },
     fernand: {
-      avant: [['fernand', 'Trois chatons viennent de filer vers la ruelle de l\'hôtel.'], ['fernand', 'À mon âge, je ne cours plus après personne.']],
+      avant: [['fernand', 'Trois chatons viennent de filer vers la ruelle à côté du café.'], ['fernand', 'À mon âge, je ne cours plus après personne.']],
       apres: [['fernand', 'Tom ? Connais pas. Mais à la supérette, on trouve de tout.']],
     },
     peintre: { avant: [['peintre', 'Je peins des chats depuis vingt ans.'], ['peintre', 'Le tien a de l\'allure… mais il ne tient pas la pose.']] },

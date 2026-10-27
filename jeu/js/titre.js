@@ -1,7 +1,7 @@
 // =====================================================================
 //  titre.js — écran d'accueil animé : ciel d'hiver, lune, toits aux
 //  fenêtres allumées, neige, et Georges assis sur un toit.
-//  Le titre « Juste un indice… » est rendu en vrais pixels.
+//  (le titre « Juste un indice… » est du texte, voir index.html)
 // =====================================================================
 'use strict';
 
@@ -29,8 +29,8 @@ const Titre = (() => {
     P.rect(0, Math.round(H * 0.75), W, H, '#2c2152');
     etoiles = [];
     for (let k = 0; k < W * H / 220; k++) etoiles.push([r.int(W), r.int(Math.round(H * 0.55)), r()]);
-    // lune et halo
-    const lx = Math.round(W * 0.9), ly = Math.round(H * 0.27);
+    // lune et halo (assez basse pour ne pas gêner le titre : elle se lève derrière les toits)
+    const lx = Math.round(W * 0.9), ly = Math.round(H * 0.4);
     for (const [rr, c] of [[22, 'rgba(255,230,180,0.05)'], [16, 'rgba(255,230,180,0.08)']]) P.ellipse(lx, ly, rr, rr, c);
     P.ellipse(lx, ly, 10, 10, '#f4e6c4'); P.ellipse(lx - 2, ly - 2, 8, 8, '#fff6dc');
     P.ellipse(lx + 3, ly + 2, 2, 2, '#e2d0a8'); P.ellipse(lx - 3, ly + 4, 1, 1, '#e2d0a8'); P.px(lx + 1, ly - 4, '#e2d0a8');
@@ -114,34 +114,6 @@ const Titre = (() => {
     raf = requestAnimationFrame(dessiner);
   }
 
-  // titre en vrais pixels : texte seuillé, dégradé doré, contour et ombre portée
-  function logo(cv, texte) {
-    const tmp = PX.canvas(260, 40), tg = tmp.getContext('2d');
-    tg.font = "700 22px 'Pixelify Sans', monospace";
-    tg.textBaseline = 'top';
-    const w = Math.ceil(tg.measureText(texte).width) + 10;
-    tg.fillStyle = '#fff'; tg.fillText(texte, 4, 4);
-    const src = tg.getImageData(0, 0, w, 34).data;
-    const masque = (x, y) => x >= 0 && y >= 0 && x < w && y < 34 && src[(y * w + x) * 4 + 3] > 120;
-    let y0 = 34, y1 = 0;
-    for (let y = 0; y < 34; y++) for (let x = 0; x < w; x++) if (masque(x, y)) { y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
-    const h = y1 - y0 + 1;
-    cv.width = w + 4; cv.height = h + 6;
-    const g = cv.getContext('2d');
-    const plein = (dx, dy, col) => { g.fillStyle = col; for (let y = y0; y <= y1; y++) for (let x = 0; x < w; x++) if (masque(x, y)) g.fillRect(x + dx, y - y0 + dy, 1, 1); };
-    plein(3, 4, '#5a1a2e');                                   // ombre portée
-    for (const [dx, dy] of [[0, 1], [2, 1], [1, 0], [1, 2]]) plein(dx, dy, '#0b0816'); // contour
-    // remplissage en dégradé doré, avec un reflet crème sur le haut des lettres
-    for (let y = y0; y <= y1; y++) {
-      const t = (y - y0) / Math.max(1, h - 1);
-      const col = t < 0.45 ? '#ffe6a0' : t < 0.7 ? '#f2c25a' : '#e08a3a';
-      g.fillStyle = col;
-      for (let x = 0; x < w; x++) if (masque(x, y)) g.fillRect(x + 1, y - y0 + 1, 1, 1);
-    }
-    g.fillStyle = '#fff8e0';
-    for (let y = y0; y <= y1; y++) for (let x = 0; x < w; x++) if (masque(x, y) && !masque(x, y - 1)) g.fillRect(x + 1, y - y0 + 1, 1, 1);
-  }
-
   function demarrer() {
     ecran = document.getElementById('titre-scene'); eg = ecran.getContext('2d');
     buf = PX.canvas(10, 10); bg = buf.getContext('2d');
@@ -150,9 +122,6 @@ const Titre = (() => {
     addEventListener('resize', dimensionner);
     actif = true;
     raf = requestAnimationFrame(dessiner);
-    const dessinerLogo = () => logo(document.getElementById('titre-logo'), 'Juste un indice…');
-    dessinerLogo();
-    if (document.fonts && document.fonts.load) document.fonts.load("700 22px 'Pixelify Sans'").then(dessinerLogo).catch(() => {});
   }
   function arreter() { actif = false; cancelAnimationFrame(raf); removeEventListener('resize', dimensionner); }
   return { demarrer, arreter };

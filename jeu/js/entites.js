@@ -32,7 +32,7 @@ const Entites = (() => {
   const portraits = {};
   function portrait(qui) {
     if (portraits[qui]) return portraits[qui];
-    if (qui === 'ismae') return SPR.ismae.down.idle;
+    if (qui === 'ismae') return CONFIG.ismae.modele === 'planche' ? Sprites.portraitIsmae() : SPR.ismae.down.idle;
     if (qui === 'georges') return SPR.georges.sit[0];
     if (qui === 'duchesse') return chat('duchesse').sit[0];
     if (['marie', 'toulouse', 'berlioz'].includes(qui)) return chaton(qui).sit[0];
@@ -121,8 +121,13 @@ const Entites = (() => {
     surprendre(type = '!') { this.bulle = { type, t: 1.1 }; }
     majScript(dt, jeu) {
       const j = jeu.joueur;
-      const loin = this.opts.attendre && Math.hypot(j.x - this.x, j.y - this.y) > this.opts.attendre;
-      if (loin && this.chemin && this.chemin.length) {
+      // marge : il s'arrête quand Ismae est trop loin, et ne repart que quand il s'est bien rapproché
+      const dj = Math.hypot(j.x - this.x, j.y - this.y);
+      if (this.opts.attendre) {
+        if (!this.attendIsmae && dj > this.opts.attendre) this.attendIsmae = true;
+        else if (this.attendIsmae && dj < this.opts.attendre - 90) this.attendIsmae = false;
+      } else this.attendIsmae = false;
+      if (this.attendIsmae && this.chemin && this.chemin.length) {
         // Ismae est trop loin : Georges s'assoit, se retourne et l'appelle
         this.etat = 'assis'; this.dir = dirDe(j.x - this.x, j.y - this.y, this.dir);
         this.attente += dt;
@@ -131,7 +136,7 @@ const Entites = (() => {
         return;
       }
       this.attente = 0;
-      if (suivreChemin(this, dt)) { this.etat = 'marche'; this.anim += dt * 11; }
+      if (suivreChemin(this, dt)) { this.etat = 'marche'; this.anim += dt * Math.max(10, this.vitesse / 6.5); }
       else if (!this.pose) { this.etat = 'assis'; this.anim += dt * 2; }
       else this.anim += dt * 6;
     }
@@ -215,7 +220,7 @@ const Entites = (() => {
       this.blinkT -= dt;
       if (this.blinkT < 0) { this.blink = true; if (this.blinkT < -0.15) { this.blink = false; this.blinkT = 2 + Math.random() * 4; } }
       if (this.chemin) {
-        if (suivreChemin(this, dt)) { this.anim += dt * (this.adulte ? 9 : 12); return; }
+        if (suivreChemin(this, dt)) { this.anim += dt * Math.max(this.adulte ? 9 : 12, this.vitesse / 7); return; }
         this.chemin = null; this.etat = 'assis';
         const f = this.surFin; this.surFin = null; if (f) f(this);
       }
