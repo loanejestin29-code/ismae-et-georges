@@ -19,8 +19,13 @@
       Titre.demarrer();
       Scenes.init(Jeu);
       Bisou.init(Jeu);
+      Sherwood.init(Jeu);
       Indices.init();
-      Jeu.init('rue', 'depart');
+      // #sherwood à la fin de l'adresse : on commence directement dans la forêt (épreuve 2)
+      if (location.hash.includes('sherwood')) {
+        Object.assign(Scenes.quete, { intro: 'fini', tom: true, cle: true, porteOuverte: true, entreeSuperette: true, bisou: 'gagne' });
+        Jeu.init('foret', 'entree');
+      } else Jeu.init('rue', 'depart');
     } catch (err) {
       $('titre-erreur').hidden = false;
       $('titre-erreur').textContent = 'Le jeu n\'a pas pu démarrer : ' + err.message;

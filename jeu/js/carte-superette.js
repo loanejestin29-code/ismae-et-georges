@@ -375,15 +375,6 @@ Jeu.enregistrerCarte('superette', () => {
   P.rect(208, 424, 32, 8, '#7a2a2e'); P.hline(208, 424, 32, '#a8484a'); for (let x = 210; x < 238; x += 3) P.px(x, 428, '#c9a040');
   C.solide(0, 434, 208, 14); C.solide(240, 434, W - 240, 14);
 
-  // panneaux suspendus au-dessus de quelques allées
-  const panneau = (couleur) => {
-    const c = PX.canvas(16, 12), Q = PX.painter(c);
-    Q.vline(4, 0, 3, '#8a92a2'); Q.vline(11, 0, 3, '#8a92a2');
-    Q.rect(0, 3, 16, 9, couleur); Q.hline(0, 3, 16, PX.shade(couleur, 0.3)); Q.hline(0, 11, 16, PX.shade(couleur, -0.3));
-    Q.rect(6, 6, 4, 3, '#ffffff');
-    return c;
-  };
-  [[24, 196, BLUE], [408, 196, RED], [24, 292, '#3fa055'], [408, 292, '#f2a020']].forEach(([x, y, col]) => C.dessusImg(panneau(col), x, y));
   const gl = Objets.guirlande(W - 32, 5); C.dessusImg(gl.img, 16, 40); gl.bulbs.forEach(([bx, by]) => C.scintille.push([16 + bx, 40 + by]));
 
   // ---------------------------------------------------------------- personnages

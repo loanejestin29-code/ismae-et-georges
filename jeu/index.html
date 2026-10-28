@@ -127,7 +127,23 @@
   @keyframes pivoter { 0%, 45% { transform: rotate(0deg); } 50%, 95% { transform: rotate(-90deg); } }
   @media (orientation: portrait) and (max-width: 900px) { #tourner { display: grid; } }
   /* ---------- épreuves : bandeau de course-poursuite, carnet d'indices, écran de victoire ---------- */
-  body.poursuite #btn-b { display: none; }
+  body.poursuite #btn-b, body.tir #btn-b, body.tir #btn-indices, body.tir #aide { display: none; }
+  /* tournoi de tir à l'arc : scores en haut, commentaires au milieu, aide en bas */
+  #tir { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  .tir-haut { position: absolute; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; gap: 8px; white-space: nowrap; }
+  .tir-haut span { font-size: 15px; font-weight: 700; padding: 5px 10px 4px; background: rgba(18, 13, 34, 0.86); color: var(--encre);
+    box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
+  #tir-score { color: #ffd24a; }
+  #tir-record { color: #c8a070; }
+  #tir-message { position: absolute; left: 50%; top: calc(54px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); margin: 0; max-width: min(520px, 80vw);
+    text-align: center; font-size: 17px; font-weight: 700; line-height: 1.25; color: #fff6dc; text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816; text-wrap: balance; }
+  #tir-message.grand { top: 40%; font-size: 26px; color: #f6d27a; }
+  #tir-message.arrive { animation: tirMsg 0.35s steps(4) both; }
+  @keyframes tirMsg { 0% { transform: translateX(-50%) scale(0.6); } 100% { transform: translateX(-50%) scale(1); } }
+  #tir-aide { position: absolute; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0; white-space: nowrap;
+    font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebond 0.8s steps(2) infinite;
+    box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
+  @media (max-height: 460px) { .tir-haut span { font-size: 13px; } #tir-message { top: calc(44px + env(safe-area-inset-top, 0px)); font-size: 15px; } #tir-message.grand { font-size: 22px; } }
   #banniere { position: fixed; z-index: 4; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
     font-family: var(--titre); font-size: 12px; line-height: 1; color: #fff4f8; background: #c8346a; padding: 9px 14px 8px; white-space: nowrap; pointer-events: none;
     box-shadow: 0 -3px 0 0 #0b0816, 0 3px 0 0 #0b0816, -3px 0 0 0 #0b0816, 3px 0 0 0 #0b0816, 0 6px 0 0 rgba(0, 0, 0, 0.35); text-shadow: 2px 2px 0 #6a1438; }
@@ -188,7 +204,7 @@
     .carnet-texte { font-size: 13px; }
   }
 
-  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
@@ -203,6 +219,12 @@
 </div>
 
 <div id="banniere" hidden>Attrape Loane !</div>
+
+<div id="tir" hidden>
+  <div class="tir-haut"><span id="tir-fleche">Flèche 1/5</span><span id="tir-score">Score : 0</span><span id="tir-record">Shérif : 29</span></div>
+  <p id="tir-message" hidden></p>
+  <p id="tir-aide"></p>
+</div>
 
 <div id="victoire" class="fenetre" hidden role="dialog" aria-modal="true" aria-labelledby="vic-titre">
   <div class="cadre">
@@ -224,11 +246,11 @@
 
 <div id="suite" class="fenetre" hidden role="dialog" aria-modal="true" aria-labelledby="suite-titre">
   <div class="cadre">
-    <p class="vic-indice">À suivre…</p>
+    <p id="suite-haut" class="vic-indice">À suivre…</p>
     <h2 id="suite-titre">ÉPREUVE 2/6</h2>
-    <p class="suite-lieu">La forêt de Sherwood</p>
-    <p class="suite-texte">Bientôt disponible. En attendant, Georges a bien mérité une petite sieste.</p>
-    <button class="btn-pixel" id="suite-ok" type="button">Retourner sur la placette</button>
+    <p id="suite-lieu" class="suite-lieu"></p>
+    <p id="suite-texte" class="suite-texte"></p>
+    <button class="btn-pixel" id="suite-ok" type="button">Continuer</button>
   </div>
 </div>
 
@@ -275,6 +297,11 @@
 <script src="js/carte-rue.js"></script>
 <script src="js/carte-superette.js"></script>
 <script src="js/epreuve-bisou.js"></script>
+<script src="js/betes.js"></script>
+<script src="js/decor-foret.js"></script>
+<script src="js/carte-foret.js"></script>
+<script src="js/tir-arc.js"></script>
+<script src="js/epreuve-sherwood.js"></script>
 <script src="js/indices.js"></script>
 <script src="js/titre.js"></script>
 <script src="js/main.js"></script>

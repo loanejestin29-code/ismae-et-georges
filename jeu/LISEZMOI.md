@@ -1,4 +1,4 @@
-# Juste un indice… — zone 1 : la rue des chats
+# Juste un indice… — la rue des chats, le Carrefour, la forêt de Sherwood
 
 Petit jeu d'aventure en pixel art, vue de dessus en trois quarts, à jouer sur iPhone, à
 l'horizontale. Tout le décor, les personnages et la musique sont générés par le code : aucune
@@ -64,8 +64,31 @@ image ni aucun son externe.
 - **La victoire** : bisou magique (cœurs, doigt guéri), Loane explique les six épreuves, puis
   l'écran « ÉPREUVE 1/6 TERMINÉE ! — PREMIER INDICE OBTENU ! ». L'indice rejoint le **carnet
   d'indices** (bouton ✦ en haut à droite, touche I sur ordinateur), gardé sur le téléphone.
-- **La suite** : Ismae retrouve Georges près de l'entrée. En sortant, un écran annonce l'épreuve 2
-  (la forêt de Sherwood, pas encore faite), puis on revient sur la placette.
+- **La suite** : Ismae retrouve Georges près de l'entrée. En sortant, un écran annonce l'épreuve 2,
+  et la porte du Carrefour mène… à la forêt de Sherwood.
+
+## Épreuve 2 : « Le tournoi de Sherwood » (dans la forêt)
+
+- **La forêt** : grands chênes, sentiers de terre, un ruisseau et ses deux petits ponts, des fleurs,
+  des champignons, des rayons de soleil et des feuilles qui tombent. Une musique à part (luth, flûte,
+  tambourin). À découvrir : le campement de Robin (Petit Jean et sa soupe), Frère Tuck qui pêche,
+  Adam de la Halle qui joue du luth, un petit lapin archer (il donne l'astuce du tir), une tortue très
+  lente, le cœur « R + M » gravé, l'avis de recherche, la flèche avec un mot, la ruche, le terrier,
+  le coffre caché, le cercle de champignons.
+- **La capture** : au carrefour, au nord du ruisseau, fanfare : le roi Jean arrive avec deux gardes
+  rhinocéros et Triste Sire. Il veut Georges pour son trône ; les gardes l'enferment dans une cage et
+  l'emportent. Pour le récupérer, il faut gagner le tournoi, dans la grande clairière au nord.
+- **Le tournoi** : en arrivant au pas de tir, le mini-jeu commence. Le viseur bouge tout seul, la
+  jauge de force monte et descend : on tire (A, toucher l'écran, ou Espace) quand la jauge est dans
+  le rouge et le viseur près du centre. Trop fort, la flèche part trop haut ; pas assez, trop bas.
+  Cinq flèches, de plus en plus difficiles ; il faut battre les 29 points du shérif. En cas d'échec,
+  le roi laisse recommencer, et c'est un peu plus facile à chaque fois.
+- **La victoire** : le roi trépigne, boude, suce son pouce et pleure en appelant sa maman. Un garde
+  ouvre la cage, Georges court retrouver Ismae. Robin des Bois sort des arbres, le félicite et lui
+  remet le deuxième indice (« ÉPREUVE 2/6 TERMINÉE ! — DEUXIÈME INDICE OBTENU ! »).
+- **La suite** : on explore la forêt avec Georges. Le chemin du nord-ouest (derrière les tentes,
+  là où il commence à neiger) mène aux montagnes enneigées : un écran annonce l'épreuve 3
+  (le bonhomme de neige, pas encore faite).
 
 ## Tester sur l'iPhone
 
@@ -93,16 +116,21 @@ se met à jour tout seul en moins d'une minute.
   Le dessin lui-même est la grille `ISMAE_STYLE` de `js/characters.js`.
 - `tom` et `loane` : leurs couleurs (cheveux, peau, tenue). Les dessins sont `TOM_STYLE` et
   `LOANE_STYLE` dans `js/characters.js`.
-- `indices` : le texte des six indices, **à remplir** (le premier s'affiche à la fin de l'épreuve 1).
-  Ne jamais y écrire la destination.
+- `indices` : le texte des six indices, **à remplir** (le premier s'affiche à la fin de l'épreuve 1,
+  le deuxième à la fin du tournoi). Ne jamais y écrire la destination.
 - `bisou` : toutes les répliques de l'épreuve 1.
+- `sherwood` : toutes les répliques de l'épreuve 2 (capture, tournoi, colère du roi, Robin).
+- `tournoi` : nombre de flèches et score du shérif à battre. La difficulté de chaque flèche est le
+  tableau `NIVEAUX` de `js/tir-arc.js`.
+- `animaux` et `figurants` : les couleurs des personnages de la forêt (les dessins sont dans `js/betes.js`).
 - `vitesseLoane` : vitesse de Loane pendant la poursuite (Ismae court à 104) ; plus bas = plus facile.
 - `musique`, `volumeMusique`, `neige`, `ambiance`.
 - `vitesseChatons` : vitesse de Georges pendant la poursuite (Ismae court à 104). La vitesse des
   chatons eux-mêmes est `VITESSE_CHATONS` dans `js/scenes.js`.
 - `personnages` : noms et couleurs des étiquettes dans les bulles.
 - `rencontre` : toutes les répliques de la scène avec Duchesse.
-- `repliques` : ce que dit chaque personnage, avant (`avant`) et après (`apres`) la piste de Tom.
+- `repliques` : ce que dit chaque personnage, avant (`avant`) et après (`apres`) la piste de Tom ;
+  dans la forêt : en arrivant (`avant`), pendant que Georges est prisonnier (`pendant`), après la victoire (`apres`).
 - `textes` : les objets qu'on peut regarder, dont le cœur gravé (`coeur`), à personnaliser.
 
 ### Où se trouve quoi
@@ -114,7 +142,12 @@ se met à jour tout seul en moins d'une minute.
 | `js/carte-superette.js` | le Carrefour ; le labyrinthe se règle avec les tableaux `Hm` et `Vm` |
 | `js/epreuve-bisou.js` | l'épreuve 1 : la scène avec Tom, la poursuite de Loane, la victoire |
 | `js/indices.js` | le carnet d'indices, l'écran de victoire, l'annonce de la suite |
-| `js/musique.js` | l'orchestre de jazz, la musique de poursuite et les bruitages |
+| `js/carte-foret.js` | la forêt de Sherwood : sentiers, ruisseau, campement, clairière du tournoi |
+| `js/epreuve-sherwood.js` | l'épreuve 2 : la capture de Georges, le tournoi, la victoire, Robin |
+| `js/tir-arc.js` | le mini-jeu de tir à l'arc (viseur, jauge, points, difficulté) |
+| `js/betes.js` | les animaux de la forêt (roi Jean, gardes, Robin…) et la cage de Georges |
+| `js/decor-foret.js` | chênes, sapins enneigés, tentes, cibles, trône, barrières… |
+| `js/musique.js` | l'orchestre de jazz, la musique de poursuite, l'air de la forêt et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
 | `js/entites.js` | Ismae, Georges, les chats, les musiciens, les habitants |
@@ -125,9 +158,10 @@ se met à jour tout seul en moins d'une minute.
 - `#debug` à la fin de l'adresse : collisions en rouge, zones à regarder en vert, portes en bleu.
 - `#reset` à la fin de l'adresse : vide le carnet d'indices (utile après des essais sur le téléphone
   qui servira à offrir le jeu).
+- `#sherwood` à la fin de l'adresse : commence directement dans la forêt (pour essayer l'épreuve 2).
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- Le texte du premier indice (`indices` dans `js/config.js`).
-- Les épreuves 2 à 6, à commencer par la forêt de Sherwood.
+- Le texte des deux premiers indices (`indices` dans `js/config.js`).
+- Les épreuves 3 à 6, à commencer par le bonhomme de neige dans les montagnes enneigées.

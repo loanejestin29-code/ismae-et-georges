@@ -24,14 +24,11 @@ const Entites = (() => {
     SPR.etoile = PX.fromRows(['.y.', 'yYy', '.y.'], { y: '#ffd24a', Y: '#fff6c0' });
     SPR.poses = Sprites.georgesPoses();
     SPR.chatons = {};
-    // épreuve du bisou : couteau, bulles (doigt coupé, doigt guéri, cœur), gros cœur du bisou
+    // épreuve du bisou : couteau, bulle cœur, gros cœur du bisou
     SPR.couteau = PX.outline(PX.fromRows(['.wwwwwkkk', 'Wwwwwwkkk'], { w: '#c9cfda', W: '#ffffff', k: '#6a4228' }), '#2a1a2e');
     SPR.couteauG = PX.flipX(SPR.couteau);
-    const bulleDoigt = (r) => PX.outline(PX.fromRows(['.wwwwwwwww.', 'wwwwwKwwwww', 'wwwwKKKwwrw', 'wwwwKKKwrrw', 'wwwwKKKwwww',
-      'wwwKKKKKwww', 'wwwKKKKKwww', '.wwwwwwwww.', '...ww......', '...w.......'], { w: '#fff8e8', K: '#e6b08a', r }), '#2a1a2e');
     SPR.bulles = {
       '!': SPR.bulle, '?': SPR.question,
-      doigt: bulleDoigt('#e0353a'), gueri: bulleDoigt('#ffd24a'),
       coeur: PX.outline(PX.fromRows(['.wwwwwww.', 'wwrwwwrww', 'wrrrwrrrw', 'wrRrrrrrw', 'wwrrrrrww', 'wwwrrrwww', '.wwwrwww.', '..ww.....', '..w......'],
         { w: '#fff8e8', r: '#ff6f9a', R: '#ffc4d6' }), '#2a1a2e'),
     };
@@ -143,25 +140,27 @@ const Entites = (() => {
     }
   }
 
-  // ------------------------------------------------------------ personnages des épreuves (Tom, Loane…)
-  // o = { id, cfg, x, y, dir, visible, vitesse, dialogue }
+  // ------------------------------------------------------------ personnages des épreuves (Tom, Loane, les animaux de Sherwood…)
+  // o = { id, cfg, x, y, dir, visible, vitesse, dialogue, fixe (ne se retourne pas), lance (garde) }
+  // pose : nom d'une suite d'images spéciales (le roi Jean qui boude, qui pleure…)
   class Perso {
     constructor(o) {
       Object.assign(this, { dir: 'down', visible: true, vitesse: 60 }, o);
-      this.spr = Sprites.person(o.cfg);
+      this.spr = o.cfg.espece ? Betes.perso(o.cfg) : Sprites.person(o.cfg);
       portraits[o.id] = this.spr.down.idle;
       this.anim = 0; this.marche = false; this.blinkT = Math.random() * 3; this.blink = false;
-      this.chemin = null; this.surFin = null; this.bulle = null; this.saut = 0;
+      this.chemin = null; this.surFin = null; this.bulle = null; this.saut = 0; this.pose = null; this.poseT = 0;
     }
     get sortY() { return this.sortYFixe ?? this.y; }
     allerVers(points, vitesse, surFin) { this.chemin = points.map((p) => ({ x: p.x, y: p.y })); if (vitesse) this.vitesse = vitesse; this.surFin = surFin || null; }
-    regarder(x, y) { this.dir = dirDe(x - this.x, y - this.y, this.dir); }
+    regarder(x, y) { if (!this.fixe) this.dir = dirDe(x - this.x, y - this.y, this.dir); }
     dire(type, duree = 1.2) { this.bulle = { type, t: duree }; }
     update(dt) {
       this.blinkT -= dt;
       if (this.blinkT < 0) { this.blink = true; if (this.blinkT < -0.15) { this.blink = false; this.blinkT = 2.5 + Math.random() * 3; } }
       if (this.bulle && (this.bulle.t -= dt) < 0) this.bulle = null;
       if (this.saut > 0) this.saut = Math.max(0, this.saut - dt);
+      this.poseT += dt;
       this.marche = false;
       if (!this.chemin) return;
       if (suivreChemin(this, dt)) { this.marche = true; this.anim += dt * Math.max(7, this.vitesse / 8); }
@@ -173,11 +172,24 @@ const Entites = (() => {
     }
     draw(g) {
       if (!this.visible) return;
-      const set = this.spr[this.dir];
-      const img = this.marche ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
+      const set = this.spr[this.dir], poses = this.pose && this.spr.poses && this.spr.poses[this.pose];
+      const img = poses ? poses[Math.floor(this.poseT * 3) % poses.length]
+        : this.marche ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
       const dy = hauteurSaut(this.saut);
       ombre(g, this.x, this.y, 6);
+      // la lance des gardes, tenue dans la main droite (derrière lui quand il s'éloigne)
+      const lance = (devant) => {
+        if (!this.lance || (this.dir === 'up') === devant) return;
+        const lx = Math.round(this.x + (this.dir === 'left' ? -7 : this.dir === 'right' ? 4 : this.dir === 'up' ? -7 : 7)), ly = Math.round(this.y + dy);
+        g.fillStyle = '#1d1626'; g.fillRect(lx - 1, ly - 41, 3, 39);
+        g.fillStyle = '#8a5a32'; g.fillRect(lx, ly - 36, 1, 33);
+        g.fillStyle = '#1d1626'; g.fillRect(lx - 2, ly - 44, 5, 6);
+        g.fillStyle = '#c9cfda'; g.fillRect(lx - 1, ly - 43, 3, 4); g.fillRect(lx, ly - 45, 1, 2);
+        g.fillStyle = '#ffffff'; g.fillRect(lx - 1, ly - 43, 1, 2);
+      };
+      lance(false);
       poser(g, img, this.x, this.y + dy);
+      lance(true);
       if (this.bulle) poser(g, SPR.bulles[this.bulle.type], this.x, this.y - img.height - 1 + dy);
     }
   }
@@ -191,6 +203,7 @@ const Entites = (() => {
       this.anim = 0; this.repos = 0; this.blinkT = 3; this.blink = false; this.reaction = 0;
       this.hb = { w: 8, h: 5 };
       this.mode = 'suivi'; this.chemin = null; this.vitesse = 50; this.pose = null; this.bulle = null; this.attente = 0; this.opts = {};
+      this.cage = 0; this.h = 0; // forêt de Sherwood : 1 = dans la cage du roi Jean, 2 = cage ouverte ; h = porté au-dessus du sol
     }
     // opts.attendre : distance au-delà de laquelle Georges s'arrête pour attendre Ismae
     allerVers(points, vitesse, opts = {}) { this.mode = 'script'; this.chemin = points.map((p) => ({ x: p.x, y: p.y })); this.vitesse = vitesse; this.opts = opts; this.pose = null; }
@@ -265,7 +278,8 @@ const Entites = (() => {
     get sortY() { return this.y; }
     zone() { return { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.texteScript || (this.mode === 'script' ? 'georgesPoursuite' : 'georges'), chat: this }; }
     draw(g) {
-      const s = SPR.georges;
+      const s = SPR.georges, y0 = this.y;
+      if (this.h) this.y -= this.h; // porté dans sa cage : on le dessine plus haut, l'ombre reste au sol
       let img;
       if (this.pose) {
         // poses comiques : dos rond, poils hérissés (qui tremblent), chute sur le dos
@@ -274,15 +288,21 @@ const Entites = (() => {
         const tremble = this.pose === 'herisse' ? (Math.floor(this.anim * 2) % 2 ? 1 : -1) : 0;
         ombre(g, this.x, this.y, 8);
         poser(g, img, this.x + tremble, this.y);
-      } else if (this.etat === 'marche') {
+      } else if (this.etat === 'marche' && !this.cage) { // dans sa cage, il reste assis (même porté)
         const f = Math.floor(this.anim);
         img = this.dir === 'right' ? s.walkR[f % 4] : this.dir === 'left' ? s.walkL[f % 4] : this.dir === 'up' ? s.up[f % 2] : s.down[f % 2];
       } else if (this.etat === 'couche') img = s.sleep[Math.floor(this.anim * 0.5) % 2];
-      else if (this.dir === 'left' || this.dir === 'right') img = (this.dir === 'right' ? s.sitR : s.sitL)[Math.floor(this.anim) % 2];
+      else if ((this.dir === 'left' || this.dir === 'right') && !this.cage) img = (this.dir === 'right' ? s.sitR : s.sitL)[Math.floor(this.anim) % 2];
       else img = this.blink ? s.sitBlink : s.sit[Math.floor(this.anim) % 2];
-      if (!this.pose) { ombre(g, this.x, this.y, 6); poser(g, img, this.x, this.y); }
-      if (this.reaction > 0) poser(g, SPR.coeur, this.x, this.y - img.height - 1 - Math.round(Math.sin(this.reaction * 8)));
-      if (this.bulle) poser(g, this.bulle.type === '?' ? SPR.question : SPR.bulle, this.x, this.y - img.height - 1 - (this.bulle.t > 0.9 ? 2 : 0));
+      if (!this.pose) { ombre(g, this.x, y0, this.cage ? 10 : 6); poser(g, img, this.x, this.y); }
+      if (this.cage) {
+        const cg = SPR.cages || (SPR.cages = [null, Betes.cage(false), Betes.cage(true)]);
+        poser(g, cg[this.cage], this.x, this.y + 3);
+      }
+      const haut = this.cage ? 24 : img.height;
+      if (this.reaction > 0) poser(g, SPR.coeur, this.x, this.y - haut - 1 - Math.round(Math.sin(this.reaction * 8)));
+      if (this.bulle) poser(g, this.bulle.type === '?' ? SPR.question : SPR.bulle, this.x, this.y - haut - 1 - (this.bulle.t > 0.9 ? 2 : 0));
+      this.y = y0;
     }
   }
 

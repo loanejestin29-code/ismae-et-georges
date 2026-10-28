@@ -15,7 +15,7 @@ const Jeu = (() => {
   let carte = null, dialogue = null, transition = null, cible = null, t = 0, last = 0, actif = false;
   const debug = location.hash === '#debug';
   // #test : la boucle continue même quand la page est en arrière-plan (sert aux vérifications)
-  const image = location.hash === '#test' ? (f) => setTimeout(() => f(performance.now()), 16) : (f) => requestAnimationFrame(f);
+  const image = location.hash.startsWith('#test') ? (f) => setTimeout(() => f(performance.now()), 16) : (f) => requestAnimationFrame(f);
   const $ = (id) => document.getElementById(id);
 
   // ------------------------------------------------------------ écran
@@ -60,7 +60,7 @@ const Jeu = (() => {
     const base = $('joy'), knob = $('joy-knob');
     let jid = null, ox = 0, oy = 0;
     ecran.addEventListener('pointerdown', (e) => {
-      if (dialogue) { action(); return; }
+      if (dialogue || J.vue) { action(); return; } // pendant le tir à l'arc, toucher l'écran = tirer
       // à l'horizontale, le pouce gauche marche et le pouce droit reste sur les boutons
       if (jid !== null || e.clientX > innerWidth * 0.62) return;
       jid = e.pointerId; ox = e.clientX; oy = e.clientY;
@@ -187,6 +187,7 @@ const Jeu = (() => {
       majDialogue();
       return;
     }
+    if (J.vue) { if (J.vue.action) J.vue.action(J); return; }
     if (script || J.cinematique) return;
     if (cible) {
       if (cible.chat) {
@@ -258,9 +259,10 @@ const Jeu = (() => {
   }
 
   // ------------------------------------------------------------ caméra
-  // vue (w × h) centrée sur Ismae, sans sortir de la carte
+  // vue (w × h) centrée sur Ismae (ou sur J.regard pendant une scène), sans sortir de la carte
+  J.regard = null;
   function vise(w, h) {
-    const p = J.joueur;
+    const p = J.regard || J.joueur;
     let tx = p.x - w / 2, ty = p.y - 24 - h / 2;
     tx = carte.w <= w ? (carte.w - w) / 2 : Math.max(0, Math.min(carte.w - w, tx));
     ty = carte.h <= h ? (carte.h - h) / 2 : Math.max(0, Math.min(carte.h - h, ty));
@@ -300,6 +302,7 @@ const Jeu = (() => {
     for (const e of J.pnj) e.update && e.update(dt, J);
     for (const d of carte.dynamiques) d.update && d.update(dt, J);
     for (const s of J.systemes) s(dt, J);
+    if (J.vue && J.vue.update) J.vue.update(dt, J);
     majScript(dt);
     if (dialogue) {
       const l = dialogue.lignes[dialogue.i].texte;
@@ -342,10 +345,21 @@ const Jeu = (() => {
         f.t -= dt;
         if (f.t < 0) { f.t = 0.5 + Math.random() * 0.4; if (Math.abs(f.x - cam.x - V.w / 2) < V.w && Math.abs(f.y - cam.y - V.h / 2) < V.h) J.particule('fumee', f.x, f.y, { vx: 5 + Math.random() * 3, vy: -9, max: 3.2 }); }
       }
-      if (CONFIG.neige && Math.random() < dt * 40) J.particule('neige', cam.x + Math.random() * (V.w + 60) - 30, cam.y - 4, { vx: -4 + Math.random() * 3, vy: 14 + Math.random() * 10, max: 30 });
+      // neige : partout dans la rue ; dans la forêt, seulement près du chemin des montagnes (carte.neige(J) = 0 à 1)
+      const kn = carte.neige === undefined ? 1 : typeof carte.neige === 'function' ? carte.neige(J) : +carte.neige;
+      if (CONFIG.neige && kn > 0 && Math.random() < dt * 40 * kn) J.particule('neige', cam.x + Math.random() * (V.w + 60) - 30, cam.y - 4, { vx: -4 + Math.random() * 3, vy: 14 + Math.random() * 10, max: 30 });
+      // feuilles qui tombent des arbres (forêt)
+      if (carte.feuilles && Math.random() < dt * carte.feuilles) {
+        const col = ['#d8892e', '#e8b54a', '#b85a2a', '#8fae4a', '#c8702e'][Math.floor(Math.random() * 5)];
+        J.particule('feuille', cam.x + Math.random() * (V.w + 40) - 20, cam.y - 4, { vx: 3 + Math.random() * 6, vy: 9 + Math.random() * 6, max: 30, col, ph: Math.random() * 6 });
+      }
     }
-    for (const q of J.particules) { q.life += dt; q.x += q.vx * dt; q.y += q.vy * dt; if (q.type === 'neige') q.x += Math.sin(t * 2 + q.y * 0.1) * 0.15; }
-    J.particules = J.particules.filter((q) => q.life < q.max && !(q.type === 'neige' && q.y > cam.y + V.h + 4));
+    for (const q of J.particules) {
+      q.life += dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.type === 'neige') q.x += Math.sin(t * 2 + q.y * 0.1) * 0.15;
+      else if (q.type === 'feuille') q.x += Math.sin(t * 2.6 + q.ph) * 0.45;
+    }
+    J.particules = J.particules.filter((q) => q.life < q.max && !((q.type === 'neige' || q.type === 'feuille') && q.y > cam.y + V.h + 4));
     camera(false);
   }
 
@@ -364,7 +378,7 @@ const Jeu = (() => {
     g.fillStyle = gr; g.fillRect(0, 0, r * 2, r * 2);
     return (lumCache[key] = c);
   }
-  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb' };
+  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb', foret: '#f6ecd6' };
 
   let eauTiles = null;
   function tuilesEau() {
@@ -430,6 +444,10 @@ const Jeu = (() => {
         g.globalAlpha = a * 0.55; g.fillStyle = '#c9c4d6';
         const r = 1 + Math.floor(q.life * 1.2);
         g.fillRect(Math.round(q.x - r), Math.round(q.y - r + 1), r * 2, r * 2 - 1); g.fillRect(Math.round(q.x - r + 1), Math.round(q.y - r), r * 2 - 2, r * 2 + 1);
+      } else if (q.type === 'feuille') {
+        g.globalAlpha = 0.95; g.fillStyle = q.col;
+        const fx = Math.round(q.x), fy = Math.round(q.y), k = Math.floor(q.life * 4 + q.ph) % 3;
+        g.fillRect(fx, fy, k === 1 ? 1 : 2, k === 1 ? 2 : 1);
       } else if (q.type === 'neige') { g.globalAlpha = 0.9; g.fillStyle = '#f4f6ff'; g.fillRect(Math.round(q.x), Math.round(q.y), q.vy > 20 ? 2 : 1, q.vy > 20 ? 2 : 1); }
       g.globalAlpha = 1;
     }
@@ -507,6 +525,7 @@ const Jeu = (() => {
       for (let k = 0; k < 4; k++) g.fillRect(Math.round(mx + Math.cos(a) * (7 + k + pulse)) + 1, Math.round(my + Math.sin(a) * (7 + k + pulse)), 1, 1);
       Entites.poser(g, Entites.SPR.coeur, mx, my + 4);
     }
+    if (J.vue && J.vue.draw) J.vue.draw(g, V, t);
     if (transition) {
       const a = transition.phase === 'out' ? transition.t / 0.32 : 1 - transition.t / 0.32;
       g.fillStyle = `rgba(10,6,18,${Math.max(0, Math.min(1, a))})`; g.fillRect(0, 0, V.w, V.h);

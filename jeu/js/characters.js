@@ -412,15 +412,15 @@ const Sprites = (() => {
       if (!row) return;
       for (let i = 0; i < row.length && i < Wd; i++) if (row[i] !== '.' && grid[y0 + j]) grid[y0 + j][i] = row[i];
     });
-    const T = M[dir];
-    stamp(T.jambes[pose], 22);
-    if (raise) stamp([T.jambes[pose][0]], 21);
-    stamp(T.torse[pose], 13 - raise);
+    const T = M[dir], o = M.decalage || 0; // decalage : lignes en plus en haut (couronnes, oreilles, chapeaux…)
+    stamp(T.jambes[pose], 22 + o);
+    if (raise) stamp([T.jambes[pose][0]], 21 + o);
+    stamp(T.torse[pose], 13 + o - raise);
     const tb = c.tablier && M !== ISMAE && TABLIER[dir];
-    if (tb) { stamp(tb.torse, 13 - raise); stamp(tb.jambes, 22); if (raise) stamp([tb.jambes[0]], 21); }
-    if (T.meches) stamp(T.meches, 13 - raise);
+    if (tb) { stamp(tb.torse, 13 + o - raise); stamp(tb.jambes, 22 + o); if (raise) stamp([tb.jambes[0]], 21 + o); }
+    if (T.meches) stamp(T.meches, 13 + o - raise);
     // la tête se pose juste au-dessus du cou, quelle que soit sa hauteur (mèches en plus)
-    stamp(T.tete.map((r) => (blink ? r.replace(/[Ee]/g, 'k') : r)), 13 - T.tete.length - raise);
+    stamp(T.tete.map((r) => (blink ? r.replace(/[Ee]/g, 'k') : r)), 13 + o - T.tete.length - raise);
     const pal = Object.assign(personPalette(c), {
       E: '#1a1322', e: c.yeux, r: PX.shade(c.cheveux, -0.42), D: c.couleurBarbe || c.cheveux,
       ...(c.zips ? { Z: c.zips } : {}),
@@ -431,8 +431,9 @@ const Sprites = (() => {
 
   // Renvoie { down, up, left, right } -> { idle, blink, walk:[4] }
   function person(c) {
-    if (c.modele === 'detaille' || c.modele === 'inspire' || c.modele === 'tom' || c.modele === 'loane') {
-      const M = { inspire: ISMAE_STYLE, tom: TOM_STYLE, loane: LOANE_STYLE }[c.modele] || ISMAE;
+    // modele : nom d'un dessin ci-dessus, ou dessin complet (les animaux de la forêt, voir betes.js)
+    if (typeof c.modele === 'object' || c.modele === 'detaille' || c.modele === 'inspire' || c.modele === 'tom' || c.modele === 'loane') {
+      const M = typeof c.modele === 'object' ? c.modele : { inspire: ISMAE_STYLE, tom: TOM_STYLE, loane: LOANE_STYLE }[c.modele] || ISMAE;
       const out = {};
       for (const dir of ['down', 'up', 'side']) {
         const walk = [composeIsmae(c, dir, 1, 0, false, M), composeIsmae(c, dir, 0, 1, false, M), composeIsmae(c, dir, 2, 0, false, M), composeIsmae(c, dir, 0, 1, false, M)];
@@ -703,5 +704,5 @@ const Sprites = (() => {
     return o;
   }
 
-  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS };
+  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS, composeIsmae, ISMAE_STYLE, JUPE };
 })();

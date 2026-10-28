@@ -4,13 +4,18 @@
 //  piano (accords), contrebasse (walking bass), trompette (thème A),
 //  clarinette (pont B), batterie légère (cymbale ride, charleston, balais).
 //  + un second morceau, plus rapide, pour la course-poursuite du Carrefour
-//  + quelques bruitages (miaous, petits bips de dialogue, portes, couteau, bisou…).
+//  + un air de la forêt de Sherwood (luth, flûte, bourdon, tambourin), et sa version du tournoi
+//  + quelques bruitages (miaous, petits bips de dialogue, portes, couteau, bisou, arc, foule…).
 // =====================================================================
 'use strict';
 
 const Musique = (() => {
-  // deux morceaux : le jazz de la rue (swing) et la course-poursuite (croches droites, plus rapide)
-  const MORCEAUX = { jazz: { bpm: 132, swing: true }, poursuite: { bpm: 172, swing: false } };
+  // les morceaux : le jazz de la rue (swing), la course-poursuite, la forêt (6/8) et le tournoi
+  // plein : joué à ce volume partout (sinon, le jazz est plus fort près des musiciens)
+  const MORCEAUX = {
+    jazz: { bpm: 132, swing: true }, poursuite: { bpm: 172, swing: false, plein: 0.8 },
+    foret: { bpm: 108, swing: false, plein: 0.62 }, tournoi: { bpm: 126, swing: false, plein: 0.72 },
+  };
   let morceau = 'jazz', suivant = null, NOIRE = 60 / MORCEAUX.jazz.bpm;
   let ctx = null, master, bus, sfx, filtre, reverb, wet, debut = 0, prochaine = 0, pas = 0, timer = null;
   let coupe = false, volumeVoulu = CONFIG.volumeMusique ?? 0.55, proximite = 0, etouffe = false;
@@ -216,6 +221,72 @@ const Musique = (() => {
     }
   }
 
+  // ------------------------------------------------------------ la forêt de Sherwood (ré dorien, 6/8)
+  // A : Dm C Dm Am Dm C G Dm — B : F C Dm Am F C G A — forme A A B A
+  const GRILLE_F = [...['D', 'C', 'D', 'A', 'D', 'C', 'G', 'D'], ...['D', 'C', 'D', 'A', 'D', 'C', 'G', 'D'], ...['F', 'C', 'D', 'A', 'F', 'C', 'G', 'A'], ...['D', 'C', 'D', 'A', 'D', 'C', 'G', 'D']]
+    .map((n, k) => ({ r: NOTES[n], mineur: (n === 'D' || (n === 'A' && k % 8 !== 7)) }));
+  // [mesure, croche (0-5), durée en croches, note MIDI]
+  const AIR_A = [
+    [0, 0, 2, 74], [0, 2, 1, 72], [0, 3, 2, 69], [0, 5, 1, 67], [1, 0, 2, 64], [1, 2, 1, 67], [1, 3, 3, 72],
+    [2, 0, 2, 74], [2, 2, 1, 76], [2, 3, 2, 77], [2, 5, 1, 76], [3, 0, 3, 76], [3, 3, 2, 69], [3, 5, 1, 72],
+    [4, 0, 1, 74], [4, 1, 1, 72], [4, 2, 1, 69], [4, 3, 2, 74], [4, 5, 1, 77], [5, 0, 2, 79], [5, 2, 1, 77], [5, 3, 2, 76], [5, 5, 1, 72],
+    [6, 0, 2, 71], [6, 2, 1, 74], [6, 3, 2, 79], [6, 5, 1, 77], [7, 0, 5, 74],
+  ];
+  const AIR_B = [
+    [0, 0, 2, 77], [0, 2, 1, 81], [0, 3, 2, 79], [0, 5, 1, 77], [1, 0, 2, 76], [1, 2, 1, 79], [1, 3, 3, 72],
+    [2, 0, 1, 74], [2, 1, 1, 76], [2, 2, 1, 77], [2, 3, 2, 81], [2, 5, 1, 79], [3, 0, 3, 76], [3, 3, 3, 69],
+    [4, 0, 2, 77], [4, 2, 1, 76], [4, 3, 2, 74], [4, 5, 1, 72], [5, 0, 2, 72], [5, 2, 1, 74], [5, 3, 2, 76], [5, 5, 1, 79],
+    [6, 0, 2, 79], [6, 2, 1, 77], [6, 3, 2, 74], [6, 5, 1, 71], [7, 0, 3, 73], [7, 3, 3, 69],
+  ];
+  const flute = (m, t, dur, vol = 0.05) => { souffle('triangle', m, t, dur, vol, 1800, 3400, 0.008); bruitFiltre(t, 'bandpass', hz(m) * 2, 2, 0.008, 0.05); };
+  function luth(m, t, vol = 0.045) {
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(700, t + 0.3);
+    g.connect(lp); lp.connect(bus); lp.connect(wet);
+    env(g, t, 0.003, vol, 0.45);
+    osc('triangle', hz(m), t, 0.5, g);
+    const h = ctx.createGain(); h.gain.value = 0.3; h.connect(g); osc('square', hz(m) * 1.003, t, 0.22, h);
+  }
+  // bourdon : fondamentale et quinte tenues, très douces
+  function bourdon(m, t, dur, vol = 0.022) {
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 480;
+    g.connect(lp); lp.connect(bus);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.08);
+    g.gain.setValueAtTime(vol, t + Math.max(0.1, dur - 0.12)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc('sawtooth', hz(m), t, dur, g); osc('sawtooth', hz(m + 7), t, dur, g);
+  }
+  function tambourin(t, acc) {
+    const g = ctx.createGain(); g.connect(bus); env(g, t, 0.003, acc ? 0.15 : 0.08, 0.16);
+    const o = ctx.createOscillator(); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.12);
+    o.connect(g); o.start(t); o.stop(t + 0.2);
+    bruitFiltre(t, 'lowpass', 900, 0.7, acc ? 0.045 : 0.025, 0.08);
+  }
+  const grelots = (t, v = 0.02) => bruitFiltre(t, 'highpass', 6500, 1.2, v, 0.09);
+  function jouerPasForet(i, t) {
+    const tournoi = morceau === 'tournoi';
+    const mesure = Math.floor(i / 6) % 32, croche = i % 6, section = Math.floor(mesure / 8), mm = mesure % 8;
+    const ac = GRILLE_F[mesure], tierce = ac.mineur ? 3 : 4;
+    // percussions : tambourin sur les deux temps, grelots entre les deux ; caisse claire au tournoi
+    if (croche === 0 || croche === 3) tambourin(t, croche === 0);
+    if (croche === 2 || croche === 5) grelots(t);
+    if (tournoi) {
+      if (croche === 3) caisseClaire(t, 0.05);
+      if (mm === 7 && croche >= 3) { caisseClaire(t, 0.04); caisseClaire(t + NOIRE / 4, 0.03); }
+      if (mesure % 8 === 0 && croche === 0) crash(t);
+    }
+    if (croche === 0) bourdon(noteBasse(ac.r, 45), t, dureeCroches(i, 6) * 0.98);
+    // luth : arpège de l'accord
+    const m0 = 50 + ((ac.r - 2 + 12) % 12);
+    luth(m0 + [0, 7, 12, 12 + tierce, 7, 12][croche], t, croche === 0 ? 0.05 : 0.035);
+    // l'air : flûte (et trompette au tournoi) ; au dernier A, le luth double la flûte
+    for (const [b, c, d, n] of section === 2 ? AIR_B : AIR_A) {
+      if (b !== mm || c !== croche) continue;
+      const dur = dureeCroches(i, d) * 0.9;
+      if (tournoi) { trompette(n - 12, t, dur); flute(n, t, dur, 0.035); }
+      else { flute(n, t, dur); if (section === 3) luth(n - 12, t, 0.03); }
+    }
+  }
+
   function planifier() {
     if (suivant) {
       // changement de morceau : on repart du début, sans laisser de trou
@@ -224,7 +295,7 @@ const Musique = (() => {
       majMix();
     }
     while (prochaine < ctx.currentTime + 0.15) {
-      (morceau === 'poursuite' ? jouerPasPoursuite : jouerPas)(pas, prochaine);
+      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : jouerPas)(pas, prochaine);
       prochaine += dureeCroche(pas);
       pas++;
     }
@@ -297,6 +368,78 @@ const Musique = (() => {
     });
     [[53, 65, 69, 72], [53, 65, 69, 72, 77]].forEach((acc, k) => acc.forEach((m) => note('triangle', hz(m), t + (k ? 3.5 : 1.5) * n, 1.2, 0.03)));
   }
+  // ---- forêt de Sherwood
+  // fanfare royale (deux trompettes)
+  function fanfare() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime + 0.05, n = 60 / 170;
+    [[67, 0, 0.5], [67, 0.5, 0.25], [67, 0.75, 0.25], [72, 1, 1], [67, 2, 0.5], [72, 2.5, 0.5], [76, 3, 2]].forEach(([m, d, l]) => {
+      [[0, 0.06], [-12, 0.035]].forEach(([iv, v]) => {
+        const g = ctx.createGain(); g.connect(sfx);
+        g.gain.setValueAtTime(0.0001, t + d * n); g.gain.exponentialRampToValueAtTime(v, t + d * n + 0.025);
+        g.gain.setValueAtTime(v, t + (d + l) * n - 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + (d + l) * n);
+        osc('sawtooth', hz(m + iv), t + d * n, l * n, g);
+      });
+    });
+  }
+  // la corde de l'arc et le sifflement de la flèche
+  function arc() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, g = ctx.createGain(); g.connect(sfx); env(g, t, 0.002, 0.08, 0.18);
+    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.15);
+    o.connect(g); o.start(t); o.stop(t + 0.22);
+    const s = ctx.createBufferSource(); s.buffer = bruit;
+    const fl = ctx.createBiquadFilter(); fl.type = 'bandpass'; fl.Q.value = 1.5; fl.frequency.setValueAtTime(2400, t); fl.frequency.exponentialRampToValueAtTime(500, t + 0.3);
+    const g2 = ctx.createGain(); s.connect(fl); fl.connect(g2); g2.connect(sfx); env(g2, t, 0.02, 0.05, 0.28); s.start(t); s.stop(t + 0.35);
+  }
+  // toc ! dans la paille (et un petit carillon pour le centre)
+  function impact(pts) {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    souffleSfx(t, 'lowpass', 900, 0.8, 0.2, 0.08); note('triangle', 120, t, 0.12, 0.12);
+    if (pts === 10) [88, 95, 100].forEach((m, k) => note('sine', hz(m), t + 0.08 + k * 0.06, 0.5, 0.04));
+  }
+  // la foule qui applaudit (force de 0 à 1), ou qui fait « ooh… »
+  function foule(force = 1) {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    for (let k = 0; k < 12; k++) souffleSfx(t + Math.random() * 0.8, 'bandpass', 700 + Math.random() * 1500, 1.2, 0.03 * force, 0.3 + Math.random() * 0.4);
+    for (let k = 0; k < 16; k++) souffleSfx(t + Math.random() * 1.1, 'highpass', 2500, 0.8, 0.025 * force, 0.04);
+  }
+  function oh() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, s = ctx.createBufferSource(); s.buffer = bruit;
+    const fl = ctx.createBiquadFilter(); fl.type = 'bandpass'; fl.Q.value = 3; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(330, t + 0.8);
+    const g = ctx.createGain(); s.connect(fl); fl.connect(g); g.connect(sfx);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.15); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    s.start(t); s.stop(t + 1);
+  }
+  // clac ! la porte de la cage
+  function cage() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    [0, 0.09].forEach((d, k) => { note('square', k ? 880 : 1180, t + d, 0.08, 0.035); souffleSfx(t + d, 'highpass', 3500, 1, 0.05, 0.08); });
+  }
+  // le roi Jean trépigne, puis sanglote
+  function colere() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.connect(lp); lp.connect(sfx); env(g, t, 0.02, 0.06, 0.55);
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(90, t + 0.5);
+    o.connect(g); o.start(t); o.stop(t + 0.6);
+  }
+  function pleurs() {
+    if (!ctx || coupe) return;
+    const t0 = ctx.currentTime;
+    for (let k = 0; k < 3; k++) {
+      const t = t0 + k * 0.5, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+      g.connect(lp); lp.connect(sfx); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.04, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+      const o = ctx.createOscillator(); o.type = 'square'; o.frequency.setValueAtTime(580 - k * 30, t); o.frequency.exponentialRampToValueAtTime(400 - k * 30, t + 0.35);
+      const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 9; lg.gain.value = 25; lfo.connect(lg); lg.connect(o.frequency);
+      o.connect(g); o.start(t); o.stop(t + 0.4); lfo.start(t); lfo.stop(t + 0.4);
+    }
+  }
+
   // coup de sifflet du départ
   function partez() {
     if (!ctx || coupe) return;
@@ -337,9 +480,9 @@ const Musique = (() => {
   }
   function majMix() {
     if (!ctx) return;
-    // la course-poursuite se joue « dans » le magasin : pleine puissance, sans étouffer
-    const fort = morceau === 'poursuite' && !suivant;
-    const v = fort ? volumeVoulu * 0.8 : volumeVoulu * (0.3 + 0.7 * proximite) * (etouffe ? 0.55 : 1);
+    // la course-poursuite, la forêt, le tournoi : même volume partout, sans étouffer
+    const plein = MORCEAUX[suivant || morceau].plein, fort = !!plein;
+    const v = fort ? volumeVoulu * plein : volumeVoulu * (0.3 + 0.7 * proximite) * (etouffe ? 0.55 : 1);
     bus.gain.setTargetAtTime(v, ctx.currentTime, 0.3);
     filtre.frequency.setTargetAtTime(etouffe && !fort ? 650 : 18000, ctx.currentTime, 0.2);
   }
@@ -357,12 +500,12 @@ const Musique = (() => {
     etouffer(oui) { if (oui !== etouffe) { etouffe = oui; majMix(); } },
     // position dans la mesure, en temps (sert à faire bouger les musiciens en rythme)
     temps: () => (ctx && timer ? (ctx.currentTime - debut) / NOIRE : performance.now() / 1000 / NOIRE),
-    // 'jazz' ou 'poursuite' : le changement se fait au prochain pas du séquenceur
+    // 'jazz', 'poursuite', 'foret' ou 'tournoi' : le changement se fait au prochain pas du séquenceur
     morceau(nom) {
       if (!MORCEAUX[nom]) return;
       if (!ctx || !timer) { morceau = nom; NOIRE = 60 / MORCEAUX[nom].bpm; return; }
       if (nom !== morceau || suivant) suivant = nom === morceau ? null : nom;
     },
-    miaou, bip, porte, couteau, aie, bisou, victoire, partez,
+    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs,
   };
 })();

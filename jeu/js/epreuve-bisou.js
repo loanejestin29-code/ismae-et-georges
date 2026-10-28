@@ -8,7 +8,7 @@
 //     Loane fuit par les allées mais reste toujours attrapable (Ismae court plus vite qu'elle,
 //     et elle s'arrête parfois pour le narguer). Pas de chronomètre.
 //  5. Attrapée : bisou magique, explications, écran de victoire et premier indice (carnet).
-//  6. Ismae retrouve Georges. La sortie mènera ensuite à la forêt de Sherwood (épreuve 2).
+//  6. Ismae retrouve Georges. La sortie mène ensuite à la forêt de Sherwood (épreuve 2, epreuve-sherwood.js).
 // =====================================================================
 'use strict';
 
@@ -18,7 +18,7 @@ const Bisou = (() => {
   Q.entreeSuperette = false;
   // Loane pendant la poursuite : case de départ, case visée, case précédente, minuteries
   const L = { de: null, vers: null, prec: null, demiTour: 0, pause: 0, temps: 0 };
-  let georgesRetrouve = false, suiteVue = false, coupT = 0;
+  let georgesRetrouve = false, coupT = 0;
   const cle = (c) => c[0] + ',' + c[1];
   const lab = () => Jeu.carte.labyrinthe;
 
@@ -93,8 +93,8 @@ const Bisou = (() => {
         for (let k = 0; k < 4; k++) J.particule('goutte', p.x - 9, p.y - 14, { vx: -12 + Math.random() * 18, vy: -22 + Math.random() * 10, max: 0.5, col: '#e0353a' });
       } },
       { dire: B.aie },
-      { faire: () => { p.dir = 'down'; p.dire('doigt', 2.4); } },
-      { attendre: 1.7 },
+      { faire: () => { p.dir = 'down'; } },
+      { attendre: 0.8 },
       // Loane, un peu plus loin dans le magasin
       { faire: () => {
         const [a, ...suite] = E.entreeLoane;
@@ -198,9 +198,7 @@ const Bisou = (() => {
         loane.regarder(p.x, p.y); p.dir = Entites.dirDe(loane.x - p.x, loane.y - p.y, p.dir);
         loane.dire('coeur', 1); loane.saut = 0.35;
       } },
-      { attendre: 0.9 },
-      { faire: () => p.dire('doigt', 1.4) },
-      { attendre: 1.0 },
+      { attendre: 1.1 },
       // le bisou magique
       { faire: () => {
         const mx = (p.x + loane.x) / 2, my = Math.min(p.y, loane.y);
@@ -210,7 +208,6 @@ const Bisou = (() => {
       } },
       { attendre: 0.7 },
       { faire: () => {
-        p.dire('gueri', 1.8);
         for (let k = 0; k < 4; k++) J.particule('etoile', p.x, p.y - 22, { max: 1.4, life: k * 0.15 });
       } },
       { attendre: 1.6 },
@@ -242,6 +239,7 @@ const Bisou = (() => {
     const b = document.getElementById('banniere');
     if (!b) return;
     b.hidden = !oui;
+    b.textContent = 'Attrape Loane !';
     b.classList.remove('arrive'); void b.offsetWidth;
     if (oui) b.classList.add('arrive');
   }
@@ -262,18 +260,21 @@ const Bisou = (() => {
     }
   }
 
-  // la porte de sortie : fermée pendant l'épreuve ; la première fois après, on annonce la suite
+  // la porte de sortie : fermée pendant l'épreuve ; une fois l'épreuve gagnée, elle mène à la forêt de Sherwood
   function peutSortir() {
     if (Q.bisou === 'scene' || Q.bisou === 'poursuite' || Q.bisou === 'victoire') return false;
-    if (Q.bisou === 'gagne' && !suiteVue) {
-      suiteVue = true; georgesRetrouve = true;
-      Indices.suite(() => Jeu.allerA('rue', 'devantSuperette'));
+    if (Q.bisou === 'gagne') {
+      georgesRetrouve = true;
+      if (J0.georges.mode === 'script') J0.georges.reprendreSuivi(J0);
+      Indices.suite({ haut: 'Épreuve suivante', titre: 'ÉPREUVE 2/6', lieu: 'Le tournoi de Sherwood', texte: 'Derrière la porte du Carrefour, ça sent soudain la mousse et le feu de bois…', bouton: 'Entrer dans la forêt' },
+        () => Jeu.allerA('foret', 'entree'));
       return false;
     }
     return true;
   }
 
-  function init(J) { J.systemes.push(maj); }
+  let J0 = null;
+  function init(J) { J0 = J; J.systemes.push(maj); }
 
   // (dev : relancer directement la poursuite, pour les essais)
   return { init, entree, peutSortir, dev: { poursuite: demarrerPoursuite } };

@@ -71,8 +71,15 @@ const Indices = (() => {
     ouvrir('carnet', 'carnet-ok');
   }
 
-  // fin provisoire de l'aventure : la suite (forêt de Sherwood) n'est pas encore prête
-  function suite(fin) { ouvrir('suite', 'suite-ok', fin); }
+  // annonce de l'épreuve suivante : o = { titre, lieu, texte, bouton, haut }
+  function suite(o, fin) {
+    $('suite-haut').textContent = o.haut || 'À suivre…';
+    $('suite-titre').textContent = o.titre;
+    $('suite-lieu').textContent = o.lieu;
+    $('suite-texte').textContent = o.texte;
+    $('suite-ok').textContent = o.bouton || 'Continuer';
+    ouvrir('suite', 'suite-ok', fin);
+  }
 
   function init() {
     if (location.hash === '#reset') { gagnes = []; sauver(); history.replaceState(null, '', location.pathname); }
