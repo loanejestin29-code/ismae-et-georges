@@ -144,6 +144,27 @@
     font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebond 0.8s steps(2) infinite;
     box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
   #tir-aide.etape2 { color: #ff9a8a; }
+  /* Arendelle : le petit inventaire du bonhomme de neige, les messages « trouvé ! », l'assemblage */
+  #inventaire { position: fixed; z-index: 4; left: calc(12px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; gap: 4px;
+    padding: 4px; background: rgba(18, 13, 34, 0.82); box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; pointer-events: none; }
+  #inventaire.arrive { animation: invArrive 0.4s steps(4); }
+  @keyframes invArrive { 0% { transform: scale(0.6); } 100% { transform: none; } }
+  .inv-case { position: relative; width: 30px; height: 30px; display: grid; place-items: center; background: #2a2244; box-shadow: inset 0 0 0 2px #3a3060; }
+  .inv-case canvas { width: 24px; height: 24px; opacity: 0.28; filter: grayscale(1); }
+  .inv-case.ok { background: #3a5a8a; box-shadow: inset 0 0 0 2px #bfe8ff; }
+  .inv-case.ok canvas { opacity: 1; filter: none; }
+  .inv-case.nouveau { animation: nouveau 0.4s steps(2) 5; }
+  .inv-nb { position: absolute; right: 1px; bottom: 0; font-size: 10px; line-height: 1; color: #fff6dc; text-shadow: 1px 1px 0 #0b0816; }
+  #toast { position: fixed; z-index: 6; left: 50%; top: calc(56px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); margin: 0; padding: 7px 14px 6px; white-space: nowrap;
+    font-size: 16px; font-weight: 700; color: #0e1430; background: #bfe8ff; box-shadow: 0 -3px 0 0 #0b0816, 0 3px 0 0 #0b0816, -3px 0 0 0 #0b0816, 3px 0 0 0 #0b0816; pointer-events: none; }
+  #toast.arrive { animation: tirMsg 0.35s steps(4) both; }
+  #assemblage { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  #asm-titre { position: absolute; left: 50%; top: calc(8px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); margin: 0; padding: 5px 12px 4px; font-size: 15px; font-weight: 700;
+    color: #f6d27a; background: rgba(18, 13, 34, 0.86); box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; white-space: nowrap; }
+  #asm-message { position: absolute; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: 40vw; font-size: 15px; font-weight: 700;
+    line-height: 1.25; color: #fff6dc; text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816; }
+  #asm-message.arrive { animation: rebond 0.5s steps(2) 2; }
+  body.assemblage #btn-b, body.assemblage #btn-a, body.assemblage #btn-indices, body.assemblage #aide, body.assemblage #inventaire { display: none; }
   @media (max-height: 460px) { .tir-haut span { font-size: 13px; } #tir-message { top: calc(44px + env(safe-area-inset-top, 0px)); font-size: 15px; } #tir-message.grand { font-size: 22px; } }
   #banniere { position: fixed; z-index: 4; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
     font-family: var(--titre); font-size: 12px; line-height: 1; color: #fff4f8; background: #c8346a; padding: 9px 14px 8px; white-space: nowrap; pointer-events: none;
@@ -205,7 +226,7 @@
     .carnet-texte { font-size: 13px; }
   }
 
-  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
@@ -220,6 +241,13 @@
 </div>
 
 <div id="banniere" hidden>Attrape Loane !</div>
+
+<div id="inventaire" hidden aria-label="Les éléments du bonhomme de neige"></div>
+<div id="toast" hidden role="status"></div>
+<div id="assemblage" hidden>
+  <p id="asm-titre">Jack Snow</p>
+  <p id="asm-message"></p>
+</div>
 
 <div id="tir" hidden>
   <div class="tir-haut"><span id="tir-fleche">Flèche 1/5</span><span id="tir-score">Score : 0</span><span id="tir-record">Shérif : 29</span></div>
@@ -303,6 +331,12 @@
 <script src="js/carte-foret.js"></script>
 <script src="js/tir-arc.js"></script>
 <script src="js/epreuve-sherwood.js"></script>
+<script src="js/decor-arendelle.js"></script>
+<script src="js/persos-neige.js"></script>
+<script src="js/carte-arendelle.js"></script>
+<script src="js/carte-oaken.js"></script>
+<script src="js/assemblage.js"></script>
+<script src="js/epreuve-neige.js"></script>
 <script src="js/indices.js"></script>
 <script src="js/titre.js"></script>
 <script src="js/main.js"></script>

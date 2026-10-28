@@ -93,6 +93,7 @@ const Entites = (() => {
       this.hb = { w: 10, h: 6 };
       // scènes : chemin imposé (sans collision), tenue ('tablier'), bulle, saut, couteau en main
       this.chemin = null; this.vitesse = 62; this.surFin = null; this.tenue = null; this.bulle = null; this.saut = 0; this.couteau = 0;
+      this.vx = 0; this.vy = 0; // vitesse (sur la glace, Ismae glisse)
     }
     allerVers(points, vitesse, surFin) { this.chemin = points.map((p) => ({ x: p.x, y: p.y })); this.vitesse = vitesse || CONFIG.vitesseMarche; this.surFin = surFin || null; }
     dire(type, duree = 1.2) { this.bulle = { type, t: duree }; }
@@ -101,7 +102,7 @@ const Entites = (() => {
       if (this.saut > 0) this.saut = Math.max(0, this.saut - dt);
       if (this.couteau > 0) this.couteau += dt;
       if (this.chemin) {
-        this.run = this.vitesse > 80;
+        this.run = this.vitesse > 80; this.vx = this.vy = 0;
         if (suivreChemin(this, dt)) { this.moving = true; this.anim += dt * (this.run ? 11 : 7.5); }
         else { this.chemin = null; this.moving = false; this.anim = 0; const f = this.surFin; this.surFin = null; if (f) f(this); }
         return;
@@ -112,14 +113,26 @@ const Entites = (() => {
       if (jeu.bloque()) { dx = dy = 0; }
       this.moving = len > 0.15 && !jeu.bloque();
       this.run = this.moving && (inp.run || len > 0.97 && inp.analog);
+      const glace = jeu.surGlace && jeu.surGlace(this) && !jeu.bloque();
       if (this.moving) {
         const n = Math.min(1, len);
         dx = (dx / len) * n; dy = (dy / len) * n;
         const sp = (this.run ? CONFIG.vitesseCourse : CONFIG.vitesseMarche) * (jeu.surEscalier(this) ? 0.75 : 1);
         this.dir = dirDe(dx, dy, this.dir);
-        jeu.deplacer(this, dx * sp * dt, dy * sp * dt);
+        // sur la glace, on accélère et on freine lentement
+        if (glace) { const k = Math.min(1, dt * 2.2); this.vx += (dx * sp - this.vx) * k; this.vy += (dy * sp - this.vy) * k; }
+        else { this.vx = dx * sp; this.vy = dy * sp; }
         this.anim += dt * (this.run ? 11 : 7.5);
-      } else this.anim = 0;
+      } else {
+        this.anim = 0;
+        if (glace) { const k = Math.max(0, 1 - dt * 0.9); this.vx *= k; this.vy *= k; if (Math.hypot(this.vx, this.vy) < 4) this.vx = this.vy = 0; }
+        else this.vx = this.vy = 0;
+      }
+      if (this.vx || this.vy) {
+        const ox = this.x, oy = this.y;
+        jeu.deplacer(this, this.vx * dt, this.vy * dt);
+        if (glace) { if (this.x === ox) this.vx = 0; if (this.y === oy) this.vy = 0; }
+      }
       this.blinkT -= dt;
       if (this.blinkT < 0) { this.blink = true; if (this.blinkT < -0.12) { this.blink = false; this.blinkT = 2.5 + Math.random() * 3; } }
     }
@@ -146,7 +159,7 @@ const Entites = (() => {
   class Perso {
     constructor(o) {
       Object.assign(this, { dir: 'down', visible: true, vitesse: 60 }, o);
-      this.spr = o.cfg.espece ? Betes.perso(o.cfg) : Sprites.person(o.cfg);
+      this.spr = o.spr || (o.cfg.espece ? Betes.perso(o.cfg) : Sprites.person(o.cfg)); // o.spr : un jeu d'images déjà dessiné (Olaf, Sven…)
       portraits[o.id] = this.spr.down.idle;
       this.anim = 0; this.marche = false; this.blinkT = Math.random() * 3; this.blink = false;
       this.chemin = null; this.surFin = null; this.bulle = null; this.saut = 0; this.pose = null; this.poseT = 0;

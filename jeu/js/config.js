@@ -97,7 +97,7 @@ const CONFIG = {
   indices: [
     { epreuve: 'Le bisou magique', texte: '(Premier indice à écrire ici)' },
     { epreuve: 'Le tournoi de Sherwood', texte: '(Deuxième indice à écrire ici)' },
-    { epreuve: 'Le bonhomme de neige', texte: '' },
+    { epreuve: 'Le bonhomme de neige', texte: '(Troisième indice à écrire ici)' },
     { epreuve: '???', texte: '' },
     { epreuve: '???', texte: '' },
     { epreuve: '???', texte: '' },
@@ -157,6 +157,21 @@ const CONFIG = {
     gertrude: { nom: 'Dame Gertrude', couleur: '#9ab0f0', bip: 840 },
     tortue: { nom: 'Une tortue', couleur: '#b8c87a', bip: 180 },
     lapin: { nom: 'Un lapin', couleur: '#e0c8b8', bip: 980 },
+    // Arendelle
+    olaf: { nom: 'Olaf', couleur: '#cfe8ff', bip: 900 },
+    anna: { nom: 'Anna', couleur: '#e86a9a', bip: 760 },
+    elsa: { nom: 'Elsa', couleur: '#8ad0f8', bip: 680 },
+    kristoff: { nom: 'Kristoff', couleur: '#e8c870', bip: 300 },
+    oaken: { nom: 'Oaken', couleur: '#f0a070', bip: 360 },
+    jack: { nom: 'Jack Snow', couleur: '#f4f8ff', bip: 520 },
+    gardeA: { nom: 'Un garde', couleur: '#7ab8c8', bip: 260 },
+    duc: { nom: 'Le duc de Weselton', couleur: '#c8b8d8', bip: 820 },
+    troll: { nom: 'Un troll', couleur: '#8ab878', bip: 200 },
+    enfant: { nom: 'Un enfant', couleur: '#f2c230', bip: 1100 },
+    villageois: { nom: 'Une habitante', couleur: '#e7a0c8', bip: 700 },
+    marchand: { nom: 'Un marchand', couleur: '#c8a070', bip: 420 },
+    patineuse: { nom: 'Une patineuse', couleur: '#a8d0f0', bip: 800 },
+    pecheur: { nom: 'Un pêcheur', couleur: '#9ab0c0', bip: 280 },
   },
 
   // ------------------------------------------------------------------
@@ -247,6 +262,106 @@ const CONFIG = {
       ['robin', 'Ta prochaine épreuve t\'attend au-delà des montagnes enneigées.'],
       ['robin', 'Prends le chemin du nord-ouest, derrière les tentes. Et prends soin de ton chat !'],
     ],
+  },
+
+  // ------------------------------------------------------------------
+  //  ÉPREUVE 3 — LE BONHOMME DE NEIGE (Arendelle, voir epreuve-neige.js et assemblage.js)
+  // ------------------------------------------------------------------
+  arendelle: {
+    // apparence des personnages (même corps qu'Ismae ; les dessins sont dans persos-neige.js)
+    persos: {
+      anna: { peau: '#f2c8a8', cheveux: '#a8502a', yeux: '#3a6ad8', veste: '#b03a6a', reflets: '#c8508a', zips: '#e8b54a', tshirt: '#1d2a3a',
+        pantalon: '#2a5a6a', collants: '#2a2232', chaussures: '#5a3a2a', semelles: '#3a2418' },
+      elsa: { peau: '#f6dccc', cheveux: '#f2eedc', yeux: '#3a8ad8', veste: '#7ac8f0', reflets: '#bfe8ff', zips: '#ffffff', pantalon: '#6ab8e8', chaussures: '#bfe8ff' },
+      kristoff: { peau: '#e8b890', cheveux: '#e8c870', couleurChapeau: '#3a3446', veste: '#6a5040', reflets: '#8a6a54', zips: '#d8c8a8', tshirt: '#4a3a5a',
+        pantalon: '#4a4250', chaussures: '#3a2a22', semelles: '#2a1e18' },
+      oaken: { peau: '#f0c8a8', cheveux: '#e8d070', veste: '#e8e0d0', reflets: '#f4efe6', zips: '#c8343a', pantalon: '#5a4a3a', chaussures: '#3a2a22', semelles: '#2a1e18' },
+      garde: { peau: '#e0b090', cheveux: '#5a3a2a', couleurChapeau: '#2a3a4a', veste: '#2f5a6a', reflets: '#4a7a8a', zips: '#e8b54a', tshirt: '#c8343a',
+        pantalon: '#2a2a3a', chaussures: '#1d1a24', semelles: '#1d1a24' },
+    },
+    // les enfants de la colline aux luges
+    enfants: [{ bonnet: '#c8343a', echarpe: '#f2c230', manteau: '#3a6aa8' }, { bonnet: '#4f8a5a', echarpe: '#ffffff', manteau: '#c86a3a' }, { bonnet: '#8a4a8a', echarpe: '#e86a9a', manteau: '#f2c230' }],
+    // les sept éléments du bonhomme de neige (nom affiché dans le petit inventaire)
+    elements: {
+      grosse: 'La grosse boule', moyenne: 'La boule moyenne', petite: 'La petite boule', cuilleres: 'Les cuillères (yeux)',
+      branches: 'Les branches (bras et nez)', cailloux: 'Les cailloux (boutons)', echarpe: 'L\'écharpe noire',
+    },
+    arrivee: [
+      'Ismae et Georges arrivent à Arendelle. Tout est blanc, il neige à gros flocons.',
+      ['ismae', 'Georges, regarde ! Un château… et un palais de glace, là-haut dans la montagne.'],
+      'Georges secoue ses pattes une par une. Visiblement, il préférait la forêt.',
+    ],
+    rencontre: [
+      ['olaf', 'Salut ! Moi, c\'est Olaf, et j\'adore les gros câlins tout chauds !'],
+      'Olaf serre Georges dans ses petits bras. Georges se laisse faire. Pour une fois.',
+      ['ismae', 'Enchanté, Olaf. Moi c\'est Ismae, et lui c\'est Georges.'],
+      ['olaf', 'Dis, Ismae… tu veux bien m\'aider ? Je voudrais construire un ami. Un bonhomme de neige !'],
+      ['olaf', 'Mais il me manque tout. Et je n\'arrive pas à rouler les boules : mes jambes partent toujours sans moi.'],
+      ['ismae', 'D\'accord. Qu\'est-ce qu\'il te faut ?'],
+      ['olaf', 'Trois boules de neige. La grosse se roule au bord du lac, la moyenne dans la clairière des sapins, à l\'est.'],
+      ['olaf', 'Pour la petite, celle de la tête… Anna fait toujours les boules les plus rondes du royaume.'],
+      ['olaf', 'Des yeux qui brillent : Oaken vend de tout, même des cuillères. Sa boutique est au bord de la forêt.'],
+      ['olaf', 'Des bras : Sven garde un tas de branches près de l\'écurie. Des boutons : trois petits cailloux noirs, dans le village.'],
+      ['olaf', 'Et une écharpe ! J\'en ai vu une noire s\'envoler vers le château.'],
+      ['olaf', 'Je t\'attends sur la grande place, près du sapin. Je vais réfléchir à son prénom !'],
+      'Les éléments à trouver s\'affichent en haut de l\'écran.',
+    ],
+    olafAttend: [['olaf', 'Il nous manque encore :']],
+    olafCarotte: [['olaf', 'Une carotte ! … Non, non, garde-la. J\'ai déjà le plus beau nez du royaume.']],
+    olafPret: [['olaf', 'Tu as TOUT trouvé ?! Allez, on le construit ! Enfin… tu le construis, et moi je t\'encourage.']],
+    // les boules à rouler
+    bouleDebut: ['Une petite boule de neige. Pousse-la en marchant : elle grossit en roulant !'],
+    bouleGrosse: ['La boule est énorme ! Ismae la pousse jusqu\'à la grande place, pour Olaf.'],
+    bouleMoyenne: ['Une belle boule, ni trop grosse ni trop petite. Direction la grande place !'],
+    bouleCoincee: ['La boule est coincée. Pousse-la dans une autre direction.'],
+    // Anna et la petite boule
+    annaBoule: [
+      ['ismae', 'Olaf m\'envoie : il paraît que tu fais les boules de neige les plus rondes du royaume.'],
+      ['anna', 'C\'est vrai ! Ma sœur et moi, on en faisait tout le temps quand on était petites.'],
+      ['anna', 'Tiens, prends celle-là : elle est parfaite pour une tête. Et dis à Olaf que je viendrai voir le résultat !'],
+    ],
+    // chez Oaken
+    oakenEntree: [['oaken', 'Youhou ! Grande liquidation d\'hiver ! Moitié prix sur les cuillères, les carottes… et les maillots de bain.']],
+    cuilleres: [
+      'Deux cuillères bien brillantes. Parfaites pour des yeux.',
+      ['ismae', 'Je pourrais avoir ces deux cuillères ?'],
+      ['oaken', 'Bien sûr ! Ça fera quatre couronnes.'],
+      ['ismae', '… Je n\'ai pas de couronnes.'],
+      ['oaken', 'Ah. … Bon. Pour un ami d\'Olaf, c\'est cadeau. Youhou !'],
+    ],
+    carotte: [
+      'Une caisse de carottes bien croquantes.',
+      ['oaken', 'Une carotte ? Pour un renne, je parie. Prends-la, c\'est la maison qui offre.'],
+    ],
+    sauna: ['Une voix sort du sauna : « Youhou ! »', 'Toute la famille d\'Oaken est là-dedans. Ils vous font coucou à travers la buée.'],
+    // Sven et les branches
+    svenSans: ['Sven te regarde en mâchonnant une branche. Il garde les autres sous son sabot.'],
+    svenCarotte: ['Sven croque la carotte avec un bonheur immense…', '… et pousse les trois branches vers toi avec son museau.'],
+    // l'écharpe, en haut de la fontaine gelée
+    echarpe: ['Une écharpe noire est accrochée tout en haut de la fontaine gelée. Bien trop haut pour Ismae.', ['ismae', 'Georges… tu veux bien ?']],
+    echarpeGeorges: ['Georges grimpe le long de la glace, attrape l\'écharpe… et redescend fièrement, l\'écharpe dans la gueule.'],
+    caillou: ['Un petit caillou noir, tout lisse, à moitié caché dans la neige.'],
+    toutTrouve: ['Tout est prêt ! Il ne reste plus qu\'à retrouver Olaf, sur la grande place.'],
+    // la victoire
+    fini: [
+      ['olaf', 'Il est MAGNIFIQUE ! Il lui faut un prénom…'],
+      ['ismae', 'Jack Snow.'],
+      ['olaf', 'Jack Snow ! J\'adore ! Bonjour, Jack Snow !'],
+      'Jack Snow ne répond pas. C\'est un bonhomme de neige.',
+    ],
+    elsa: [['elsa', 'Il est très réussi. Laissez-moi lui donner un petit coup de pouce.']],
+    vivant: [
+      ['jack', 'B… bonjour ? Je m\'appelle… Jack Snow ?'],
+      ['olaf', 'OUI ! Et moi c\'est Olaf, et j\'adore les gros câlins !'],
+      ['jack', 'Moi aussi, je crois.'],
+    ],
+    magieFinie: ['La magie retombe doucement. Jack Snow redevient un bonhomme de neige immobile…', '… mais on jurerait qu\'il sourit un peu plus qu\'avant.'],
+    indice: [
+      ['elsa', 'La magie ne dure pas toujours. Les bons souvenirs, si.'],
+      ['elsa', 'Une jeune femme en manteau rouge m\'a confié ceci pour toi.'],
+    ],
+    apres: [['olaf', 'Le bus pour la suite de ton voyage passe à la sortie d\'Arendelle, au sud-est. Reviens nous voir avec Jack !']],
+    busAvant: ['Un arrêt de bus, au milieu de la neige. « Ligne 4 ».', 'Le prochain passage n\'est pas indiqué. Il attend sûrement que le bonhomme de neige soit fini.'],
   },
 
   // ------------------------------------------------------------------
@@ -393,6 +508,59 @@ const CONFIG = {
     robin: {
       apres: [['robin', 'Les montagnes enneigées, c\'est par le chemin du nord-ouest, derrière les tentes. Bonne route !']],
     },
+    // Arendelle : avant = en arrivant, pendant = en cherchant les éléments, apres = Jack Snow construit
+    anna: {
+      avant: [['anna', 'Bonjour ! Moi c\'est Anna. Tu as vu comme la neige est belle, ce soir ?'], ['anna', 'Ma sœur a encore un peu trop bien réussi l\'hiver, cette année.']],
+      pendant: [['anna', 'Le chocolat chaud du marché est le meilleur du royaume. J\'en suis à mon troisième.']],
+      apres: [['anna', 'Jack Snow ! Il est parfait. Olaf ne le quitte plus.']],
+    },
+    kristoff: {
+      avant: [['kristoff', 'Salut. Moi c\'est Kristoff, et lui c\'est Sven. Il est plus poli que moi.']],
+      pendant: [['kristoff', 'Les branches ? Sven les garde comme un trésor.'], ['kristoff', 'Il ne les lâchera que pour une carotte. Oaken en vend, au bord de la forêt.']],
+      apres: [['kristoff', 'Sven t\'aime bien. Moi aussi. Mais je ne le dirai pas.']],
+    },
+    kristoffMerci: { pendant: [['kristoff', 'Une carotte pour Sven ? Tu sais parler aux rennes, toi.']] },
+    oaken: {
+      avant: [['oaken', 'Youhou ! Tout est en promo, sauf le sauna. Le sauna, c\'est gratuit.']],
+      pendant: [['oaken', 'Youhou ! Grande liquidation d\'hiver ! Cuillères, carottes, maillots de bain.']],
+      apres: [['oaken', 'Un bonhomme de neige avec mes cuillères ? Je suis très fier. Youhou !']],
+    },
+    gardeA: {
+      avant: [['gardeA', 'Bienvenue au château d\'Arendelle. Les grandes portes sont ouvertes à tous, aujourd\'hui.']],
+      apres: [['gardeA', 'Paraît qu\'un bonhomme de neige a parlé sur la place. On ne s\'étonne plus de rien, ici.']],
+    },
+    duc: {
+      avant: [['duc', 'C\'est Weselton ! WE-SEL-TON. Personne ne fait jamais l\'effort.'], ['duc', 'Encore de la neige… Très mauvais pour le commerce.']],
+      apres: [['duc', 'Un bonhomme de neige VIVANT ? Je vais porter plainte. Contre qui, je ne sais pas encore.']],
+    },
+    troll: {
+      avant: [['troll', 'Oh ! Un humain ! Et un chat ! Bienvenue chez les trolls !'], ['troll', 'Il a de bien jolis yeux, ce garçon. Il est déjà pris ?']],
+      pendant: [['troll', 'Des cailloux ? Ne nous confonds pas avec des cailloux, jeune homme !'], ['troll', '… Mais il y en a de très jolis près du puits, sur la place. Et sur le pas des portes.']],
+      apres: [['troll', 'Un bonhomme de neige amoureux des câlins… Ça nous rappelle quelqu\'un.']],
+    },
+    enfant: {
+      avant: [['enfant', 'On fait de la luge ! Tu veux essayer ? … Ah non, elle est trop petite pour toi.']],
+      pendant: [['enfant', 'Les cailloux noirs ? On en cache partout pour jouer. Cherche là où la neige brille !']],
+      apres: [['enfant', 'Jack Snow a fait coucou ! Je l\'ai vu ! Personne ne me croit !']],
+    },
+    villageois: {
+      avant: [['villageois', 'Bonsoir ! Le marché de Noël ferme tard ce soir. Le chocolat chaud est à tomber.']],
+      pendant: [['villageois', 'Une écharpe noire ? Le vent l\'a emportée vers le château. Je l\'ai vue passer au-dessus du pont.']],
+      apres: [['villageois', 'Quel joli bonhomme de neige, sur la place ! On dirait qu\'il nous regarde.']],
+    },
+    marchand: {
+      avant: [['marchand', 'Chocolat chaud ! Biscuits au gingembre ! Lutefisk !'], ['marchand', 'Le lutefisk, personne n\'en prend. Sauf ton chat, apparemment.']],
+      apres: [['marchand', 'Chocolat chaud offert pour fêter Jack Snow ! Enfin… le premier est offert.']],
+    },
+    patineuse: {
+      avant: [['patineuse', 'Le fjord est gelé d\'un bord à l\'autre ! Attention, ça glisse… Wiii !']],
+      pendant: [['patineuse', 'La neige du bord du lac est la meilleure pour rouler de grosses boules.']],
+      apres: [['patineuse', 'J\'ai fait un huit parfait ! Enfin, presque. Un sept et demi.']],
+    },
+    pecheur: {
+      avant: [['pecheur', 'Chut. Ça mord. … Non. Ça ne mord pas. Ça ne mord jamais.']],
+      apres: [['pecheur', 'Toujours rien. Mais j\'ai vu un bonhomme de neige faire coucou. C\'est déjà ça.']],
+    },
   },
 
   // ------------------------------------------------------------------
@@ -484,6 +652,35 @@ const CONFIG = {
     chapelle: ['La petite chapelle de Frère Tuck. Ses fenêtres brillent dans le soir.', 'Sur la porte : « Messe à l\'aube. Soupe à midi. Sieste ensuite. »'],
     ratelier: ['Les arcs de Robin et de Petit Jean. L\'un d\'eux a une corde en ficelle de cuisine.'],
     charrette: ['Une charrette de foin. Un lapin dort dedans, les pattes en l\'air.'],
+    // Arendelle
+    bienvenue: ['« Bienvenue à Arendelle »', 'En dessous, en plus petit : « Merci de ne pas geler la ville. »'],
+    portesChateau: ['Les grandes portes du château d\'Arendelle. Aujourd\'hui, elles sont grandes ouvertes.'],
+    porteChateau: ['Ismae frappe à la porte du château. Toc, toc, toc…', 'Personne ne répond. Cette porte en a entendu, des « toc toc ».'],
+    fontaineGelee: ['Une fontaine figée en plein jet. Seule une magie très puissante peut faire ça.'],
+    sapinPlace: ['Le grand sapin de la place. Tout en haut, un flocon de glace scintille.'],
+    etalChocolat: ['Chocolat chaud ! Anna en a déjà bu trois ce soir.'],
+    etalPoisson: ['Du lutefisk. Georges est très, très intéressé.'],
+    etalLegumes: ['Des carottes et des choux. Sven a réservé presque tout le stock.'],
+    etalTricots: ['Des moufles, des bonnets, des écharpes… mais pas d\'écharpe noire.'],
+    etalPains: ['Des biscuits au gingembre en forme de renne.'],
+    puitsGele: ['Un puits gelé. Une pièce brille au fond… sous dix centimètres de glace.'],
+    bateauGele: ['Un bateau prisonnier de la glace. Il attendra le printemps.'],
+    lacGele: ['Le fjord est gelé d\'un bord à l\'autre. Attention, ça glisse !'],
+    longueVue: ['Une longue-vue braquée sur la montagne : là-haut, le palais de glace d\'Elsa scintille.'],
+    gantElsa: ['Un gant bleu clair, oublié dans la neige.', 'Il est glacé… de l\'intérieur.'],
+    transat: ['Un transat, une serviette et des lunettes de soleil, en plein hiver.', 'Quelqu\'un rêve très, très fort de l\'été.'],
+    bonhommeEnfants: ['Le bonhomme de neige des enfants. Il a un nez en carotte. Olaf est un peu jaloux.'],
+    lugeRouge: ['Une luge rouge, oubliée là pendant une course vers le marché.'],
+    blocsGlace: ['Des blocs de glace taillés au cordeau. Kristoff les vend… même en plein hiver.'],
+    traineau: ['Le traîneau de Kristoff. Un luth est posé sur le siège.'],
+    ecurie: ['L\'écurie. Ça sent le foin… et la carotte.'],
+    comptoirOaken: ['« Comptoir d\'Oaken… et sauna ». Une affiche annonce : « Grande liquidation d\'hiver ! »'],
+    rocherTroll: ['Un rocher couvert de mousse. Il… ronfle ?'],
+    maisonArendelle: ['Une maison aux volets peints. Ça sent la cannelle et le feu de bois.'],
+    trouPeche: ['Un trou dans la glace, une ligne qui pend. Le pêcheur attend depuis ce matin.'],
+    rayonsOaken: ['Des bonnets, des skis, des patins… et des maillots de bain. En promo.'],
+    poeleOaken: ['Un gros poêle qui ronronne. Georges s\'installerait bien devant pour l\'hiver.'],
+    sortieArendelle: ['Le chemin redescend vers la forêt.', ['ismae', 'Non, on a promis à Olaf. On reste.']],
     bonhommeNeige: ['Un bonhomme de neige à moitié fini. Il lui manque un nez… et une tête bien ronde.', 'On dirait qu\'il attend quelqu\'un pour le terminer.'],
   },
 };

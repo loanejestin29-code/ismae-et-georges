@@ -5,6 +5,7 @@
 //  clarinette (pont B), batterie légère (cymbale ride, charleston, balais).
 //  + un second morceau, plus rapide, pour la course-poursuite du Carrefour
 //  + un air de la forêt de Sherwood (luth, flûte, bourdon, tambourin), et sa version du tournoi
+//  + une valse d'hiver pour Arendelle (clochettes, cordes, pizzicati, grelots)
 //  + quelques bruitages (miaous, petits bips de dialogue, portes, couteau, bisou, arc, foule…).
 // =====================================================================
 'use strict';
@@ -15,6 +16,7 @@ const Musique = (() => {
   const MORCEAUX = {
     jazz: { bpm: 132, swing: true }, poursuite: { bpm: 172, swing: false, plein: 0.8 },
     foret: { bpm: 108, swing: false, plein: 0.62 }, tournoi: { bpm: 126, swing: false, plein: 0.72 },
+    arendelle: { bpm: 132, swing: false, plein: 0.6 },
   };
   let morceau = 'jazz', suivant = null, NOIRE = 60 / MORCEAUX.jazz.bpm;
   let ctx = null, master, bus, sfx, filtre, reverb, wet, debut = 0, prochaine = 0, pas = 0, timer = null;
@@ -287,6 +289,45 @@ const Musique = (() => {
     }
   }
 
+  // ------------------------------------------------------------ Arendelle : une valse d'hiver (si mineur, 3/4)
+  // A : Bm G D A Bm G Em F# — B : G D A Bm G D Em F# — forme A A B A
+  const GRILLE_V = [['B', 'G', 'D', 'A', 'B', 'G', 'E', 'Gb'], ['G', 'D', 'A', 'B', 'G', 'D', 'E', 'Gb']];
+  const VALSE_A = [
+    [0, 0, 3, 78], [0, 3, 1, 76], [0, 4, 2, 74], [1, 0, 4, 71], [1, 4, 2, 74], [2, 0, 3, 81], [2, 3, 1, 79], [2, 4, 2, 78], [3, 0, 6, 76],
+    [4, 0, 2, 78], [4, 2, 2, 79], [4, 4, 2, 81], [5, 0, 3, 83], [5, 3, 1, 81], [5, 4, 2, 79], [6, 0, 2, 78], [6, 2, 2, 76], [6, 4, 2, 74], [7, 0, 6, 73],
+  ];
+  const VALSE_B = [
+    [0, 0, 2, 74], [0, 2, 2, 79], [0, 4, 2, 83], [1, 0, 4, 81], [1, 4, 2, 78], [2, 0, 2, 76], [2, 2, 2, 81], [2, 4, 2, 85], [3, 0, 6, 83],
+    [4, 0, 2, 79], [4, 2, 2, 83], [4, 4, 2, 86], [5, 0, 3, 85], [5, 3, 1, 83], [5, 4, 2, 81], [6, 0, 2, 79], [6, 2, 2, 78], [6, 4, 2, 76], [7, 0, 3, 73], [7, 3, 3, 78],
+  ];
+  function clochette(m, t, dur, vol = 0.045) {
+    const g = ctx.createGain(); g.connect(bus); g.connect(wet);
+    env(g, t, 0.003, vol, Math.min(1.4, dur + 0.6));
+    osc('sine', hz(m), t, dur + 0.7, g);
+    const h = ctx.createGain(); h.gain.value = 0.25; h.connect(g); osc('sine', hz(m) * 2.01, t, 0.4, h);
+  }
+  function cordes(notes, t, dur, vol = 0.012) {
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.connect(lp); lp.connect(bus); lp.connect(wet);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.25);
+    g.gain.setValueAtTime(vol, t + Math.max(0.3, dur - 0.2)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.1);
+    for (const m of notes) { osc('sawtooth', hz(m), t, dur + 0.15, g); osc('sawtooth', hz(m) * 1.004, t, dur + 0.15, g); }
+  }
+  const pizz = (m, t, vol = 0.03) => { const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1600; g.connect(lp); lp.connect(bus); env(g, t, 0.002, vol, 0.16); osc('triangle', hz(m), t, 0.2, g); };
+  function jouerPasValse(i, t) {
+    const mesure = Math.floor(i / 6) % 32, croche = i % 6, section = Math.floor(mesure / 8), mm = mesure % 8;
+    const nom = GRILLE_V[section === 2 ? 1 : 0][mm], r0 = NOTES[nom], mineur = nom === 'B' || nom === 'E', tierce = mineur ? 3 : 4;
+    const accord = [0, tierce, 7].map((iv) => { let m = 60 + ((r0 + iv) % 12); while (m > 71) m -= 12; return m; });
+    // oum-pa-pa : la basse sur le premier temps, les pizzicati et les grelots sur les deux autres
+    if (croche === 0) { contrebasse(noteBasse(r0, 43), t, 0.26); cordes(accord, t, dureeCroches(i, 6)); }
+    if (croche === 2 || croche === 4) { accord.forEach((m) => pizz(m, t)); grelots(t, 0.014); }
+    for (const [b, c, d, n] of section === 2 ? VALSE_B : VALSE_A) {
+      if (b !== mm || c !== croche) continue;
+      clochette(n, t, dureeCroches(i, d));
+      if (section === 3) clochette(n - 12, t, dureeCroches(i, d), 0.025);
+    }
+  }
+
   function planifier() {
     if (suivant) {
       // changement de morceau : on repart du début, sans laisser de trou
@@ -295,7 +336,7 @@ const Musique = (() => {
       majMix();
     }
     while (prochaine < ctx.currentTime + 0.15) {
-      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : jouerPas)(pas, prochaine);
+      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : jouerPas)(pas, prochaine);
       prochaine += dureeCroche(pas);
       pas++;
     }
@@ -440,6 +481,26 @@ const Musique = (() => {
     }
   }
 
+  // ---- Arendelle
+  // petit carillon : un élément du bonhomme de neige est trouvé (ou posé)
+  function trouve() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    [84, 88, 91, 96].forEach((m, k) => note('sine', hz(m), t + k * 0.07, 0.35, 0.05));
+  }
+  function victoireCourte() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    [79, 83, 86, 91, 95].forEach((m, k) => { note('sine', hz(m), t + k * 0.11, 0.7, 0.05); note('triangle', hz(m - 12), t + k * 0.11, 0.4, 0.02); });
+  }
+  // la magie d'Elsa : une pluie de clochettes qui monte
+  function magie() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    for (let k = 0; k < 16; k++) note('sine', hz(84 + k + (k % 3) * 2), t + k * 0.06, 0.6, 0.03);
+    souffleSfx(t, 'highpass', 6000, 0.6, 0.03, 1.4);
+  }
+
   // coup de sifflet du départ
   function partez() {
     if (!ctx || coupe) return;
@@ -482,9 +543,11 @@ const Musique = (() => {
     if (!ctx) return;
     // la course-poursuite, la forêt, le tournoi : même volume partout, sans étouffer
     const plein = MORCEAUX[suivant || morceau].plein, fort = !!plein;
-    const v = fort ? volumeVoulu * plein : volumeVoulu * (0.3 + 0.7 * proximite) * (etouffe ? 0.55 : 1);
+    // la course-poursuite se joue « dans » le magasin : jamais étouffée ; les autres morceaux le sont à l'intérieur
+    const etouffeIci = etouffe && (suivant || morceau) !== 'poursuite';
+    const v = fort ? volumeVoulu * plein * (etouffeIci ? 0.6 : 1) : volumeVoulu * (0.3 + 0.7 * proximite) * (etouffe ? 0.55 : 1);
     bus.gain.setTargetAtTime(v, ctx.currentTime, 0.3);
-    filtre.frequency.setTargetAtTime(etouffe && !fort ? 650 : 18000, ctx.currentTime, 0.2);
+    filtre.frequency.setTargetAtTime(etouffeIci ? 650 : 18000, ctx.currentTime, 0.2);
   }
   return {
     demarrer,
@@ -506,6 +569,6 @@ const Musique = (() => {
       if (!ctx || !timer) { morceau = nom; NOIRE = 60 / MORCEAUX[nom].bpm; return; }
       if (nom !== morceau || suivant) suivant = nom === morceau ? null : nom;
     },
-    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs,
+    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie,
   };
 })();

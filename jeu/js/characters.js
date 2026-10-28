@@ -164,6 +164,7 @@ const Sprites = (() => {
     beret: ['................', '.......A........', '....AAAAAAAAa...', '...AAAAAAAAAAa..', '....aaaaaaaaa...'],
     capeline: ['................', '.....AAAAAA.....', '....AAAAAAVV....', '.AAAAYYYYYYAAAA.', '..aaaaaaaaaaaa..'],
     casquette: ['................', '................', '.....AAAAAA.....', '....AAAAAAAA....', '...aYYYYYYYYa...'],
+    bonnet: ['......VV........', '.....AAAAA......', '....AAAAAAAA....', '...AAAAAAAAAA...', '...aYaYaYaYaYa..'], // bonnet tricoté à pompon
   };
   // tablier blanc par-dessus le torse (vue de face / de profil)
   const APRON = {
@@ -704,5 +705,5 @@ const Sprites = (() => {
     return o;
   }
 
-  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS, composeIsmae, ISMAE_STYLE, JUPE };
+  return { person, cat, pigeon, chaton, georgesPoses, musicien, MUSICIENS, composeIsmae, ISMAE_STYLE, LOANE_STYLE, TOM_STYLE, JUPE };
 })();

@@ -282,7 +282,7 @@ const Betes = (() => {
   class Figurant {
     constructor(o) {
       Object.assign(this, { visible: true, joie: 0, flip: false }, o);
-      this.spr = o.type === 'serpent' ? serpent() : figurant(o.type, o.cfg);
+      this.spr = o.spr || (o.type === 'serpent' ? serpent() : figurant(o.type, o.cfg)); // o.spr : images déjà prêtes (enfants d'Arendelle, trolls…)
       this.t = Math.random() * 4; this.blinkT = Math.random() * 3; this.blink = false; this.bulle = null;
       const portrait = this.spr.idle || this.spr.frames[0];
       if (o.id) Entites.portraits[o.id] = portrait;

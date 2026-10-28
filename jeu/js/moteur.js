@@ -59,7 +59,15 @@ const Jeu = (() => {
     // (le clavier ci-dessus ne sert qu'aux tests sur ordinateur)
     const base = $('joy'), knob = $('joy-knob');
     let jid = null, ox = 0, oy = 0;
+    // position d'un doigt (ou de la souris) en pixels du jeu
+    const versJeu = (e) => ({ x: (e.clientX * ecran.width) / innerWidth / V.s, y: (e.clientY * ecran.height) / innerHeight / V.s });
+    J.versJeu = versJeu;
     ecran.addEventListener('pointerdown', (e) => {
+      // un mini-jeu qui se manipule au doigt ou à la souris (l'assemblage du bonhomme de neige)
+      if (J.vue && J.vue.pointeur && !dialogue) {
+        try { ecran.setPointerCapture(e.pointerId); } catch (_) { /* rien */ }
+        J.vue.pointeur('down', versJeu(e), e); return;
+      }
       if (dialogue || J.vue) { action(); return; } // pendant le tir à l'arc, toucher l'écran = tirer
       // à l'horizontale, le pouce gauche marche et le pouce droit reste sur les boutons
       if (jid !== null || e.clientX > innerWidth * 0.62) return;
@@ -69,6 +77,7 @@ const Jeu = (() => {
       try { ecran.setPointerCapture(jid); } catch (_) { /* rien */ }
     });
     ecran.addEventListener('pointermove', (e) => {
+      if (J.vue && J.vue.pointeur) { J.vue.pointeur('move', versJeu(e), e); return; }
       if (e.pointerId !== jid) return;
       let dx = e.clientX - ox, dy = e.clientY - oy;
       const R = 46, d = Math.hypot(dx, dy);
@@ -76,7 +85,11 @@ const Jeu = (() => {
       knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
       if (d < 7) { touch.x = touch.y = 0; } else { touch.x = dx / R; touch.y = dy / R; }
     });
-    const fin = (e) => { if (e.pointerId !== jid) return; jid = null; base.hidden = true; touch.x = touch.y = 0; };
+    const fin = (e) => {
+      if (J.vue && J.vue.pointeur) J.vue.pointeur('up', versJeu(e), e);
+      if (e.pointerId !== jid) return;
+      jid = null; base.hidden = true; touch.x = touch.y = 0;
+    };
     ecran.addEventListener('pointerup', fin);
     ecran.addEventListener('pointercancel', fin);
     J.relacher = () => { jid = null; base.hidden = true; touch.x = touch.y = 0; keys.clear(); };
@@ -131,6 +144,8 @@ const Jeu = (() => {
   };
   J.bloque = () => !!dialogue || !!transition || !!script || !!J.cinematique;
   J.surEscalier = (e) => (carte.escaliers || []).some((s) => e.x > s.x && e.x < s.x + s.w && e.y > s.y && e.y < s.y + s.h);
+  // la glace (lac gelé) : rectangles { x, y, w, h } ou ellipses { cx, cy, rx, ry } ; on y glisse
+  J.surGlace = (e) => (carte.glaces || []).some((z) => (z.rx ? ((e.x - z.cx) / z.rx) ** 2 + ((e.y - z.cy) / z.ry) ** 2 < 1 : e.x > z.x && e.x < z.x + z.w && e.y > z.y && e.y < z.y + z.h));
   J.particule = (type, x, y, o = {}) => J.particules.push(Object.assign({ type, x, y, vx: 0, vy: 0, life: 0, max: 1.5 }, o));
 
   // ------------------------------------------------------------ dialogues

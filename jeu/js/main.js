@@ -20,11 +20,15 @@
       Scenes.init(Jeu);
       Bisou.init(Jeu);
       Sherwood.init(Jeu);
+      EpreuveNeige.init(Jeu);
       Indices.init();
       // #sherwood à la fin de l'adresse : on commence directement dans la forêt (épreuve 2)
       if (location.hash.includes('sherwood')) {
         Object.assign(Scenes.quete, { intro: 'fini', tom: true, cle: true, porteOuverte: true, entreeSuperette: true, bisou: 'gagne' });
         Jeu.init('foret', 'entree');
+      } else if (location.hash.includes('arendelle')) { // #arendelle : directement à Arendelle (épreuve 3)
+        Object.assign(Scenes.quete, { intro: 'fini', tom: true, cle: true, porteOuverte: true, entreeSuperette: true, bisou: 'gagne', sherwood: 'gagne' });
+        Jeu.init('arendelle', 'entree');
       } else Jeu.init('rue', 'depart');
     } catch (err) {
       $('titre-erreur').hidden = false;

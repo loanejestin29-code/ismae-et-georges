@@ -1,4 +1,4 @@
-# Juste un indice… — la rue des chats, le Carrefour, la forêt de Sherwood
+# Juste un indice… — la rue des chats, le Carrefour, la forêt de Sherwood, Arendelle
 
 Petit jeu d'aventure en pixel art, vue de dessus en trois quarts, à jouer sur iPhone, à
 l'horizontale. Tout le décor, les personnages et la musique sont générés par le code : aucune
@@ -91,7 +91,39 @@ image ni aucun son externe.
   remet le deuxième indice (« ÉPREUVE 2/6 TERMINÉE ! — DEUXIÈME INDICE OBTENU ! »).
 - **La suite** : on explore la forêt avec Georges. Le chemin du nord-ouest (derrière les tentes,
   là où il commence à neiger, entre les sapins enneigés et un bonhomme de neige à moitié fini)
-  mène aux montagnes enneigées : un écran annonce l'épreuve 3
+  mène aux montagnes enneigées : un écran annonce l'épreuve 3, puis on arrive à Arendelle.
+
+## Épreuve 3 : « Le bonhomme de neige » (à Arendelle)
+
+- **Arendelle sous la neige**, le soir : village de maisons scandinaves colorées, grande place avec
+  son sapin, son marché de Noël (chocolat chaud, lutefisk, tricots, carottes, biscuits) et son puits ;
+  le château aux toits de cuivre vert, ses grandes portes qui s'ouvrent et sa fontaine gelée ; le
+  fjord gelé (on y glisse !) avec ses bateaux pris dans la glace et ses patineuses ; la forêt de
+  sapins et la clairière des trolls (des rochers… qui se réveillent) ; le comptoir d'Oaken (et son
+  sauna), où l'on peut entrer ; l'écurie de Kristoff et Sven ; le palais de glace d'Elsa dans la
+  montagne, sous une aurore boréale. Flocons, guirlandes, lanternes, traces de pas dans la neige.
+  Une valse d'hiver originale (clochettes, cordes, grelots).
+- **Les habitants** : Olaf, Anna qui se promène, Kristoff et Sven, Oaken, les gardes, le duc de
+  Weselton, des enfants sur la colline aux luges, un pêcheur sur la glace, les trolls…
+  Secrets : le gant d'Elsa près du canal, la longue-vue, le transat d'Olaf qui rêve de l'été, etc.
+- **La quête** : Olaf accueille Ismae (« j'adore les gros câlins ! ») et lui demande d'aider à
+  construire un ami. Sept éléments à trouver, affichés dans un petit inventaire en haut à gauche :
+  1. la grosse boule : on la pousse en marchant au bord du lac, elle grossit en roulant ;
+  2. la boule moyenne : pareil, dans la clairière des sapins ;
+  3. la petite boule (la tête) : Anna la donne ;
+  4. les cuillères (les yeux) : chez Oaken (« quatre couronnes… bon, c'est cadeau ») ;
+  5. les branches (bras, nez et sourire) : Sven les garde, il les échange contre une carotte d'Oaken ;
+  6. les cailloux (boutons) : trois petits cailloux noirs qui brillent dans le village ;
+  7. l'écharpe noire : en haut de la fontaine gelée, et c'est Georges qui grimpe la chercher.
+- **L'assemblage** : on retourne voir Olaf, et on fait glisser chaque élément à sa place (souris ou
+  doigt). Les places libres sont en pointillés ; on pose d'abord la grosse boule, puis le ventre,
+  puis la tête.
+- **Jack Snow** : c'est le bonhomme de neige construit par Loane et Ismae (d'après la photo) :
+  grosse base, ventre, tête bien ronde, yeux en cuillères, sourire en brindilles, bras en branches,
+  écharpe noire. Son dessin est la fonction `jack()` de `js/persos-neige.js`.
+- **La victoire** : Olaf est ravi, Elsa arrive et donne vie à Jack Snow quelques secondes, puis
+  remet le troisième indice (« ÉPREUVE 3/6 TERMINÉE ! — TROISIÈME INDICE OBTENU ! »).
+- **La suite** : l'arrêt de bus, à la sortie d'Arendelle (sud-est), annonce l'épreuve 4 (pas encore faite).
   (le bonhomme de neige, pas encore faite).
 
 ## Tester sur l'iPhone
@@ -127,6 +159,8 @@ se met à jour tout seul en moins d'une minute.
 - `tournoi` : nombre de flèches et score du shérif à battre. La difficulté de chaque flèche est le
   tableau `NIVEAUX` de `js/tir-arc.js`.
 - `animaux` et `figurants` : les couleurs des personnages de la forêt (les dessins sont dans `js/betes.js`).
+- `arendelle` : les répliques de l'épreuve 3, les couleurs d'Anna, Elsa, Kristoff, Oaken et des gardes,
+  les enfants, et les noms des sept éléments du bonhomme de neige.
 - `vitesseLoane` : vitesse de Loane pendant la poursuite (Ismae court à 104) ; plus bas = plus facile.
 - `musique`, `volumeMusique`, `neige`, `ambiance`.
 - `vitesseChatons` : vitesse de Georges pendant la poursuite (Ismae court à 104). La vitesse des
@@ -151,6 +185,12 @@ se met à jour tout seul en moins d'une minute.
 | `js/tir-arc.js` | le mini-jeu de tir à l'arc (viseur, jauge, points, difficulté) |
 | `js/betes.js` | les animaux de la forêt (roi Jean, gardes, Robin…) et la cage de Georges |
 | `js/decor-foret.js` | chênes, sapins enneigés, tentes, cibles, trône, barrières… |
+| `js/carte-arendelle.js` | Arendelle : village, place, château, fjord gelé, forêt, écurie, arrêt de bus |
+| `js/carte-oaken.js` | l'intérieur du comptoir d'Oaken |
+| `js/epreuve-neige.js` | l'épreuve 3 : Olaf, les sept éléments, l'inventaire, la victoire, l'arrêt de bus |
+| `js/assemblage.js` | le mini-jeu d'assemblage de Jack Snow (glisser-déposer) |
+| `js/persos-neige.js` | Olaf, Sven, Anna, Elsa, Kristoff, Oaken, les trolls, les enfants, et Jack Snow |
+| `js/decor-arendelle.js` | maisons scandinaves, château, fontaine gelée, marché, écurie, palais de glace… |
 | `js/musique.js` | l'orchestre de jazz, la musique de poursuite, l'air de la forêt et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
@@ -163,9 +203,10 @@ se met à jour tout seul en moins d'une minute.
 - `#reset` à la fin de l'adresse : vide le carnet d'indices (utile après des essais sur le téléphone
   qui servira à offrir le jeu).
 - `#sherwood` à la fin de l'adresse : commence directement dans la forêt (pour essayer l'épreuve 2).
+- `#arendelle` à la fin de l'adresse : commence directement à Arendelle (pour essayer l'épreuve 3).
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- Le texte des deux premiers indices (`indices` dans `js/config.js`).
-- Les épreuves 3 à 6, à commencer par le bonhomme de neige dans les montagnes enneigées.
+- Le texte des trois premiers indices (`indices` dans `js/config.js`).
+- Les épreuves 4 à 6, à commencer par celle de l'arrêt de bus.

@@ -9,7 +9,7 @@
 //     En cas d'échec, le roi laisse recommencer (et le tir devient un peu plus facile).
 //  4. Victoire : le roi trépigne, boude, suce son pouce et pleure en appelant sa maman.
 //     Les gardes libèrent Georges, Robin des Bois félicite Ismae et lui remet le deuxième indice.
-//  5. Ensuite, le chemin du nord-ouest mène aux montagnes enneigées (épreuve 3, pas encore faite).
+//  5. Ensuite, le chemin du nord-ouest mène aux montagnes enneigées, et à Arendelle (épreuve 3, epreuve-neige.js).
 // =====================================================================
 'use strict';
 
@@ -240,7 +240,8 @@ const Sherwood = (() => {
   function montagnes() {
     const p = Jeu.joueur;
     if (Q.sherwood !== 'gagne') { Jeu.dire('sansGeorges'); p.y += 10; return false; }
-    Indices.suite({ titre: 'ÉPREUVE 3/6', lieu: 'Le bonhomme de neige', texte: 'Bientôt disponible. En attendant, Georges a bien mérité une petite sieste au coin du feu.', bouton: 'Rester dans la forêt' }, () => { p.y += 12; p.dir = 'down'; });
+    Indices.suite({ haut: 'Épreuve suivante', titre: 'ÉPREUVE 3/6', lieu: 'Le bonhomme de neige', texte: 'Le chemin grimpe dans la neige… En bas, de l\'autre côté, les lumières d\'un village et d\'un château.', bouton: 'Aller à Arendelle' },
+      () => Jeu.allerA('arendelle', 'entree'));
     return false;
   }
 
