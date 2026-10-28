@@ -24,6 +24,23 @@ const Entites = (() => {
     SPR.etoile = PX.fromRows(['.y.', 'yYy', '.y.'], { y: '#ffd24a', Y: '#fff6c0' });
     SPR.poses = Sprites.georgesPoses();
     SPR.chatons = {};
+    // épreuve du bisou : couteau, bulles (doigt coupé, doigt guéri, cœur), gros cœur du bisou
+    SPR.couteau = PX.outline(PX.fromRows(['.wwwwwkkk', 'Wwwwwwkkk'], { w: '#c9cfda', W: '#ffffff', k: '#6a4228' }), '#2a1a2e');
+    SPR.couteauG = PX.flipX(SPR.couteau);
+    const bulleDoigt = (r) => PX.outline(PX.fromRows(['.wwwwwwwww.', 'wwwwwKwwwww', 'wwwwKKKwwrw', 'wwwwKKKwrrw', 'wwwwKKKwwww',
+      'wwwKKKKKwww', 'wwwKKKKKwww', '.wwwwwwwww.', '...ww......', '...w.......'], { w: '#fff8e8', K: '#e6b08a', r }), '#2a1a2e');
+    SPR.bulles = {
+      '!': SPR.bulle, '?': SPR.question,
+      doigt: bulleDoigt('#e0353a'), gueri: bulleDoigt('#ffd24a'),
+      coeur: PX.outline(PX.fromRows(['.wwwwwww.', 'wwrwwwrww', 'wrrrwrrrw', 'wrRrrrrrw', 'wwrrrrrww', 'wwwrrrwww', '.wwwrwww.', '..ww.....', '..w......'],
+        { w: '#fff8e8', r: '#ff6f9a', R: '#ffc4d6' }), '#2a1a2e'),
+    };
+    SPR.grosCoeur = PX.outline(PX.fromRows(['.rr...rr.', 'rRrr.rrrr', 'rRrrrrrrr', 'rrrrrrrrr', '.rrrrrrr.', '..rrrrr..', '...rrr...', '....r....'],
+      { r: '#ff5c8a', R: '#ffc4d6' }), '#4a1630');
+  }
+  // Ismae en tablier de boucher (créé au premier besoin)
+  function ismaeTablier() {
+    return SPR.ismaeTablier || (SPR.ismaeTablier = Sprites.person(Object.assign({}, CONFIG.ismae, { tablier: CONFIG.tom.tablier, rayures: CONFIG.tom.rayures })));
   }
   function chat(name) { return SPR.chats[name] || (SPR.chats[name] = Sprites.cat(name)); }
   function chaton(name) { return SPR.chatons[name] || (SPR.chatons[name] = Sprites.chaton(name)); }
@@ -68,14 +85,30 @@ const Entites = (() => {
     return Math.abs(dx) > Math.abs(dy) * 1.05 ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
   }
 
+  // saut de surprise : petit bond de 3 px pendant 0,35 s
+  const hauteurSaut = (t) => (t > 0 ? -Math.round(Math.sin((t / 0.35) * Math.PI) * 3) : 0);
+
   // ------------------------------------------------------------ Ismae
   class Joueur {
     constructor(x, y, dir = 'down') {
       this.x = x; this.y = y; this.dir = dir;
       this.anim = 0; this.moving = false; this.blinkT = 2 + Math.random() * 3; this.blink = false; this.run = false;
       this.hb = { w: 10, h: 6 };
+      // scènes : chemin imposé (sans collision), tenue ('tablier'), bulle, saut, couteau en main
+      this.chemin = null; this.vitesse = 62; this.surFin = null; this.tenue = null; this.bulle = null; this.saut = 0; this.couteau = 0;
     }
+    allerVers(points, vitesse, surFin) { this.chemin = points.map((p) => ({ x: p.x, y: p.y })); this.vitesse = vitesse || CONFIG.vitesseMarche; this.surFin = surFin || null; }
+    dire(type, duree = 1.2) { this.bulle = { type, t: duree }; }
     update(dt, jeu) {
+      if (this.bulle && (this.bulle.t -= dt) < 0) this.bulle = null;
+      if (this.saut > 0) this.saut = Math.max(0, this.saut - dt);
+      if (this.couteau > 0) this.couteau += dt;
+      if (this.chemin) {
+        this.run = this.vitesse > 80;
+        if (suivreChemin(this, dt)) { this.moving = true; this.anim += dt * (this.run ? 11 : 7.5); }
+        else { this.chemin = null; this.moving = false; this.anim = 0; const f = this.surFin; this.surFin = null; if (f) f(this); }
+        return;
+      }
       const inp = jeu.input;
       let dx = inp.x, dy = inp.y;
       const len = Math.hypot(dx, dy);
@@ -95,10 +128,57 @@ const Entites = (() => {
     }
     get sortY() { return this.y; }
     draw(g) {
-      const set = SPR.ismae[this.dir];
+      const set = (this.tenue === 'tablier' ? ismaeTablier() : SPR.ismae)[this.dir];
       const img = this.moving ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
+      const dy = hauteurSaut(this.saut);
       ombre(g, this.x, this.y, 6);
-      poser(g, img, this.x, this.y);
+      poser(g, img, this.x, this.y + dy);
+      // le couteau monte et descend sur la planche (de profil uniquement)
+      if (this.couteau > 0 && (this.dir === 'left' || this.dir === 'right')) {
+        const s = this.dir === 'left' ? -1 : 1, lame = s < 0 ? SPR.couteauG : SPR.couteau;
+        const leve = Math.floor(this.couteau * 7) % 2 ? 3 : 0;
+        g.drawImage(lame, Math.round(this.x + (s < 0 ? -13 : 3)), Math.round(this.y - 14 - leve + dy));
+      }
+      if (this.bulle) poser(g, SPR.bulles[this.bulle.type], this.x, this.y - img.height - 1 + dy);
+    }
+  }
+
+  // ------------------------------------------------------------ personnages des épreuves (Tom, Loane…)
+  // o = { id, cfg, x, y, dir, visible, vitesse, dialogue }
+  class Perso {
+    constructor(o) {
+      Object.assign(this, { dir: 'down', visible: true, vitesse: 60 }, o);
+      this.spr = Sprites.person(o.cfg);
+      portraits[o.id] = this.spr.down.idle;
+      this.anim = 0; this.marche = false; this.blinkT = Math.random() * 3; this.blink = false;
+      this.chemin = null; this.surFin = null; this.bulle = null; this.saut = 0;
+    }
+    get sortY() { return this.sortYFixe ?? this.y; }
+    allerVers(points, vitesse, surFin) { this.chemin = points.map((p) => ({ x: p.x, y: p.y })); if (vitesse) this.vitesse = vitesse; this.surFin = surFin || null; }
+    regarder(x, y) { this.dir = dirDe(x - this.x, y - this.y, this.dir); }
+    dire(type, duree = 1.2) { this.bulle = { type, t: duree }; }
+    update(dt) {
+      this.blinkT -= dt;
+      if (this.blinkT < 0) { this.blink = true; if (this.blinkT < -0.15) { this.blink = false; this.blinkT = 2.5 + Math.random() * 3; } }
+      if (this.bulle && (this.bulle.t -= dt) < 0) this.bulle = null;
+      if (this.saut > 0) this.saut = Math.max(0, this.saut - dt);
+      this.marche = false;
+      if (!this.chemin) return;
+      if (suivreChemin(this, dt)) { this.marche = true; this.anim += dt * Math.max(7, this.vitesse / 8); }
+      else { this.chemin = null; const f = this.surFin; this.surFin = null; if (f) f(this); }
+    }
+    zone() {
+      if (!this.visible || !this.dialogue) return null;
+      return { x: this.x - 9, y: this.y - 14, w: 18, h: 18, dialogue: (jeu) => { this.regarder(jeu.joueur.x, jeu.joueur.y); return this.dialogue(jeu); } };
+    }
+    draw(g) {
+      if (!this.visible) return;
+      const set = this.spr[this.dir];
+      const img = this.marche ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
+      const dy = hauteurSaut(this.saut);
+      ombre(g, this.x, this.y, 6);
+      poser(g, img, this.x, this.y + dy);
+      if (this.bulle) poser(g, SPR.bulles[this.bulle.type], this.x, this.y - img.height - 1 + dy);
     }
   }
 
@@ -115,7 +195,7 @@ const Entites = (() => {
     // opts.attendre : distance au-delà de laquelle Georges s'arrête pour attendre Ismae
     allerVers(points, vitesse, opts = {}) { this.mode = 'script'; this.chemin = points.map((p) => ({ x: p.x, y: p.y })); this.vitesse = vitesse; this.opts = opts; this.pose = null; }
     reprendreSuivi(jeu) {
-      this.mode = 'suivi'; this.chemin = null; this.pose = null; this.opts = {};
+      this.mode = 'suivi'; this.chemin = null; this.pose = null; this.opts = {}; this.texteScript = null;
       jeu.trace = [{ x: this.x, y: this.y }, { x: jeu.joueur.x, y: jeu.joueur.y }];
     }
     surprendre(type = '!') { this.bulle = { type, t: 1.1 }; }
@@ -183,7 +263,7 @@ const Entites = (() => {
       if (this.etat === 'couche' && Math.random() < dt * 0.5) jeu.particule('z', this.x + 4, this.y - 12);
     }
     get sortY() { return this.y; }
-    zone() { return { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.mode === 'script' ? 'georgesPoursuite' : 'georges', chat: this }; }
+    zone() { return { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.texteScript || (this.mode === 'script' ? 'georgesPoursuite' : 'georges'), chat: this }; }
     draw(g) {
       const s = SPR.georges;
       let img;
@@ -401,5 +481,5 @@ const Entites = (() => {
     }
   }
 
-  return { init, SPR, Joueur, Georges, ChatPNJ, ChatScript, Musicien, Passant, Pigeon, ombre, poser, chat, chaton, portrait, portraits, suivreChemin };
+  return { init, SPR, Joueur, Georges, ChatPNJ, ChatScript, Musicien, Passant, Perso, Pigeon, ombre, poser, chat, chaton, portrait, portraits, suivreChemin, dirDe };
 })();

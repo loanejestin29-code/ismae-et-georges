@@ -38,14 +38,34 @@ image ni aucun son externe.
   - Duchesse conseille de demander aux habitants ; M. Fernand dit de suivre la musique.
   - La boulangère : Tom disparaît derrière la grande porte verte, au bout de la rue (à côté du
     club de jazz). La colonne d'affiches juste à côté le confirme.
-  - La porte est fermée à clé. Le livreur et le peintre (dans la cour, par la deuxième ruelle)
-    disent que c'est Colette qui a la clé ; elle se promène sur le quai.
+  - La porte est fermée à clé (c'est la seule porte verte du jeu). Le livreur et le peintre (dans
+    la cour, par la deuxième ruelle) disent que c'est Colette qui a la clé ; elle se promène en bas
+    des quais, au bord de l'eau, près des bateaux.
   - Colette prête la clé (seulement une fois la piste de Tom connue) ; on ouvre la porte verte.
 - **La placette des Matous** : derrière la porte verte, un passage mène à une petite place cachée.
   Les musiciens jouent sur une scène posée juste devant la supérette : il faut passer derrière eux
   pour atteindre sa porte.
-- **La supérette** : petite épicerie rétro (logo seul, aucun texte). À l'intérieur, les rayons
-  forment un labyrinthe façon Pac-Man, sans aucune impasse, prêt pour la future course-poursuite.
+
+## Épreuve 1 : « Le bisou magique » (au Carrefour)
+
+- **Le magasin** : crèmerie et surgelés au fond, la **boucherie** de Tom au centre (enseigne,
+  store rayé, charcuterie suspendue, vitrine réfrigérée, billot, chambre froide), des rayons pleins
+  de produits qui forment un labyrinthe façon Pac-Man (aucune impasse) avec un îlot de chocolats
+  de Noël au milieu, deux caisses, l'étal de fruits et quelques clients à qui parler.
+- **La scène** : Georges attend près de l'entrée (pas de chats à la boucherie). Ismae rejoint Tom
+  (« My besto friendo ! »), passe derrière le comptoir, enfile un tablier… et se coupe le doigt.
+  Il aperçoit Loane : « Viens me faire un bisou magique ! » — « Viens le chercher ! 😏 »
+- **La poursuite** : la caméra dézoome un peu, la musique devient une course rapide, le bandeau
+  « Attrape Loane ! » s'affiche et une petite flèche indique Loane quand elle sort de l'écran.
+  Ismae court tout seul pendant la poursuite (le bouton Courir disparaît). Loane fuit par les allées
+  en choisissant celles qui l'éloignent le plus ; elle court un peu moins vite qu'Ismae, s'arrête
+  parfois pour le narguer et se fatigue avec le temps : on finit toujours par l'attraper.
+  Pas de chronomètre. On l'attrape surtout dans les angles.
+- **La victoire** : bisou magique (cœurs, doigt guéri), Loane explique les six épreuves, puis
+  l'écran « ÉPREUVE 1/6 TERMINÉE ! — PREMIER INDICE OBTENU ! ». L'indice rejoint le **carnet
+  d'indices** (bouton ✦ en haut à droite, touche I sur ordinateur), gardé sur le téléphone.
+- **La suite** : Ismae retrouve Georges près de l'entrée. En sortant, un écran annonce l'épreuve 2
+  (la forêt de Sherwood, pas encore faite), puis on revient sur la placette.
 
 ## Tester sur l'iPhone
 
@@ -71,6 +91,12 @@ se met à jour tout seul en moins d'une minute.
 
 - `ismae` : `modele: 'inspire'` et les couleurs (peau, cheveux, veste, zips, pantalon, baskets).
   Le dessin lui-même est la grille `ISMAE_STYLE` de `js/characters.js`.
+- `tom` et `loane` : leurs couleurs (cheveux, peau, tenue). Les dessins sont `TOM_STYLE` et
+  `LOANE_STYLE` dans `js/characters.js`.
+- `indices` : le texte des six indices, **à remplir** (le premier s'affiche à la fin de l'épreuve 1).
+  Ne jamais y écrire la destination.
+- `bisou` : toutes les répliques de l'épreuve 1.
+- `vitesseLoane` : vitesse de Loane pendant la poursuite (Ismae court à 104) ; plus bas = plus facile.
 - `musique`, `volumeMusique`, `neige`, `ambiance`.
 - `vitesseChatons` : vitesse de Georges pendant la poursuite (Ismae court à 104). La vitesse des
   chatons eux-mêmes est `VITESSE_CHATONS` dans `js/scenes.js`.
@@ -85,8 +111,10 @@ se met à jour tout seul en moins d'une minute.
 | --- | --- |
 | `js/scenes.js` | l'introduction (chatons, poursuite, Duchesse) et la quête de Tom |
 | `js/carte-rue.js` | le plan de la rue, les immeubles, la scène, les habitants, les chats |
-| `js/carte-superette.js` | l'intérieur ; le labyrinthe se règle avec les tableaux `H` et `V` |
-| `js/musique.js` | l'orchestre de jazz et les bruitages |
+| `js/carte-superette.js` | le Carrefour ; le labyrinthe se règle avec les tableaux `Hm` et `Vm` |
+| `js/epreuve-bisou.js` | l'épreuve 1 : la scène avec Tom, la poursuite de Loane, la victoire |
+| `js/indices.js` | le carnet d'indices, l'écran de victoire, l'annonce de la suite |
+| `js/musique.js` | l'orchestre de jazz, la musique de poursuite et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
 | `js/entites.js` | Ismae, Georges, les chats, les musiciens, les habitants |
@@ -95,9 +123,11 @@ se met à jour tout seul en moins d'une minute.
 ### Vérifier
 
 - `#debug` à la fin de l'adresse : collisions en rouge, zones à regarder en vert, portes en bleu.
+- `#reset` à la fin de l'adresse : vide le carnet d'indices (utile après des essais sur le téléphone
+  qui servira à offrir le jeu).
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- L'histoire dans la supérette (la coupure au doigt, Loane) et le mini-jeu de poursuite.
-- Les autres zones.
+- Le texte du premier indice (`indices` dans `js/config.js`).
+- Les épreuves 2 à 6, à commencer par la forêt de Sherwood.

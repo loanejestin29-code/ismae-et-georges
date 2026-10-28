@@ -36,6 +36,42 @@ const CONFIG = {
   },
 
   // ------------------------------------------------------------------
+  //  TOM (le meilleur ami, boucher) et LOANE — même style qu'Ismae
+  // ------------------------------------------------------------------
+  tom: {
+    modele: 'tom',             // calot de boucher, veste blanche, tablier rayé
+    peau: '#d9a07a',
+    cheveux: '#2e2222',
+    couleurChapeau: '#f4f2ec', // le calot
+    veste: '#efede6', reflets: '#ffffff', zips: '#b8b4c4',
+    tablier: '#fbfaf6', rayures: '#3a4a7e',
+    pantalon: '#2c2b38', chaussures: '#3a3846', semelles: '#d8d6e0',
+  },
+  loane: {
+    modele: 'loane',           // cheveux longs, manteau rouge, jupe, collants, bottines
+    peau: '#f0c4a4',
+    cheveux: '#5a3424',
+    veste: '#b8323c', reflets: '#d0505a', zips: '#e0646c', // manteau
+    tshirt: '#f2e6d0',         // pull crème
+    pantalon: '#2e2a3e',       // jupe
+    collants: '#3a2c3c',
+    chaussures: '#5a3a2a', semelles: '#2e2026',
+  },
+
+  // ------------------------------------------------------------------
+  //  CARNET D'INDICES — un indice par épreuve réussie (6 en tout)
+  //  Ne jamais y écrire la destination !
+  // ------------------------------------------------------------------
+  indices: [
+    { epreuve: 'Le bisou magique', texte: '(Premier indice à écrire ici)' },
+    { epreuve: 'La forêt de Sherwood', texte: '' },
+    { epreuve: '???', texte: '' },
+    { epreuve: '???', texte: '' },
+    { epreuve: '???', texte: '' },
+    { epreuve: '???', texte: '' },
+  ],
+
+  // ------------------------------------------------------------------
   //  AMBIANCE ET RÉGLAGES
   // ------------------------------------------------------------------
   ambiance: 'soir',           // 'soir' (lampadaires allumés) ou 'jour'
@@ -46,6 +82,7 @@ const CONFIG = {
   vitesseCourse: 104,
   distanceGeorges: 17,        // distance à laquelle Georges suit Ismae
   vitesseChatons: 120,        // vitesse de Georges pendant la poursuite (plus rapide qu'Ismae qui court ; les chatons encore plus)
+  vitesseLoane: 96,           // course-poursuite au Carrefour : Ismae court à 104, Loane un peu moins vite
 
   // ------------------------------------------------------------------
   //  PERSONNAGES QUI PARLENT (nom affiché + couleur de l'étiquette)
@@ -68,6 +105,37 @@ const CONFIG = {
     fernand: { nom: 'M. Fernand', couleur: '#c8b8a0' },
     peintre: { nom: 'Le peintre', couleur: '#e0a070' },
     caissier: { nom: 'Le caissier', couleur: '#7fa6e0' },
+    caissiere: { nom: 'La caissière', couleur: '#9ad0a0' },
+    client: { nom: 'Un client', couleur: '#c8b8a0' },
+    tom: { nom: 'Tom', couleur: '#e8906a', bip: 540 },
+    loane: { nom: 'Loane', couleur: '#ff8fb8', bip: 780 },
+  },
+
+  // ------------------------------------------------------------------
+  //  ÉPREUVE 1 — LE BISOU MAGIQUE (au Carrefour, voir epreuve-bisou.js)
+  // ------------------------------------------------------------------
+  bisou: {
+    retrouvailles: [
+      ['tom', 'Ismae ?! Qu\'est-ce que tu fais là ?'],
+      ['ismae', 'My besto friendo ! Je te cherche depuis une heure.'],
+      ['tom', 'Une heure ? C\'est juste derrière la porte verte.'],
+      ['ismae', 'Fermée à clé. J\'ai dû retrouver Colette.'],
+      ['tom', 'Colette ? Elle t\'a raconté toute sa vie, j\'imagine.'],
+      ['ismae', 'Deux fois.'],
+      ['tom', 'Bon, tu tombes bien, collègue : j\'ai dix rôtis à ficeler. Passe derrière !'],
+    ],
+    tablier: ['Ismae enfile un tablier et attrape un couteau.'],
+    travail: [['tom', 'Doucement, hein. Rien ne presse.']],
+    aie: [['ismae', 'Aïe !']],
+    appel: [['ismae', 'Loane ! Viens me faire un bisou magique !']],
+    reponse: [['loane', 'Viens le chercher ! 😏']],
+    victoire: [
+      ['loane', 'Bon, t\'as réussi à m\'attraper !'],
+      ['loane', 'Tu viens de réussir ta première épreuve !'],
+      ['loane', 'Pour découvrir ton cadeau de Noël, tu vas devoir réussir six épreuves. À chaque victoire, tu gagneras un indice.'],
+    ],
+    apres: [['ismae', 'Bon. Allons retrouver Georges, près de l\'entrée.']],
+    georges: ['Georges renifle le doigt d\'Ismae.', 'Le bisou magique a l\'air d\'avoir marché.'],
   },
 
   // ------------------------------------------------------------------
@@ -115,7 +183,7 @@ const CONFIG = {
     },
     livreur: {
       avant: [['livreur', 'Attention, ça passe ! Livraison urgente de baguettes !']],
-      apres: [['livreur', 'La supérette de la placette ? J\'y livre tous les matins !'], ['livreur', 'Mais le soir, la porte verte est fermée à clé. C\'est Colette qui a la clé.'], ['livreur', 'Elle se promène sur le quai, avec son grand chapeau violet.']],
+      apres: [['livreur', 'La supérette de la placette ? J\'y livre tous les matins !'], ['livreur', 'Mais le soir, la porte verte est fermée à clé. C\'est Colette qui a la clé.'], ['livreur', 'Elle se promène en bas des quais, au bord de l\'eau, près des bateaux. Grand chapeau violet.']],
     },
     colette: {
       avant: [['colette', 'Quel joli chat noir ! Il s\'appelle comment ?'], ['ismae', 'Georges.'], ['colette', 'Georges ! Ça lui va à merveille.']],
@@ -128,9 +196,32 @@ const CONFIG = {
     },
     peintre: {
       avant: [['peintre', 'Je peins des chats depuis vingt ans.'], ['peintre', 'Le tien a de l\'allure… mais il ne tient pas la pose.']],
-      apres: [['peintre', 'La placette des Matous ? Je la peins souvent, avec ses musiciens.'], ['peintre', 'Mais on n\'y entre pas comme ça : il faut la clé de Colette.']],
+      apres: [['peintre', 'La placette des Matous ? Je la peins souvent, avec ses musiciens.'], ['peintre', 'Mais on n\'y entre pas comme ça : il faut la clé de Colette. Elle se promène au bord de l\'eau.']],
     },
-    caissier: { avant: [['caissier', 'Bonsoir ! Tom ? Il était là il y a deux minutes…'], ['caissier', 'Avec tous ces rayons, on se perd vite, ici.']] },
+    // au Carrefour : avant = avant l'épreuve, apres = une fois Loane attrapée
+    caissier: {
+      avant: [['caissier', 'Bonsoir ! Tom ? À la boucherie, tout au fond.'], ['caissier', 'Avec tous ces rayons, on s\'y perd vite. Suis l\'odeur du saucisson.']],
+      apres: [['caissier', 'C\'était quoi, cette course dans les rayons ?'], ['caissier', 'Ici, d\'habitude, on ne court qu\'après les promos.']],
+    },
+    caissiere: {
+      avant: [['caissiere', 'Ma caisse est ouverte ! Enfin… dès que j\'aurai fini mon café.']],
+      apres: [['caissiere', 'Elle court vite, ton amie. Tu devrais faire du sport.']],
+    },
+    cliente: {
+      avant: [['cliente', 'Beurre doux ou demi-sel… Quelle décision, à mon âge.']],
+      apres: [['cliente', 'Ah, l\'amour ! De mon temps, on se courait après dans les bals. Pas entre les yaourts.']],
+    },
+    client: {
+      avant: [['client', 'Je cherche des marrons pour la dinde. Rayon introuvable.']],
+      apres: [['client', 'Vous avez renversé trois paquets de pâtes. Je dis ça, je dis rien.']],
+    },
+    tom: {
+      avant: [['tom', 'Viens, passe derrière le comptoir !']],
+      apres: [['tom', 'Alors, ce doigt ? Il a l\'air d\'aller beaucoup mieux.'], ['tom', 'File ! Je finis les rôtis. Sans toi, ça ira plus vite.']],
+    },
+    loane: {
+      apres: [['loane', 'Georges et moi, on t\'attendait.'], ['loane', 'Ta deuxième épreuve t\'attend dehors. Bonne chance !']],
+    },
   },
 
   // ------------------------------------------------------------------
@@ -139,7 +230,8 @@ const CONFIG = {
   textes: {
     georges: ['Georges ronronne.', 'Il a sûrement faim. Comme toujours.'],
     georgesPoursuite: ['Georges est bien trop occupé à suivre les chatons.'],
-    entreeSuperette: [['ismae', 'Tom doit être quelque part dans les rayons…']],
+    entreeSuperette: [['ismae', 'Georges, tu m\'attends ici. Pas de chats à la boucherie.'], 'Georges s\'assoit près de l\'entrée, l\'air profondément vexé.', ['ismae', 'Tom doit être à la boucherie, tout au fond.']],
+    georgesAttend: ['Georges monte la garde près de l\'entrée.', 'Il boude encore un peu.'],
     fontaine: ['Georges boit une gorgée… puis secoue la patte, vexé. L\'eau est glacée.'],
     colonne: ['« Grand concert de jazz — Les Matous Swing — ce soir ! »', 'En bas, quelqu\'un a ajouté au crayon : « placette des Matous, derrière la porte verte ».'],
     porcheFerme: ['Une grande porte cochère verte, fermée à clé.', 'De l\'autre côté… on dirait du jazz.'],
@@ -183,13 +275,16 @@ const CONFIG = {
     chatTigre: ['Un chat tigré ronfle sur le banc. Chut.'],
     chatGris: ['Un chaton gris se bat contre une feuille morte. Il perd.'],
     // supérette
-    rayons: ['Des pâtes, du riz, des conserves… et des croquettes. Georges insiste.'],
-    frigos: ['Les frigos ronronnent presque aussi fort que Georges.'],
+    rayons: ['Des pâtes, du riz, des conserves… et des croquettes.'],
+    frigos: ['Yaourts, fromages, beurre… Les frigos ronronnent presque aussi fort que Georges.'],
+    surgeles: ['Des glaces en plein hiver. Courageux.'],
     fruits: ['Des clémentines bien orange. C\'est bientôt Noël.'],
-    promo: ['Un îlot de chocolats de Noël. Georges tente l\'escalade.'],
+    promo: ['Une montagne de chocolats de Noël autour du sapin.', 'Tout en haut, une boîte en forme de cœur.'],
     paniers: ['Des paniers rouges. Juste la bonne taille pour un chat.'],
-    cliente: [['cliente', 'Votre chat est très élégant, jeune homme.']],
-    sortie: ['La sortie donne sur la rue.'],
+    boucherie: ['Côtes de bœuf, saucisses, rôtis ficelés… La vitrine de Tom est impeccable.'],
+    caisseFermee: ['« Caisse fermée ». Sauf pour les câlins, visiblement.'],
+    sortie: ['La sortie donne sur la placette.'],
+    sortieBloquee: ['Pas question de partir : Loane court encore quelque part dans les rayons !'],
   },
 };
 CONFIG.personnages.cliente = { nom: 'Une cliente', couleur: '#e7a0c8' };

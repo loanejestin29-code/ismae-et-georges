@@ -316,13 +316,15 @@ const Batiments = (() => {
   }
 
   function residence(P, type, x0, y0, w, h, pal, r, out) {
-    // rez-de-chaussée en pierre à refends + porte cochère
+    // rez-de-chaussée en pierre à refends + porte d'entrée en bois
+    // (jamais verte : la seule porte verte du jeu est la porte cochère de la placette)
     P.rect(x0, y0, w, h, pal.base);
     for (let yy = y0 + 4; yy < y0 + h; yy += 5) { P.hline(x0, yy, w, pal.mid); P.hline(x0, yy + 1, w, pal.hi); }
     const dw = type === 'hotel' ? 16 : 18, dx = Math.round(x0 + w / 2 - dw / 2), dy = y0 + 5;
+    const bois = type === 'hotel' ? '#5a2a2e' : pal.porte || '#2c3a5e';
     P.rect(dx - 2, dy - 2, dw + 4, h - 3, pal.hi);
-    P.rect(dx, dy, dw, h - 5, type === 'hotel' ? '#5a2a2e' : '#2c4f3e');
-    P.ellipse(dx + dw / 2 - 0.5, dy + 1, dw / 2 - 1, 3, type === 'hotel' ? '#5a2a2e' : '#2c4f3e');
+    P.rect(dx, dy, dw, h - 5, bois);
+    P.ellipse(dx + dw / 2 - 0.5, dy + 1, dw / 2 - 1, 3, bois);
     if (type === 'hotel') {
       P.rect(dx + 2, dy + 3, dw - 4, h - 10, LIT.a); P.dither(dx + 2, dy + 3, dw - 4, h - 10, LIT.b, 5);
       P.vline(dx + dw / 2, dy + 3, h - 10, '#5a2a2e');
@@ -332,8 +334,8 @@ const Batiments = (() => {
       for (const lx of [dx - 6, dx + dw + 4]) { P.rect(lx, dy + 2, 2, 4, '#d9a440'); P.px(lx, dy + 3, '#fff1b0'); out.lights.push({ x: x0 + (lx - x0) + 1, y: dy + 4, r: 16, k: 'lamp', wall: true }); }
       out.lights.push({ x: x0 + w / 2, y: y0 + h + 6, r: 36, k: 'shop' });
     } else {
-      for (let j = dy + 3; j < dy + h - 6; j += 4) { P.hline(dx + 2, j, dw - 4, '#3d6a54'); P.hline(dx + 2, j + 2, dw - 4, '#1f3a2e'); }
-      P.vline(dx + dw / 2, dy, h - 5, '#1b3328');
+      for (let j = dy + 3; j < dy + h - 6; j += 4) { P.hline(dx + 2, j, dw - 4, S(bois, 0.16)); P.hline(dx + 2, j + 2, dw - 4, S(bois, -0.3)); }
+      P.vline(dx + dw / 2, dy, h - 5, S(bois, -0.42));
       P.px(dx + dw / 2 - 2, dy + 12, '#e0b04a'); P.px(dx + dw / 2 + 1, dy + 12, '#e0b04a');
     }
     for (const wx of [x0 + 5, x0 + w - 13]) {
@@ -417,7 +419,7 @@ const Batiments = (() => {
     A: ['.#.', '#.#', '###', '#.#', '#.#'], B: ['##.', '#.#', '##.', '#.#', '##.'], C: ['.##', '#..', '#..', '#..', '.##'],
     E: ['###', '#..', '##.', '#..', '###'], H: ['#.#', '#.#', '###', '#.#', '#.#'], I: ['###', '.#.', '.#.', '.#.', '###'],
     J: ['..#', '..#', '..#', '#.#', '.#.'], L: ['#..', '#..', '#..', '#..', '###'], O: ['.#.', '#.#', '#.#', '#.#', '.#.'],
-    S: ['.##', '#..', '.#.', '..#', '##.'], T: ['###', '.#.', '.#.', '.#.', '.#.'], U: ['#.#', '#.#', '#.#', '#.#', '.#.'],
+    S: ['.##', '#..', '.#.', '..#', '##.'], T: ['###', '.#.', '.#.', '.#.', '.#.'], U: ['#.#', '#.#', '#.#', '#.#', '###'],
     W: ['#.#', '#.#', '#.#', '###', '#.#'], Z: ['###', '..#', '.#.', '#..', '###'], N: ['##.', '#.#', '#.#', '#.#', '#.#'],
     M: ['#.#', '###', '#.#', '#.#', '#.#'], ' ': ['...', '...', '...', '...', '...'],
     G: ['.##', '#..', '#.#', '#.#', '.##'], R: ['##.', '#.#', '##.', '#.#', '#.#'],
@@ -592,7 +594,7 @@ const Batiments = (() => {
     }
     // ---- rez-de-chaussée
     P.hline(0, y, W, pal.hi); P.hline(0, y + 1, W, pal.mid);
-    shopfront(P, o.boutique || 'porte', 0, y + 2, W, GF - 4, pal, r, out);
+    shopfront(P, o.boutique || 'porte', 0, y + 2, W, GF - 4, o.porte ? Object.assign({}, pal, { porte: o.porte }) : pal, r, out);
     P.rect(0, H - 2, W, 2, pal.lo);
     P.hline(0, H - 1, W, pal.deep);
     // ---- arêtes du bâtiment

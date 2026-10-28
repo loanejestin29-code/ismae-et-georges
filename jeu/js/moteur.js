@@ -19,11 +19,14 @@ const Jeu = (() => {
   const $ = (id) => document.getElementById(id);
 
   // ------------------------------------------------------------ écran
+  // zoom : 1 = vue normale ; plus grand = on voit plus loin (dézoom de la course-poursuite)
+  let zoom = 1, zoomAnim = null;
+  const echelle = (cw, ch, z) => Math.max(z > 1 ? 2 : 1, Math.round(Math.min(cw, ch) / (250 * z)));
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     const cw = Math.round(innerWidth * dpr), ch = Math.round(innerHeight * dpr);
     ecran.width = cw; ecran.height = ch;
-    V.s = Math.max(1, Math.round(Math.min(cw, ch) / 250));
+    V.s = echelle(cw, ch, zoom);
     V.w = Math.ceil(cw / V.s); V.h = Math.ceil(ch / V.s);
     buf.width = V.w; buf.height = V.h; lum.width = V.w; lum.height = V.h;
     eg.imageSmoothingEnabled = false; bg.imageSmoothingEnabled = false;
@@ -43,6 +46,7 @@ const Jeu = (() => {
   const touch = { x: 0, y: 0, run: false };
   function initCommandes() {
     addEventListener('keydown', (e) => {
+      if (J.overlay) return; // une fenêtre (carnet, victoire…) gère son propre clavier
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
       if (e.repeat) return;
       keys.add(e.code);
@@ -93,6 +97,7 @@ const Jeu = (() => {
     const i = J.input;
     if (x || y) { i.x = x; i.y = y; i.analog = false; i.run = keys.has('ShiftLeft') || keys.has('ShiftRight'); }
     else { i.x = touch.x; i.y = touch.y; i.analog = false; i.run = touch.run; }
+    if (J.sprint) i.run = true; // pendant la course-poursuite, Ismae court tout seul
   }
 
   // ------------------------------------------------------------ collisions
@@ -107,6 +112,7 @@ const Jeu = (() => {
     return false;
   }
   const bloqueEnt = (e, x, y) => bloqueRect(x - e.hb.w / 2, y - e.hb.h + 1, e.hb.w, e.hb.h, e);
+  J.libre = (x, y) => !bloqueRect(x - 5, y - 5, 10, 6, null); // un personnage tiendrait-il debout ici ?
   J.deplacer = (e, dx, dy) => {
     if (dx) {
       if (!bloqueEnt(e, e.x + dx, e.y)) e.x += dx;
@@ -172,7 +178,7 @@ const Jeu = (() => {
     if (f) f();
   }
   function action() {
-    if (!actif || transition) return;
+    if (!actif || transition || J.overlay) return;
     if (dialogue) {
       const l = dialogue.lignes[dialogue.i].texte;
       if (dialogue.n < l.length) dialogue.n = l.length;
@@ -252,15 +258,33 @@ const Jeu = (() => {
   }
 
   // ------------------------------------------------------------ caméra
-  function camera(snap) {
+  // vue (w × h) centrée sur Ismae, sans sortir de la carte
+  function vise(w, h) {
     const p = J.joueur;
-    let tx = p.x - V.w / 2, ty = p.y - 24 - V.h / 2;
-    tx = carte.w <= V.w ? (carte.w - V.w) / 2 : Math.max(0, Math.min(carte.w - V.w, tx));
-    ty = carte.h <= V.h ? (carte.h - V.h) / 2 : Math.max(0, Math.min(carte.h - V.h, ty));
-    if (snap) { cam.x = tx; cam.y = ty; return; }
-    const k = Math.min(1, J.dt * 7);
-    cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+    let tx = p.x - w / 2, ty = p.y - 24 - h / 2;
+    tx = carte.w <= w ? (carte.w - w) / 2 : Math.max(0, Math.min(carte.w - w, tx));
+    ty = carte.h <= h ? (carte.h - h) / 2 : Math.max(0, Math.min(carte.h - h, ty));
+    return { x: tx, y: ty };
   }
+  function camera(snap) {
+    const v = vise(V.w, V.h);
+    if (snap) { cam.x = v.x; cam.y = v.y; return; }
+    const k = Math.min(1, J.dt * 7);
+    cam.x += (v.x - cam.x) * k; cam.y += (v.y - cam.y) * k;
+  }
+  // changement de zoom en douceur : on calcule toujours l'image à la plus petite échelle
+  // (la plus large) et on en recadre une partie qui s'agrandit ou se resserre
+  J.zoomer = (z, duree = 0.8) => {
+    if (z === zoom && !zoomAnim) return;
+    if (zoomAnim && zoomAnim.z !== undefined) { zoom = zoomAnim.z; resize(); }
+    zoomAnim = null;
+    const s = echelle(ecran.width, ecran.height, z);
+    if (s < V.s) { const de = { x: cam.x, y: cam.y, s: V.s }; zoom = z; resize(); zoomAnim = { de, t: 0, duree }; }
+    else if (s > V.s) zoomAnim = { vers: s, z, t: 0, duree };
+    else zoom = z;
+  };
+  J.secousse = 0;     // secousse de l'écran (secondes restantes)
+  J.reperes = [];     // personnages signalés par une flèche quand ils sortent de l'écran
 
   // ------------------------------------------------------------ mise à jour
   function update(dt) {
@@ -299,7 +323,7 @@ const Jeu = (() => {
     }
     // cible d'interaction devant Ismae
     cible = null;
-    if (!J.bloque()) {
+    if (!J.bloque() && !J.sprint) { // pendant la course-poursuite, on ne s'arrête pas pour regarder les rayons
       const f = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] }[p.dir];
       const pr = { x: p.x + f[0] * 9 - 7, y: p.y + f[1] * 8 - 9, w: 14, h: 14 };
       let best = 1e9;
@@ -358,7 +382,8 @@ const Jeu = (() => {
 
   function render() {
     const g = bg;
-    const cx = Math.round(cam.x), cy = Math.round(cam.y);
+    let cx = Math.round(cam.x), cy = Math.round(cam.y);
+    if (J.secousse > 0) { cx += Math.round((Math.random() - 0.5) * 4); cy += Math.round((Math.random() - 0.5) * 3); }
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalCompositeOperation = 'source-over';
     g.fillStyle = carte.fond; g.fillRect(0, 0, V.w, V.h);
@@ -398,7 +423,8 @@ const Jeu = (() => {
       if (q.type === 'coeur') { g.globalAlpha = Math.min(1, a * 2); Entites.poser(g, Entites.SPR.coeur, q.x, q.y); }
       else if (q.type === 'note') { g.globalAlpha = Math.min(1, a * 2.5); g.drawImage(Entites.SPR.notes[q.v || 0], Math.round(q.x + Math.sin(q.life * 4 + q.y) * 2), Math.round(q.y)); }
       else if (q.type === 'etoile') { g.globalAlpha = a; g.drawImage(Entites.SPR.etoile, Math.round(q.x + Math.cos(q.life * 9) * 6), Math.round(q.y + Math.sin(q.life * 9) * 2)); }
-      else if (q.type === 'goutte') { g.globalAlpha = a; g.fillStyle = '#bfe6f4'; g.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); }
+      else if (q.type === 'goutte') { g.globalAlpha = a; g.fillStyle = q.col || '#bfe6f4'; g.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); }
+      else if (q.type === 'grosCoeur') { g.globalAlpha = Math.min(1, a * 2); Entites.poser(g, Entites.SPR.grosCoeur, q.x, q.y + Math.round(Math.sin(q.life * 6))); }
       else if (q.type === 'z') { g.globalAlpha = a; g.drawImage(Entites.SPR.z, Math.round(q.x + Math.sin(q.life * 3) * 2), Math.round(q.y - q.life * 8)); }
       else if (q.type === 'fumee') {
         g.globalAlpha = a * 0.55; g.fillStyle = '#c9c4d6';
@@ -468,17 +494,52 @@ const Jeu = (() => {
       g.strokeStyle = 'rgba(80,160,255,0.9)'; carte.portes.forEach((s) => g.strokeRect(s.x + 0.5, s.y + 0.5, s.w - 1, s.h - 1));
     }
     g.setTransform(1, 0, 0, 1, 0, 0);
+    // flèches vers les personnages hors de l'écran (Loane pendant la poursuite)
+    for (const e of J.reperes) {
+      if (!e.visible) continue;
+      const ex = e.x - cx, ey = e.y - 14 - cy;
+      if (ex > 4 && ex < V.w - 4 && ey > 4 && ey < V.h - 4) continue;
+      const mx = Math.max(10, Math.min(V.w - 10, ex)), my = Math.max(12, Math.min(V.h - 12, ey));
+      const a = Math.atan2(ey - my, ex - mx), pulse = Math.sin(t * 8) > 0 ? 1 : 0;
+      g.fillStyle = '#2a1a2e';
+      for (let k = 0; k < 4; k++) g.fillRect(Math.round(mx + Math.cos(a) * (7 + k + pulse)), Math.round(my + Math.sin(a) * (7 + k + pulse)) - 1, 3, 3);
+      g.fillStyle = '#ff6f9a';
+      for (let k = 0; k < 4; k++) g.fillRect(Math.round(mx + Math.cos(a) * (7 + k + pulse)) + 1, Math.round(my + Math.sin(a) * (7 + k + pulse)), 1, 1);
+      Entites.poser(g, Entites.SPR.coeur, mx, my + 4);
+    }
     if (transition) {
       const a = transition.phase === 'out' ? transition.t / 0.32 : 1 - transition.t / 0.32;
       g.fillStyle = `rgba(10,6,18,${Math.max(0, Math.min(1, a))})`; g.fillRect(0, 0, V.w, V.h);
     }
-    eg.drawImage(buf, 0, 0, V.w * V.s, V.h * V.s);
+    if (zoomAnim) recadrer();
+    else eg.drawImage(buf, 0, 0, V.w * V.s, V.h * V.s);
+  }
+
+  // pendant un changement de zoom : on n'affiche qu'une partie de l'image, qui s'agrandit ou se resserre
+  function recadrer() {
+    const a = zoomAnim, cw = ecran.width, ch = ecran.height;
+    a.t += Math.min(0.05, J.dt || 0.016);
+    const p = Math.min(1, a.t / a.duree), q = p * p * (3 - 2 * p);
+    let A, B; // { x, y, s } : coin haut-gauche de la vue (en pixels du jeu) et échelle
+    if (a.de) { A = a.de; B = { x: cam.x, y: cam.y, s: V.s }; } else { A = { x: cam.x, y: cam.y, s: V.s }; const v = vise(cw / a.vers, ch / a.vers); B = { x: v.x, y: v.y, s: a.vers }; }
+    const s = A.s + (B.s - A.s) * q, w = cw / s, h = ch / s;
+    // on interpole le centre de la vue, puis on recadre dans l'image calculée
+    const mx = A.x + cw / A.s / 2 + (B.x + cw / B.s / 2 - (A.x + cw / A.s / 2)) * q;
+    const my = A.y + ch / A.s / 2 + (B.y + ch / B.s / 2 - (A.y + ch / A.s / 2)) * q;
+    const sx = Math.max(0, Math.min(V.w - w, mx - w / 2 - Math.round(cam.x)));
+    const sy = Math.max(0, Math.min(V.h - h, my - h / 2 - Math.round(cam.y)));
+    eg.drawImage(buf, sx, sy, Math.min(w, V.w), Math.min(h, V.h), 0, 0, cw, ch);
+    if (p >= 1) {
+      zoomAnim = null;
+      if (a.z !== undefined) { zoom = a.z; resize(); }
+    }
   }
 
   function boucle(now) {
     const dt = Math.min(0.05, (now - last) / 1000 || 0);
     last = now;
-    if (actif && !J.enPause) update(dt);
+    if (J.secousse > 0) J.secousse = Math.max(0, J.secousse - dt);
+    if (actif && !J.enPause && !J.overlay) update(dt);
     if (!J.enPause) render();
     image(boucle);
   }
@@ -492,7 +553,11 @@ const Jeu = (() => {
     J.joueur = new Entites.Joueur(0, 0);
     J.georges = new Entites.Georges(0, 0);
     resize();
-    addEventListener('resize', resize);
+    addEventListener('resize', () => {
+      if (zoomAnim && zoomAnim.z !== undefined) zoom = zoomAnim.z;
+      zoomAnim = null;
+      resize();
+    });
     initCommandes();
     placer(carteId, arrivee);
     image((n) => { last = n; image(boucle); });

@@ -18,6 +18,8 @@
     try {
       Titre.demarrer();
       Scenes.init(Jeu);
+      Bisou.init(Jeu);
+      Indices.init();
       Jeu.init('rue', 'depart');
     } catch (err) {
       $('titre-erreur').hidden = false;

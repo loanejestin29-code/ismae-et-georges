@@ -204,7 +204,7 @@ const Sprites = (() => {
       I: c.tshirt || S(c.veste, -0.2), i: S(c.tshirt || c.veste, -0.3),
       Z: S(c.reflets || c.veste, 0.25), C: c.ceinture || S(c.pantalon, -0.3), c: c.boucle || '#cfcdd8',
       A: c.couleurChapeau || '#2a2630', a: S(c.couleurChapeau || '#2a2630', -0.35), Y: c.ruban || '#7a2a34', V: c.fleur || '#ff9ac0',
-      Q: c.tablier || '#f4efe6', q: S(c.tablier || '#f4efe6', -0.18),
+      Q: c.tablier || '#f4efe6', q: S(c.tablier || '#f4efe6', -0.18), J: c.rayures || S(c.tablier || '#f4efe6', -0.18),
       ...(c.tenue === 'blouson' && c.reflets ? { U: c.reflets } : {}),
     };
   }
@@ -329,29 +329,110 @@ const Sprites = (() => {
   };
   ISMAE_STYLE.up.jambes = ISMAE_STYLE.down.jambes;
 
+  // ------------------------------------------------------------ TOM (même style, calot et veste de boucher)
+  // A/a calot en papier, H/h/L cheveux courts ; la veste est fermée (boutons Z) et il porte le tablier
+  const veste = (rows) => rows.map((r) => r.replace(/I/g, 'T').replace(/i/g, 't'));
+  const TOM_STYLE = {
+    largeur: 16, hauteur: 30,
+    down: {
+      tete: ['....aAAAAAAa....', '...aAAAAAAAAa...', '...AAAAAAAAAA...', '..hHHHHHHHHHHh..', '..hHHLHHHHLHHh..',
+        '..hHHHHHHHHHHh..', '..hHKKKKKKKKHh..', '..kKKKKKKKKKKk..', '...KKEKKKKEKK...', '...KKEKKKKEKK...',
+        '...kKKKKKKKKk...', '....kkKKKKkk....'],
+      torse: ISMAE_STYLE.down.torse.map(veste), jambes: ISMAE_STYLE.down.jambes,
+    },
+    up: {
+      tete: ['....aAAAAAAa....', '...aAAAAAAAAa...', '...AAAAAAAAAA...', '..hHHHHHHHHHHh..', '..hHHHLHHHHHHh..',
+        '..hHHHHHHHHHHh..', '..hHHHHHHLHHHh..', '..kHHHHHHHHHHk..', '...HHHHHHHHHH...', '...hHHHHHHHHh...',
+        '...khhhhhhhhk...', '....kkKKKKkk....'],
+      torse: ISMAE_STYLE.up.torse.map(veste), jambes: ISMAE_STYLE.down.jambes,
+    },
+    side: {
+      tete: ['....aAAAAAAa....', '...aAAAAAAAAa...', '...AAAAAAAAAAA..', '..hHHHHHHHHHHh..', '..hHHHLHHHHHhh..',
+        '..hHHHHHHHhKKh..', '..hHHHHhKKKKK...', '..hHHHkKKKKEKK..', '..hHHHkKKKKEKKK.', '..hHHKKKKKKKK...',
+        '...hHkKKKKKKk...', '.....kkKKKkk....'],
+      torse: ISMAE_STYLE.side.torse.map(veste), jambes: ISMAE_STYLE.side.jambes,
+    },
+  };
+
+  // ------------------------------------------------------------ LOANE (même style, cheveux longs, manteau, jupe)
+  // les mèches (M) retombent sur les épaules ; N/n collants, B/b/W bottines
+  const JUPE = {
+    down: [
+      ['.....pPPPPp.....', '....pPOPPOPp....', '...pPOPPPPOPp...', '....nN....Nn....', '....nN....Nn....', '....nN....Nn....', '...bBBB..BBBb...', '...WWWW..WWWW...'],
+      ['.....pPPPPp.....', '....pPOPPOPp....', '...pPOPPPPOPp...', '....nN....Nn....', '....nN...bBBb...', '....nN...WWWW...', '...bBBB.........', '...WWWW.........'],
+      ['.....pPPPPp.....', '....pPOPPOPp....', '...pPOPPPPOPp...', '....nN....Nn....', '...bBBb...Nn....', '...WWWW...Nn....', '.........bBBB...', '.........WWWW...'],
+    ],
+    side: [
+      ['......PPPPP.....', '.....pPPOPPp....', '....pPPPOPPPp...', '......nNN.......', '......nNN.......', '......nNN.......', '.....bBBBBB.....', '.....WWWWWWW....'],
+      ['......PPPPP.....', '.....pPPOPPp....', '....pPPPOPPPp...', '.....nN..NN.....', '....nN....NN....', '...nN......NN...', '..bBBB....BBBBB.', '..WWWW....WWWWW.'],
+      ['......PPPPP.....', '.....pPPOPPp....', '....pPPPOPPPp...', '.....NN..nN.....', '....NN....nN....', '...NN......nN...', '..BBBb....bBBBB.', '..WWWW....WWWWW.'],
+    ],
+  };
+  const LOANE_STYLE = {
+    largeur: 16, hauteur: 30,
+    down: {
+      tete: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.',
+        '.hHHHHHHHHhHHHh.', '.hHHhKKKKKKhHHh.', '.HHhKKKKKKKKhHH.', '.HHKKEKKKKEKKHH.', '.HHKKEKKKKEKKHH.',
+        '.HHkmKKKKKKmkHH.', '.hHHkkKKKKkkHHh.'],
+      meches: ['.hHH........HHh.', '.hHH........HHh.', '.hHh........hHh.', '..hh........hh..'],
+      torse: ISMAE_STYLE.down.torse, jambes: JUPE.down,
+    },
+    up: {
+      tete: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.',
+        '.hHHHHHHHLHHHHh.', '.hHHHHHHHHHHHHh.', '.HHHHLHHHHHHHHH.', '.HHHHHHHHHHHHHH.', '.HHHHHHHHHLHHHH.',
+        '.HHHHHHHHHHHHHH.', '.hHHHHHHHHHHHHh.'],
+      meches: ['.hHHHHHHHHHHHHh.', '.hHHHHHHHHHHHHh.', '..hHHHHHHHHHHh..', '..hHHHHHHHHHHh..', '...hhHHHHHHhh...', '.....hhhhhh.....'],
+      torse: ISMAE_STYLE.up.torse, jambes: JUPE.down,
+    },
+    side: {
+      tete: ['.....hHHHHh.....', '...hHHHLLHHh....', '..hHHHLLHHHHh...', '.hHHHLHHHHHHHh..', '.hHHHHHHHHHHHHh.',
+        '.hHHHHHHhHHhKh..', '.HHHHHHhKKKKKK..', '.HHHHHkKKKKEKK..', '.HHHHHkKKKKEKKK.', '.HHHHHKKKKmKK...',
+        '.hHHHhkKKKKKKk..', '.hHHHh.kkKKkk...'],
+      meches: ['.hHHHh..........', '.hHHHh..........', '.hHHh...........', '..hh............'],
+      torse: ISMAE_STYLE.side.torse, jambes: JUPE.side,
+    },
+  };
+
+  // tablier de boucher rayé par-dessus le style « inspiré » (Q tablier, J rayures, q ombre) ; rien de dos
+  const TABLIER = {
+    down: {
+      torse: [null, null, '......JQQJ......', '......JQQJ......', '......JQQJ......', '.....qQQQQq.....', '.....QJQQJQ.....', '.....QJQQJQ.....', '.....QJQQJQ.....'],
+      jambes: ['....QJQQQQJQ....', '....QJQQQQJQ....', '....QJQQQQJQ....', '....qqqqqqqq....'],
+    },
+    side: {
+      torse: [null, null, '.........QJ.....', '.........QJ.....', '.........QJ.....', '........qQQ.....', '........QJQ.....', '........QJQ.....', '........QJQ.....'],
+      jambes: ['.......QJQQ.....', '.......QJQQ.....', '.......QJQq.....', '.......qqq......'],
+    },
+  };
+
   function composeIsmae(c, dir, pose, raise, blink, M = ISMAE) {
     const Wd = M.largeur || 18, Hh = M.hauteur || 31;
     const grid = Array.from({ length: Hh }, () => Array(Wd).fill('.'));
     const stamp = (rows, y0) => rows.forEach((row, j) => {
+      if (!row) return;
       for (let i = 0; i < row.length && i < Wd; i++) if (row[i] !== '.' && grid[y0 + j]) grid[y0 + j][i] = row[i];
     });
     const T = M[dir];
     stamp(T.jambes[pose], 22);
     if (raise) stamp([T.jambes[pose][0]], 21);
     stamp(T.torse[pose], 13 - raise);
+    const tb = c.tablier && M !== ISMAE && TABLIER[dir];
+    if (tb) { stamp(tb.torse, 13 - raise); stamp(tb.jambes, 22); if (raise) stamp([tb.jambes[0]], 21); }
+    if (T.meches) stamp(T.meches, 13 - raise);
     // la tête se pose juste au-dessus du cou, quelle que soit sa hauteur (mèches en plus)
     stamp(T.tete.map((r) => (blink ? r.replace(/[Ee]/g, 'k') : r)), 13 - T.tete.length - raise);
     const pal = Object.assign(personPalette(c), {
       E: '#1a1322', e: c.yeux, r: PX.shade(c.cheveux, -0.42), D: c.couleurBarbe || c.cheveux,
       ...(c.zips ? { Z: c.zips } : {}),
+      ...(c.collants ? { N: c.collants, n: PX.shade(c.collants, -0.3) } : {}),
     });
     return PX.outline(PX.fromRows(grid.map((r) => r.join('')), pal), '#1d1626');
   }
 
   // Renvoie { down, up, left, right } -> { idle, blink, walk:[4] }
   function person(c) {
-    if (c.modele === 'detaille' || c.modele === 'inspire') {
-      const M = c.modele === 'inspire' ? ISMAE_STYLE : ISMAE;
+    if (c.modele === 'detaille' || c.modele === 'inspire' || c.modele === 'tom' || c.modele === 'loane') {
+      const M = { inspire: ISMAE_STYLE, tom: TOM_STYLE, loane: LOANE_STYLE }[c.modele] || ISMAE;
       const out = {};
       for (const dir of ['down', 'up', 'side']) {
         const walk = [composeIsmae(c, dir, 1, 0, false, M), composeIsmae(c, dir, 0, 1, false, M), composeIsmae(c, dir, 2, 0, false, M), composeIsmae(c, dir, 0, 1, false, M)];

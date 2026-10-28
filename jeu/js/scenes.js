@@ -13,7 +13,7 @@
 'use strict';
 
 const Scenes = (() => {
-  const Q = { intro: 'attente', tom: false, cle: false, porteOuverte: false, entreeSuperette: false };
+  const Q = { intro: 'attente', tom: false, cle: false, porteOuverte: false };
   let temps = 0, parcouru = 0, avant = null, attenteLoin = 0, appel = 0;
   // positions finales dans le jardin secret (par la ruelle de l'hôtel, la première depuis l'arrivée)
   const FIN = {
@@ -176,10 +176,7 @@ const Scenes = (() => {
         }
       }
       if (carte.id === 'rue') cache.aristochats = carte.aristochats;
-      if (carte.id === 'superette' && !Q.entreeSuperette) {
-        Q.entreeSuperette = true;
-        J.jouerScript([{ attendre: 0.6 }, { dire: 'entreeSuperette' }]);
-      }
+      // l'arrivée au Carrefour est gérée par l'épreuve du bisou (epreuve-bisou.js)
     };
   }
   const cache = {};

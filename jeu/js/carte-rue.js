@@ -110,7 +110,7 @@ Jeu.enregistrerCarte('rue', () => {
   // placette des Matous : la supérette au fond, juste derrière la scène des musiciens
   poser('placeOuest', B({ w: 120, facade: 'ocre', style: 'ancien', etages: 2, boutique: 'porte', volets: '#3f6d8e', lierre: 'gauche', seed: 71, cheminees: 1 }), PX0, PB);
   poser('carrefour', B({ w: 130, facade: 'gris', etages: 2, boutique: 'carrefour', seed: 57 }), 170, PB);
-  poser('placeEst', B({ w: 120, facade: 'rose', style: 'ancien', etages: 2, boutique: 'porte', volets: '#7a2a34', seed: 73, cheminees: 1 }), 300, PB);
+  poser('placeEst', B({ w: 120, facade: 'rose', style: 'ancien', etages: 2, boutique: 'porte', volets: '#7a2a34', porte: '#5a3a28', seed: 73, cheminees: 1 }), 300, PB);
   C.zone(178, PB - 12, 114, 14, null, { dialogue: (J) => (J.quete.tom ? 'superetteVitrineTom' : 'superetteVitrine') });
   // cour
   poser('cour1', B({ w: 120, facade: 'ocre', style: 'ancien', etages: 3, boutique: 'porte', volets: '#5f7f5a', seed: 41, cheminees: 1 }), 520, 162);
@@ -120,7 +120,7 @@ Jeu.enregistrerCarte('rue', () => {
   const rue = [
     ['pharmacie', 0, 150, { facade: 'creme', seed: 31 }],
     ['atelier', 150, 130, { facade: 'ocre', style: 'ancien', etages: 4, volets: '#3f6d8e', lierre: 'gauche', seed: 33 }],
-    ['residence', 320, 110, { boutique: 'porte', facade: 'blanc', style: 'ancien', etages: 4, volets: '#5f7f5a', seed: 45 }],
+    ['residence', 320, 110, { boutique: 'porte', facade: 'blanc', style: 'ancien', etages: 4, volets: '#4c6f96', porte: '#5a3a28', seed: 45 }],
     ['jazzclub', 430, 60, { facade: 'rose', style: 'ancien', etages: 4, volets: '#7a2a34', seed: 58, cheminees: 1 }],
     ['cafe', 490, 110, { facade: 'ocre', seed: 53 }],
     ['fleuriste', 640, 130, { facade: 'rose', seed: 55, etages: 4, lierre: 'droite' }],
@@ -369,10 +369,11 @@ Jeu.enregistrerCarte('rue', () => {
   habitant({ id: 'livreur', x: 340, y: 498, vitesse: 26,
     chemin: [{ x: 700, y: 498, pause: 2, regard: 'up' }, { x: 1040, y: 498, pause: 1.5, regard: 'up' }, { x: 340, y: 498, pause: 2, regard: 'left' }],
     cfg: { peau: '#d8a07a', cheveux: '#2a2020', coiffure: 'court', barbe: 'aucune', yeux: '#2a1d2e', chapeau: 'casquette', couleurChapeau: '#4a5a7a', ruban: '#2a3a5a', veste: '#5a7a5a', echarpe: '#e8c84a', pantalon: '#4a4a5a', chaussures: '#3a2a22' } });
-  // Colette prête la clé de la porte verte, une fois qu'Ismae cherche Tom
-  habitant({ id: 'colette', x: 140, y: 614, vitesse: 18,
+  // Colette prête la clé de la porte verte, une fois qu'Ismae cherche Tom.
+  // Elle se promène en bas des quais, au bord de l'eau, entre la péniche et la barque.
+  habitant({ id: 'colette', x: 620, y: 828, vitesse: 16,
     dialogue: (J) => { const l = Scenes.repliques('colette', J); if (J.quete.tom) J.quete.cle = true; return l; },
-    chemin: [{ x: 560, y: 614, pause: 3, regard: 'up' }, { x: 820, y: 614, pause: 2.5, regard: 'up' }, { x: 1450, y: 614, pause: 2, regard: 'down' }, { x: 140, y: 614, pause: 2, regard: 'down' }],
+    chemin: [{ x: 760, y: 828, pause: 3.5, regard: 'down' }, { x: 1030, y: 828, pause: 2.5, regard: 'down' }, { x: 470, y: 828, pause: 3, regard: 'down' }],
     cfg: { peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a5a8a', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', echarpe: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', chaussures: '#2a2026' } });
   habitant({ id: 'fernand', x: 1110, y: 514, vitesse: 11,
     chemin: [{ x: 1380, y: 514, pause: 4, regard: 'up' }, { x: 1110, y: 514, pause: 4, regard: 'up' }],
