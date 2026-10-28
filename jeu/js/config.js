@@ -74,9 +74,9 @@ const CONFIG = {
       veste: '#8a5ac8', reflets: '#a87ae0', zips: '#6a3aa8', pantalon: '#8a5ac8', chaussures: '#5a3a8a' },
     sherif: { espece: 'sherif', peau: '#8a8494', cheveux: '#5a5462', couleurBarbe: '#c8c2cc', couleurLunettes: '#1d1626', couleurChapeau: '#6a4428', ruban: '#e8b54a',
       veste: '#5a4a3a', reflets: '#7a6a54', zips: '#3a2e24', pantalon: '#3a3440', chaussures: '#2a2026', semelles: '#1d1626' },
-    petitJean: { espece: 'petitJean', peau: '#8a5a34', cheveux: '#5a3a22', couleurBarbe: '#d8b088', couleurLunettes: '#1d1626', veste: '#5a6a3a', reflets: '#6a7a4a',
-      zips: '#4a5a2a', tshirt: '#d8c8a0', pantalon: '#6a4a2e', chaussures: '#4a3020' },
-    tuck: { espece: 'tuck', peau: '#9a8c78', cheveux: '#5a4a42', couleurBarbe: '#f4f0e8', couleurLunettes: '#1d1626', veste: '#7a5a3a', reflets: '#94704a', zips: '#5a4028',
+    petitJean: { espece: 'petitJean', peau: '#8a5a34', cheveux: '#5a3a22', couleurBarbe: '#d8b088', couleurLunettes: '#1d1626', couleurChapeau: '#5a7a3a', ruban: '#d8323a',
+      tshirt: '#4e6a38', veste: '#4e6a38', ceinture: '#3a2618', pantalon: '#4e6a38', chaussures: '#4a3020' }, // gros ours au petit chapeau, haut et pantalon verts
+    tuck: { espece: 'tuck', peau: '#6e6458', cheveux: '#2a2228', couleurBarbe: '#ece4d4', couleurLunettes: '#1d1626', veste: '#7a5a3a', reflets: '#94704a', zips: '#5a4028',
       ceinture: '#e8d8a8', pantalon: '#7a5a3a', chaussures: '#4a3020' },
   },
   // petits figurants : pelage, habit, chapeau, bec, crête…
@@ -222,7 +222,8 @@ const CONFIG = {
       ['roi', 'Cinq flèches. Fais plus de 29 points et ton chat est libre.'],
       ['ismae', 'Et si je perds ?'],
       ['roi', 'Alors il deviendra le chat officiel du royaume. Avec une petite couronne. Plus petite que la mienne.'],
-      ['sire', 'Le viseur bouge tout seul. Tire quand la jauge passe dans le rouge… et quand le viseur est bien au centre !'],
+      ['sire', 'Chaque flèche se tire en deux temps. D\'abord, vise : arrête le viseur au centre de la cible.'],
+      ['sire', 'Ensuite, la force : tire quand la jauge passe dans le rouge. Ni trop fort, ni trop faible !'],
     ],
     rate: [
       ['roi', 'Ha ! Ha ! Raté ! Le chat est à moi !'],
@@ -350,7 +351,7 @@ const CONFIG = {
     },
     lapereau: {
       avant: [['lapereau', 'Regarde, j\'ai un arc comme Robin des Bois !'], ['lapereau', 'Bon, c\'est un bâton avec une ficelle.']],
-      pendant: [['lapereau', 'Tu vas faire le tournoi ? Je te donne mon secret !'], ['lapereau', 'Attends que le viseur passe au milieu de la cible… et tire quand la jauge est dans le rouge !']],
+      pendant: [['lapereau', 'Tu vas faire le tournoi ? Je te donne mon secret !'], ['lapereau', 'D\'abord, tu arrêtes le viseur pile au milieu de la cible. Ensuite, tu tires quand la jauge est dans le rouge !']],
       apres: [['lapereau', 'T\'as battu le shérif ! Quand je serai grand, je serai comme toi.'], ['lapereau', 'Ou comme Robin. Je sais pas encore.']],
     },
     tortue: {
@@ -480,6 +481,10 @@ const CONFIG = {
     montagnes: ['« Montagnes enneigées »', 'Il fait déjà plus froid par ici.'],
     sansGeorges: [['ismae', 'Pas sans Georges.']],
     tirFini: ['Le tournoi est terminé. Les cibles se reposent.'],
+    chapelle: ['La petite chapelle de Frère Tuck. Ses fenêtres brillent dans le soir.', 'Sur la porte : « Messe à l\'aube. Soupe à midi. Sieste ensuite. »'],
+    ratelier: ['Les arcs de Robin et de Petit Jean. L\'un d\'eux a une corde en ficelle de cuisine.'],
+    charrette: ['Une charrette de foin. Un lapin dort dedans, les pattes en l\'air.'],
+    bonhommeNeige: ['Un bonhomme de neige à moitié fini. Il lui manque un nez… et une tête bien ronde.', 'On dirait qu\'il attend quelqu\'un pour le terminer.'],
   },
 };
 CONFIG.personnages.cliente = { nom: 'Une cliente', couleur: '#e7a0c8' };

@@ -69,25 +69,29 @@ image ni aucun son externe.
 
 ## Épreuve 2 : « Le tournoi de Sherwood » (dans la forêt)
 
-- **La forêt** : grands chênes, sentiers de terre, un ruisseau et ses deux petits ponts, des fleurs,
-  des champignons, des rayons de soleil et des feuilles qui tombent. Une musique à part (luth, flûte,
-  tambourin). À découvrir : le campement de Robin (Petit Jean et sa soupe), Frère Tuck qui pêche,
+- **La forêt**, en fin de journée (la même lumière du soir que dans la rue) : grands chênes, sentiers
+  de terre éclairés par des lanternes, un ruisseau et ses deux petits ponts, des lucioles, des fougères,
+  des fleurs, des feuilles qui tombent, la chapelle de Frère Tuck aux fenêtres allumées, un feu de camp,
+  des torches et des guirlandes de fanions au tournoi. Une musique à part (luth, flûte, tambourin).
+  À découvrir : le campement de Robin (Petit Jean, gros ours au petit chapeau, et sa soupe), Frère Tuck qui pêche,
   Adam de la Halle qui joue du luth, un petit lapin archer (il donne l'astuce du tir), une tortue très
   lente, le cœur « R + M » gravé, l'avis de recherche, la flèche avec un mot, la ruche, le terrier,
   le coffre caché, le cercle de champignons.
 - **La capture** : au carrefour, au nord du ruisseau, fanfare : le roi Jean arrive avec deux gardes
   rhinocéros et Triste Sire. Il veut Georges pour son trône ; les gardes l'enferment dans une cage et
   l'emportent. Pour le récupérer, il faut gagner le tournoi, dans la grande clairière au nord.
-- **Le tournoi** : en arrivant au pas de tir, le mini-jeu commence. Le viseur bouge tout seul, la
-  jauge de force monte et descend : on tire (A, toucher l'écran, ou Espace) quand la jauge est dans
-  le rouge et le viseur près du centre. Trop fort, la flèche part trop haut ; pas assez, trop bas.
+- **Le tournoi** : en arrivant au pas de tir, le mini-jeu commence. Chaque flèche se tire en deux
+  temps (A, toucher l'écran, ou Espace), pour ne regarder qu'une chose à la fois : d'abord on arrête
+  le viseur, qui bouge tout seul, au centre de la cible ; puis une jauge de force apparaît à côté de
+  la cible et on tire quand elle passe dans le rouge. Trop fort, la flèche part trop haut ; pas assez, trop bas.
   Cinq flèches, de plus en plus difficiles ; il faut battre les 29 points du shérif. En cas d'échec,
   le roi laisse recommencer, et c'est un peu plus facile à chaque fois.
 - **La victoire** : le roi trépigne, boude, suce son pouce et pleure en appelant sa maman. Un garde
   ouvre la cage, Georges court retrouver Ismae. Robin des Bois sort des arbres, le félicite et lui
   remet le deuxième indice (« ÉPREUVE 2/6 TERMINÉE ! — DEUXIÈME INDICE OBTENU ! »).
 - **La suite** : on explore la forêt avec Georges. Le chemin du nord-ouest (derrière les tentes,
-  là où il commence à neiger) mène aux montagnes enneigées : un écran annonce l'épreuve 3
+  là où il commence à neiger, entre les sapins enneigés et un bonhomme de neige à moitié fini)
+  mène aux montagnes enneigées : un écran annonce l'épreuve 3
   (le bonhomme de neige, pas encore faite).
 
 ## Tester sur l'iPhone

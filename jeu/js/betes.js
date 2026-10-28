@@ -96,12 +96,12 @@ const Betes = (() => {
     },
     // Frère Tuck : blaireau (bande blanche, taches noires autour des yeux)
     blaireau: {
-      down: ['....hhhhhhhh....', '...hKKKDDKKKh...', '..hKKKKDDKKKKh..', '..KKKKKDDKKKKK..', '..KHHKKDDKKHHK..', '..KHEHKDDKHEHK..',
-        '..KHHHKDDKHHHK..', '..KKKKDDDDKKKK..', '...kKKDDDDKKk...', '....kKDGGDKk....', '.....kDmmDk.....', '......kKKk......'],
+      down: ['....hhhhhhhh....', '...hKKKDDKKKh...', '..hKKKKDDKKKKh..', '..KKKKKDDKKKKK..', '..KkKKKDDKKKkK..', '..KKKEKKKKEKKK..',
+        '..KKKEKKKKEKKK..', '..KKKKKDDKKKKK..', '...kKKDDDDKKk...', '....kKDGGDKk....', '.....kDmmDk.....', '......kKKk......'],
       up: ['....hhhhhhhh....', '...hKKKDDKKKh...', '..hKKKKDDKKKKh..', '..KKKKKDDKKKKK..', '..KKKKKDDKKKKK..', '..KKKKKDDKKKKK..',
         '..KKKKKKKKKKKK..', '..kKKKKKKKKKKk..', '...kKKKKKKKKk...', '....kKKKKKKk....', '.....kKKKKk.....', '......kKKk......'],
-      side: ['....hhhhhhh.....', '...hKKKKDDDh....', '..hKKKKKKDDDh...', '..KKKKKKKKDDDK..', '..KKKKKKKHHHKK..', '..KKKKKKKHEHKK..',
-        '..KKKKKKKHHHDDD.', '..kKKKKKKDDDDDG.', '...kKKKKDDDDD...', '....kKKKDDDk....', '.....kkKKkk.....', '......kKKk......'],
+      side: ['....hhhhhhh.....', '...hKKKKDDDh....', '..hKKKKKKDDDh...', '..KKKKKKKKDDDK..', '..KKKKKKKKKKKK..', '..KKKKKKKKEKKK..',
+        '..KKKKKKKKKKDDD.', '..kKKKKKKDDDDDG.', '...kKKKKDDDDD...', '....kKKKDDDk....', '.....kkKKkk.....', '......kKKk......'],
     },
   };
 
@@ -148,6 +148,41 @@ const Betes = (() => {
     petitJean: modele('ours', 'veste', 'pantalon'),
     tuck: modele('blaireau', 'ceinture', 'robe'),
   };
+  // Petit Jean : un gros ours, plus grand et plus large qu'Ismae (22 × 34), avec un petit chapeau
+  // a/A chapeau, Y plume, h/L oreilles, D museau, G nez, I tee-shirt (manches courtes), T gilet, C ceinture, P pantalon
+  const OURS_TORSE = ['.........kKKk.........', '....kKKTTTDDTTTKKk....', '...kKKTTTDDDDTTTKKk...', '..kKKKTTDDDDDDTTKKKk..', '..KKKTTDDDDDDDDTTKKK..',
+    '.kKKKTTDDDDDDDDTTKKKk.', '.kKKTTDDDDDDDDDDTTKKk.', '.kKkTTDDDDDDDDDDTTkKk.', '..kKTTDDDDDDDDDDTTKk..', '...TTCCCCCCCCCCCCTT...', '....TPPPPPPPPPPPPT....'];
+  const OURS_JAMBES = ['....pPPPPPPPPPPPPp....', '....pPPPPPPPPPPPPp....', '....pPPPPP..PPPPPp....', '....pPPPPP..PPPPPp....', '....pPPPPp..pPPPPp....',
+    '....pPPPPp..pPPPPp....', '...kKKKKKK..KKKKKKk...', '...kkkkkkk..kkkkkkk...'];
+  const OURS_COTE = {
+    tete: ['........aAAa..........', '.......aAAAAaY........', '....hhhaaaaaaa........', '...hLLhKKKKKKKK.......', '...hLhKKKKKKKKKK......', '....KKKKKKKKKKKKK.....',
+      '...KKKKKKKKKKKKKKK....', '...KKKKKKKKKKKEKKK....', '...KKKKKKKKKKKEKKKDD..', '...KKKKKKKKKKKKKDDDDG.', '...kKKKKKKKKKKKKDDDDD.', '....kKKKKKKKKKKKDmmD..',
+      '.....kKKKKKKKKKKKkk...', '.......kkKKKKKKkk.....'],
+    torse: ['.........kKKk.........', '.......kKKTTTTk.......', '......kKKKTTTDDD......', '.....kKKKKTTDDDDD.....', '.....KKKKKTTDDDDDD....', '....kKKKKKTTDDDDDDD...',
+      '....kKKKKKTTDDDDDDD...', '....kKkKKKTTDDDDDDD...', '.....kKKKTTTDDDDDD....', '......TTCCCCCCCCCT....', '.......TPPPPPPPPT.....'],
+    jambes: ['.......pPPPPPPPPp.....', '.......pPPPPPPPPp.....', '.......pPPPPPPPPp.....', '........pPPPPPPp......', '........pPPPPPPp......', '........pPPPPPPp......',
+      '.......kKKKKKKKKKK....', '.......kkkkkkkkkkk....'],
+  };
+  // le tee-shirt : à la place du ventre, avec des manches courtes sur les épaules (lignes 1 à 3)
+  const teeShirt = (rows) => rows.map((r, y) => { const t = r.replace(/D/g, 'I'); return y >= 1 && y <= 3 ? t.replace(/K/g, 'I').replace(/k/g, 'i') : t; });
+  const OURS = {
+    largeur: 22, hauteur: 34, decalage: 4,
+    down: {
+      tete: ['.........aAAa.........', '........aAAAAaY.......', '...hhh.aaaaaaaa.hhh...', '..hLLhKKKKKKKKKKhLLh..', '..hLhKKKKKKKKKKKKhLh..', '...hKKKKKKKKKKKKKKh...',
+        '..KKKKKKKKKKKKKKKKKK..', '..KKKKKEKKKKKKEKKKKK..', '..KKKKKEKKKKKKEKKKKK..', '..KKKKKKKDDDDKKKKKKK..', '..kKKKKKDDGGDDKKKKKk..', '..kKKKKKDDDDDDKKKKKk..',
+        '...kKKKKKDmmDKKKKKk...', '....kkKKKKKKKKKKkk....'],
+      torse: [0, 1, 2].map(() => teeShirt(OURS_TORSE)), jambes: [OURS_JAMBES, OURS_JAMBES, OURS_JAMBES],
+    },
+    up: {
+      tete: ['.........aAAa.........', '........aAAAAaY.......', '...hhh.aaaaaaaa.hhh...', '..hhhhKKKKKKKKKKhhhh..', '..hhhKKKKKKKKKKKKhhh..', '...hKKKKKKKKKKKKKKh...',
+        '..KKKKKKKKKKKKKKKKKK..', '..KKKKKKKKKKKKKKKKKK..', '..KKKKKKKKKKKKKKKKKK..', '..KKKKKKKKKKKKKKKKKK..', '..kKKKKKKKKKKKKKKKKk..', '..kKKKKKKKKKKKKKKKKk..',
+        '...kKKKKKKKKKKKKKKk...', '....kkKKKKKKKKKKkk....'],
+      torse: [0, 1, 2].map(() => teeShirt(OURS_TORSE.map((r) => r.replace(/D/g, 'T')))), jambes: [OURS_JAMBES, OURS_JAMBES, OURS_JAMBES],
+    },
+    side: { tete: OURS_COTE.tete, torse: [0, 1, 2].map(() => teeShirt(OURS_COTE.torse)), jambes: [0, 1, 2].map(() => OURS_COTE.jambes) },
+  };
+  MODELES.petitJean = OURS;
+
   // la tunique des gardes : cotte de mailles (T) et tabard aux couleurs du roi (au centre)
   MODELES.garde.down.torse = T0.map((r) => r);
   MODELES.garde.up.torse = TU;

@@ -17,7 +17,8 @@
 
 Jeu.enregistrerCarte('foret', () => {
   const W = 1056, H = 1008, CW = 16;
-  const C = new Carte('foret', W, H, { ambiance: 'foret', fond: '#14261c' });
+  // fin de journée : la même lumière du soir que dans la rue, avec des lanternes, des torches et un feu de camp
+  const C = new Carte('foret', W, H, { ambiance: 'crepuscule', fond: '#10201a' });
   const P = C.P, O = C.O, r = PX.rng(1404);
   const AUTOMNE = ['#c8802e', '#e0a83a', '#b8562a', '#d89a3a'];
   C.feuilles = 2.4;
@@ -219,8 +220,9 @@ Jeu.enregistrerCarte('foret', () => {
     P.px(x, y, r.pick(['#f4f6ff', '#dfe6f4', '#ffffff']));
     if (r.chance(0.25)) P.rect(x, y, 2, 1, '#eef2fa');
   }
-  eclaircir(50, 30, 150, 230, '#f2f6fc', 0.9);
+  eclaircir(50, 30, 170, 250, '#f2f6fc', 1.3); eclaircir(56, 0, 90, 130, '#ffffff', 1.2);
   C.objet(Foret.poteau([['^', '#c8a070'], ['>', '#a88660']]), 124, 236, { solide: [-2, -2, 4, 3], texte: 'montagnes', zw: 18 });
+  C.objet(Foret.bonhomme(), 76, 236, { solide: [-8, -4, 16, 5], ombre: [9, 3], texte: 'bonhommeNeige', zw: 20 });
 
   // ---------------------------------------------------------------- campement de Robin (sud-ouest)
   P.ellipse(214, 866, 10, 5, '#5a5a66'); for (let k = 0; k < 10; k++) { const a = (k / 10) * Math.PI * 2; P.ellipse(214 + Math.round(Math.cos(a) * 10), 866 + Math.round(Math.sin(a) * 5), 2, 1, k % 2 ? '#8a8a98' : '#a8a8b4'); }
@@ -239,6 +241,7 @@ Jeu.enregistrerCarte('foret', () => {
     } };
   C.dynamiques.push(feu);
   C.fumees.push({ x: 214, y: 850, t: 0 });
+  C.lumiere(214, 858, 78, 'feu');
   C.solide(204, 860, 20, 9);
   C.zone(200, 856, 28, 16, 'feuDeCamp');
   C.objet(Foret.marmite(), 230, 870, { solide: [-6, -3, 12, 4] });
@@ -299,7 +302,7 @@ Jeu.enregistrerCarte('foret', () => {
   }
   // et de grands chênes en bordure
   const VARIANTES = [1, 2, 3, 4, 5, 6, 7, 8].map((s) => Foret.chene(200 + s, { automne: s % 3 === 0 ? 1.4 : 0.5 }));
-  const SAPINS = [0, 1, 2].map((s) => Foret.sapin(300 + s, 2));
+  const SAPINS = [2, 3, 2].map((n, s) => Foret.sapin(300 + s, n));
   const places = [];
   const loinDesAutres = (x, y, d) => places.every(([a, b]) => Math.hypot(a - x, b - y) > d);
   // distance d'un point au chemin le plus proche (pour ne pas planter d'arbre en travers)
@@ -309,7 +312,7 @@ Jeu.enregistrerCarte('foret', () => {
   }))));
   const couloirDegage = (x, y) => distChemin(x, y) > 22;
   // les endroits à ne jamais cacher sous un feuillage (personnages, détails à trouver, arrivée)
-  const A_VOIR = [[214, 866], [246, 872], [128, 816], [256, 634], [380, 477], [682, 470], [706, 444], [528, 952], [470, 552],
+  const A_VOIR = [[214, 866], [246, 872], [128, 816], [256, 634], [380, 477], [682, 470], [706, 444], [528, 952], [470, 552], [200, 470], [76, 236],
     [918, 898], [858, 928], [700, 906], [930, 762], [180, 520], [566, 474], [572, 952], [124, 236], [830, 840]];
   const cache = (x, y) => A_VOIR.some(([a, b]) => Math.abs(a - x) < 50 && b < y - 6 && b > y - 118);
   for (let j = 0; j < NR; j++) for (let i = 0; i < NC; i++) {
@@ -328,12 +331,73 @@ Jeu.enregistrerCarte('foret', () => {
     O.ellipse(x + 6, y - 4, neige ? 14 : 30, neige ? 5 : 10, '#000');
   }
 
+  // ---------------------------------------------------------------- les lumières du soir et les petits détails
+  // la chapelle de Frère Tuck, ses fenêtres éclairées
+  const chap = Foret.chapelle();
+  C.objet(chap, 200, 470, { solide: [-32, -36, 64, 36] });
+  chap.lumieres.forEach(([lx, ly, lr]) => C.lumiere(200 - chap.ax + lx, 470 - chap.ay + ly, lr, 'win'));
+  O.rect(170, 470, 62, 3, '#000');
+  C.zone(188, 466, 24, 12, 'chapelle');
+  // lanternes le long des chemins
+  for (const [x, y] of [[556, 906], [474, 802], [464, 696], [394, 610], [478, 470], [480, 392], [576, 360], [862, 610], [362, 832], [296, 626], [140, 228], [404, 492]])
+    C.objet(Foret.lanterne(), x, y, { solide: [-2, -3, 5, 3], rayon: 48 });
+  // torches (flammes animées) à l'entrée du tournoi, au pied de la tribune et près des cibles
+  const torche = (x, y) => {
+    C.solide(x - 2, y - 3, 5, 3);
+    C.lumiere(x, y - 30, 56, 'feu');
+    C.dynamiques.push({ sortY: y, draw(g, J) {
+      const t = J.t || 0;
+      g.fillStyle = '#1d1626'; g.fillRect(x - 2, y - 28, 5, 28); g.fillStyle = '#6a4428'; g.fillRect(x - 1, y - 27, 3, 27); g.fillStyle = '#9a7a52'; g.fillRect(x - 1, y - 27, 1, 27);
+      g.fillStyle = '#3a3646'; g.fillRect(x - 3, y - 31, 7, 4); g.fillStyle = '#5a5668'; g.fillRect(x - 3, y - 31, 7, 1);
+      for (let k = 0; k < 3; k++) {
+        const hgt = 5 + Math.round(Math.abs(Math.sin(t * 11 + k * 2.1 + x)) * 4) - (k === 1 ? 0 : 2), fx = x - 2 + k * 2;
+        g.fillStyle = '#d8402a'; g.fillRect(fx, y - 31 - hgt, 2, hgt); g.fillStyle = '#f2a03a'; g.fillRect(fx, y - 30 - hgt + 2, 2, Math.max(1, hgt - 3)); g.fillStyle = '#ffe28a'; g.fillRect(fx + (k % 2), y - 31 - Math.max(1, hgt - 4), 1, Math.max(1, hgt - 5));
+      }
+    } });
+  };
+  torche(484, 322); torche(574, 322); torche(TRIB.x + 62, TRIB.y + TRIB.h + 18); torche(TRIB.x + 106, TRIB.y + TRIB.h + 18); torche(396, 150); torche(664, 150);
+  C.lumiere(236, 104, 26, 'win'); C.lumiere(900, 104, 26, 'win'); // le dedans des tentes
+  // guirlandes de fanions, au premier plan
+  C.dessusImg(Foret.fanions(100, 8, ['#c8343a', '#f2c230', '#3a5aa8', '#f4efe6']), 480, 290);
+  C.dessusImg(Foret.fanions(286, 16, ['#f2c230', '#c8343a', '#f4efe6', '#3a5aa8']), 388, 52);
+  C.dessusImg(Foret.fanions(TRIB.w - 6, 10, ['#a8283a', '#e8b54a']), TRIB.x + 3, TRIB.y - 42);
+  // au campement : le râtelier d'arcs, une cible d'entraînement ; au tournoi, la charrette de foin
+  C.objet(Foret.ratelier(), 286, 820, { solide: [-12, -3, 24, 4], texte: 'ratelier', zw: 24 });
+  C.objet(Foret.cible(6), 300, 900, { solide: [-7, -2, 14, 3] });
+  C.objet(Foret.charrette(), 330, 104, { solide: [-22, -6, 44, 7], ombre: [22, 4], texte: 'charrette', zw: 40 });
+  // fougères et hautes herbes là où l'on ne marche pas trop
+  const vr = PX.rng(4321);
+  for (let k = 0, n = 0; k < 900 && n < 110; k++) {
+    const x = 70 + vr.int(W - 140), y = 80 + vr.int(H - 120);
+    if (!estLibre(x, y) || !estLibre(x - 8, y) || !estLibre(x + 8, y) || distChemin(x, y) < 18 || A_VOIR.some(([a, b]) => Math.hypot(a - x, b - y) < 28)) continue;
+    if ((x > GRAD.x - 10 && x < TRIB.x + TRIB.w + 10 && y < 330) || Math.abs(y - yc(x)) < 30) continue; // pas sur le terrain du tournoi ni dans l'eau
+    if (C.solides.some((s) => x > s.x - 6 && x < s.x + s.w + 6 && y > s.y - 4 && y < s.y + s.h + 8)) continue;
+    C.objet(vr.chance(0.5) ? Foret.fougere(k) : Foret.herbes(k), x, y);
+    n++;
+  }
+  // les lucioles, au-dessus de l'eau, dans la prairie et autour du campement (elles brillent par-dessus l'éclairage)
+  const lucioles = [];
+  for (const [zx, zy, zw, zh, n] of [[80, 610, 900, 80, 26], [660, 760, 300, 160, 14], [90, 780, 260, 140, 10], [380, 440, 280, 140, 8]])
+    for (let k = 0; k < n; k++) lucioles.push({ x: zx + vr.int(zw), y: zy + vr.int(zh), ph: vr() * 6.28, v: 0.5 + vr() });
+  C.apresLumiere = (g, J, lum) => {
+    const t = J.t || 0, cam = J.cam, V = J.V;
+    g.globalCompositeOperation = 'lighter';
+    for (const l of lucioles) {
+      const x = Math.round(l.x + Math.sin(t * 0.6 * l.v + l.ph) * 14), y = Math.round(l.y + Math.cos(t * 0.8 * l.v + l.ph * 2) * 8);
+      if (x < cam.x - 8 || x > cam.x + V.w + 8 || y < cam.y - 8 || y > cam.y + V.h + 8) continue;
+      const a = Math.max(0, Math.sin(t * 2 * l.v + l.ph));
+      if (a < 0.05) continue;
+      g.globalAlpha = a * 0.55; g.drawImage(lum(5, 'luciole'), x - 5, y - 5);
+      g.globalAlpha = a; g.fillStyle = '#f4ffc0'; g.fillRect(x, y, 1, 1);
+    }
+  };
+
   // ---------------------------------------------------------------- rayons de soleil entre les arbres
   const rayon = (w, h) => {
     const c = PX.canvas(w + h, h), g = c.getContext('2d');
     for (let y = 0; y < h; y++) {
       const a = 0.11 * Math.sin((y / h) * Math.PI);
-      g.fillStyle = `rgba(255,244,196,${a.toFixed(3)})`; g.fillRect(Math.round(h - y), y, w, 1);
+      g.fillStyle = `rgba(255,206,140,${a.toFixed(3)})`; g.fillRect(Math.round(h - y), y, w, 1);
     }
     return c;
   };
@@ -345,7 +409,7 @@ Jeu.enregistrerCarte('foret', () => {
   const bete = (id, cfg, x, y, o = {}) => { const b = new Entites.Perso(Object.assign({ id, cfg, x, y, dialogue: rep(o.repliques || id) }, o)); C.pnj.push(b); return b; };
   const figurant = (id, type, cfg, x, y, o = {}) => { const f = new Betes.Figurant(Object.assign({ id, type, cfg, x, y, dialogue: rep(o.repliques || id) }, o)); C.pnj.push(f); return f; };
   // habitants de la forêt
-  bete('petitJean', A.petitJean, 246, 872, { dir: 'left', fixe: true });
+  bete('petitJean', A.petitJean, 250, 876, { dir: 'left', fixe: true, ombreR: 10 });
   const tuck = bete('tuck', A.tuck, 256, 634, { dir: 'down', fixe: true });
   C.dynamiques.push({ sortY: 635, draw(g, J) { // sa canne à pêche
     const b = Math.round(Math.sin((J.t || 0) * 3) * 1), x0 = tuck.x + 6, y0 = tuck.y - 13, x1 = tuck.x + 22, y1 = tuck.y - 20;

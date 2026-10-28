@@ -85,18 +85,53 @@ const Foret = (() => {
     return { img: c, ax: cx, ay: base };
   }
 
-  // sapin des montagnes, plus ou moins enneigé
+  // sapin des montagnes : six étages de branches qui se recouvrent ; la neige se pose
+  // sur le dessus de chaque étage (neige : 0 = sans neige, 1 à 3 = de plus en plus)
   function sapin(seed, neige = 0) {
-    const r = PX.rng(seed), { c, P } = mk(40, 72), cx = 20, base = 71;
-    P.rect(cx - 2, base - 12, 4, 12, '#4a3020'); P.vline(cx - 2, base - 12, 12, '#6a4a30');
-    for (let j = 0; j < 58; j++) {
-      const tier = j % 12, w = Math.floor(2 + j * 0.27 + tier * 0.55);
-      P.rect(cx - w, 3 + j, w * 2, 1, tier > 8 ? '#163628' : j % 2 ? '#214c38' : '#27563e');
-      if (tier > 7) P.hline(cx - w, 3 + j, 2, '#36704c');
-      if (neige && tier < 1 + neige * 3 && r.chance(0.9)) P.rect(cx - w + 1, 3 + j, Math.max(1, w * 2 - 2), 1, tier ? '#e2ecf8' : '#ffffff');
+    const r = PX.rng(seed), W = 46, H = 86, { c, P } = mk(W, H), cx = 23, base = H - 1;
+    const V = ['#0e2620', '#16382c', '#1e4834', '#2a5a40', '#3c7452'];
+    P.rect(cx - 2, base - 13, 5, 13, '#4a3020'); P.vline(cx - 2, base - 13, 13, '#6a4a30'); P.vline(cx + 2, base - 13, 13, '#2e1e14');
+    for (let e = 5; e >= 0; e--) {
+      const y0 = 3 + e * 11, hh = 14 + e, demi = 4 + e * 3.3;
+      const largeur = (j) => Math.round(1 + (j / (hh - 1)) * demi);
+      for (let j = 0; j < hh; j++) {
+        const hw = largeur(j), jag = r.int(2);
+        for (let x = -hw - jag; x <= hw + jag; x++) {
+          const cote = x / (hw + 1);
+          P.px(cx + x, y0 + j, j > hh - 3 ? V[0] : cote < -0.35 ? V[3] : cote > 0.45 ? V[1] : V[2]);
+        }
+      }
+      for (let x = -Math.round(demi); x <= Math.round(demi); x += 3) P.px(cx + x, y0 + hh, V[0]); // pointes
+      for (let k = 0; k < 6 + e * 2; k++) { const j = 2 + r.int(hh - 4), hw = largeur(j); P.px(cx - hw + 1 + r.int(Math.max(1, hw)), y0 + j, V[4]); }
     }
-    if (neige) P.rect(cx - 1, 1, 2, 3, '#ffffff');
+    // la neige : une bande blanche sur le dessus de chaque étage, juste sous l'étage d'au-dessus
+    if (neige) for (let e = 0; e < 6; e++) {
+      const y0 = 3 + e * 11, hh = 14 + e, demi = 4 + e * 3.3;
+      const debut = e ? 5 + 12 * e - y0 : 0, ns = e ? 2 + neige : 3 + neige;
+      for (let j = debut; j < Math.min(hh - 2, debut + ns); j++) {
+        const hw = Math.round(1 + (j / (hh - 1)) * demi);
+        for (let x = -hw; x <= hw; x++) {
+          const bord = debut + ns - 1 - Math.round(Math.abs(Math.sin((x + e * 5) * 0.8)) * 1.6);
+          if (j > bord) continue;
+          P.px(cx + x, y0 + j, j === bord ? '#b4c8e2' : x > hw * 0.45 ? '#d8e4f4' : '#ffffff');
+        }
+      }
+      for (let k = 0; k < 2 + e; k++) { const x = Math.round((r() * 2 - 1) * demi * 0.85), yy = y0 + hh - 2 - r.int(2); P.px(cx + x, yy, '#ffffff'); P.px(cx + x + 1, yy, '#d8e4f4'); }
+    }
+    if (neige) { P.rect(cx - 1, 1, 3, 3, '#ffffff'); P.px(cx + 1, 3, '#d8e4f4'); }
     return { img: c, ax: cx, ay: base };
+  }
+
+  // un bonhomme de neige à moitié fini (près du chemin des montagnes)
+  function bonhomme() {
+    const { c, P } = mk(24, 30);
+    P.ellipse(12, 23, 9, 6, '#b4c8e2'); P.ellipse(12, 22, 8, 5, '#f2f6fc'); P.ellipse(10, 21, 4, 2, '#ffffff');
+    P.ellipse(12, 12, 6, 5, '#b4c8e2'); P.ellipse(12, 11, 5, 4, '#f2f6fc'); P.ellipse(11, 10, 2, 2, '#ffffff');
+    P.px(10, 10, '#1d1626'); P.px(14, 10, '#1d1626');
+    for (const y of [19, 22, 25]) P.px(12, y, '#2a2632');
+    line(P, 6, 15, 1, 11, '#5e4230'); line(P, 18, 15, 22, 10, '#5e4230'); P.px(1, 10, '#5e4230'); P.px(23, 9, '#5e4230');
+    P.rect(7, 15, 10, 2, '#c8343a'); P.rect(14, 16, 2, 4, '#a82a30');
+    return { img: c, ax: 12, ay: 28 };
   }
 
   function buisson(seed, w = 28, o = {}) {
@@ -241,5 +276,89 @@ const Foret = (() => {
     return { img: c, ax: 2, ay: h + 9 };
   }
 
-  return { VERTS, feuillage, chene, sapin, buisson, souche, rondin, rocher, abri, marmite, coffre, tente, anneaux, cible, trone, carquois, barriere, poteau, rambarde, BOIS };
+  // ------------------------------------------------------------ lumières et petits décors (comme les réverbères de la rue)
+  // lanterne accrochée à un poteau de bois
+  function lanterne() {
+    const { c, P } = mk(16, 38);
+    P.rect(5, 6, 3, 32, BOIS.moyen); P.vline(5, 6, 32, BOIS.reflet); P.vline(7, 6, 32, BOIS.fonce);
+    P.rect(4, 4, 10, 2, BOIS.fonce); P.hline(4, 4, 10, BOIS.clair); P.vline(12, 6, 2, '#2a2632');
+    P.rect(9, 8, 7, 2, '#2a2632'); P.rect(10, 10, 5, 7, '#2a2632'); P.rect(11, 11, 3, 5, '#ffd27a'); P.px(11, 11, '#fff4c8'); P.rect(9, 17, 7, 1, '#2a2632');
+    P.rect(3, 35, 7, 3, BOIS.fonce);
+    return { img: c, ax: 6, ay: 37, light: { dx: 6, dy: -24 } };
+  }
+  // la petite chapelle de Frère Tuck : murs de pierre, toit d'ardoise, clocher, rosace éclairée
+  function chapelle() {
+    const r = PX.rng(12), W = 80, H = 96, { c, P } = mk(W, H), base = H - 1, x0 = 10, x1 = 70, yMur = 40;
+    // toit
+    for (let j = 0; j < 26; j++) { const ww = Math.round(18 + j * 1.75); P.rect(40 - ww, 16 + j, ww * 2, 1, j % 4 === 3 ? '#3a3e54' : '#4c5270'); }
+    for (let j = 0; j < 26; j += 4) for (let x = 40 - 18 - j * 1.75; x < 40 + 18 + j * 1.75; x += 6) P.px(Math.round(x + (j % 8 ? 3 : 0)), 16 + j, '#5e6688');
+    P.hline(22, 15, 36, '#6a7294');
+    // murs
+    P.rect(x0, yMur, x1 - x0, base - yMur, '#8e8478');
+    for (let row = 0, y = yMur; y < base; row++, y += 6) for (let x = x0 + (row % 2 ? -6 : 0); x < x1; x += 12) {
+      const a = Math.max(x0, x), b = Math.min(x1, x + 11), col = r.pick(['#9a9084', '#8a8074', '#a49a8c', '#948a7e']);
+      P.rect(a, y, b - a, 5, col); P.hline(a, y, b - a, PX.shade(col, 0.15)); P.hline(a, y + 5, b - a, '#5e564c');
+    }
+    P.dither(x0, yMur, x1 - x0, 6, '#2a2238', 7);
+    // porte en bois, arrondie
+    P.rect(32, 70, 16, 25, '#3a2618'); P.ellipse(40, 70, 8, 5, '#3a2618'); P.rect(33, 70, 14, 25, '#6a4428'); P.ellipse(40, 70, 7, 4, '#6a4428');
+    P.vline(40, 66, 29, '#3a2618'); for (let y = 72; y < 95; y += 5) P.hline(33, y, 14, '#5a3a22'); P.px(44, 82, '#e8b54a'); P.px(36, 82, '#e8b54a');
+    // rosace et fenêtres éclairées
+    P.ellipse(40, 54, 6, 6, '#3a3446'); P.ellipse(40, 54, 5, 5, '#ffcf72'); P.vline(40, 49, 11, '#8a5a2e'); P.hline(35, 54, 11, '#8a5a2e'); P.px(38, 52, '#fff4c8');
+    for (const fx of [18, 58]) { P.rect(fx - 3, 58, 7, 12, '#3a3446'); P.rect(fx - 2, 59, 5, 10, '#ffc66a'); P.ellipse(fx, 58, 3, 2, '#3a3446'); P.ellipse(fx, 59, 2, 1, '#ffc66a'); P.hline(fx - 2, 64, 5, '#8a5a2e'); }
+    // clocher et sa cloche
+    P.rect(32, 4, 16, 14, '#8e8478'); P.rect(35, 7, 10, 10, '#2a2238'); P.ellipse(40, 12, 3, 3, '#e8b54a'); P.rect(37, 14, 7, 2, '#c8902e'); P.px(39, 10, '#fff0a0');
+    for (let j = 0; j < 6; j++) P.rect(40 - j - 2, j - 2, j * 2 + 4, 1, '#4c5270');
+    P.vline(40, -3, 4, '#3a2618'); P.hline(38, -1, 5, '#3a2618');
+    // lierre et marches
+    for (let k = 0; k < 90; k++) { const x = r.chance(0.5) ? x0 + r.int(10) : x1 - 1 - r.int(10), y = yMur + r.int(base - yMur); P.px(x, y, r.pick(['#2f5d2e', '#3f7a35', '#4e8c4a'])); }
+    P.rect(28, 93, 24, 3, '#a49a8c'); P.hline(28, 93, 24, '#c0b6a8');
+    return { img: c, ax: 40, ay: base, lumieres: [[40, 54, 34], [18, 64, 22], [58, 64, 22], [40, 88, 20]] };
+  }
+  function fougere(seed) {
+    const r = PX.rng(seed), { c, P } = mk(24, 15);
+    for (let k = 0; k < 7; k++) {
+      const a = Math.PI * (1.08 + k * 0.14), l = 7 + r.int(4), x2 = 12 + Math.cos(a) * l * 1.3, y2 = 14 + Math.sin(a) * l * 0.9;
+      line(P, 12, 14, x2, y2, '#2a5e30');
+      for (let t = 0.3; t < 1; t += 0.18) { const x = 12 + (x2 - 12) * t, y = 14 + (y2 - 14) * t; P.px(x, y - 1, '#4f8a3e'); P.px(x + 1, y, '#3a7436'); }
+      P.px(x2, y2, '#7ab454');
+    }
+    return { img: c, ax: 12, ay: 14 };
+  }
+  function herbes(seed) {
+    const r = PX.rng(seed), { c, P } = mk(14, 14);
+    for (let k = 0; k < 9; k++) {
+      const x = 2 + r.int(10), h = 5 + r.int(8), pen = r.int(3) - 1;
+      line(P, x, 13, x + pen, 13 - h, r.pick(['#3f7a35', '#4e8c42', '#5a9a48']));
+      P.px(x + pen, 13 - h, r.chance(0.3) ? '#d8c070' : '#7ab454');
+    }
+    return { img: c, ax: 7, ay: 13 };
+  }
+  // charrette de foin et râtelier d'arcs
+  function charrette() {
+    const { c, P } = mk(48, 32);
+    P.ellipse(24, 12, 20, 9, '#d8b860'); for (let k = 0; k < 40; k++) P.px(6 + (k * 37) % 36, 5 + (k * 13) % 14, k % 2 ? '#f0d488' : '#b89a48');
+    P.rect(4, 14, 40, 9, '#8a5a32'); P.hline(4, 14, 40, '#a8743e'); for (let x = 8; x < 44; x += 7) P.vline(x, 15, 8, '#6a4428');
+    line(P, 44, 20, 48, 26, BOIS.fonce, 2);
+    for (const wx of [12, 36]) { P.ellipse(wx, 26, 5, 5, '#3a2618'); P.ellipse(wx, 26, 3, 3, '#8a5a32'); P.px(wx, 26, '#3a2618'); }
+    return { img: c, ax: 24, ay: 31 };
+  }
+  function ratelier() {
+    const { c, P } = mk(28, 26);
+    P.rect(2, 4, 3, 22, BOIS.moyen); P.rect(23, 4, 3, 22, BOIS.moyen); P.rect(1, 6, 26, 2, BOIS.clair); P.rect(1, 18, 26, 2, BOIS.clair);
+    for (const x of [8, 14, 20]) { for (let y = 2; y < 24; y++) P.px(x - Math.round(3 * Math.sin((y - 2) / 22 * Math.PI)), y, '#8a5a32'); P.vline(x, 2, 22, 'rgba(246,242,234,0.8)'); }
+    return { img: c, ax: 14, ay: 25 };
+  }
+  // guirlande de petits fanions triangulaires, tendue entre deux points (dessinée au premier plan)
+  function fanions(w, creux, couleurs) {
+    const c = PX.canvas(w, creux + 10), P = PX.painter(c), yDe = (x) => Math.round(creux * 4 * (x / w) * (1 - x / w));
+    for (let x = 0; x < w; x++) P.px(x, yDe(x), '#3a2618');
+    for (let x = 4, k = 0; x < w - 6; x += 9, k++) {
+      const y = yDe(x + 3) + 1, col = couleurs[k % couleurs.length];
+      for (let j = 0; j < 6; j++) P.rect(x + Math.floor(j / 2), y + j, 7 - j - Math.floor(j / 2), 1, j === 0 ? PX.shade(col, 0.2) : col);
+    }
+    return c;
+  }
+
+  return { VERTS, feuillage, chene, sapin, bonhomme, lanterne, chapelle, fougere, herbes, charrette, ratelier, fanions, buisson, souche, rondin, rocher, abri, marmite, coffre, tente, anneaux, cible, trone, carquois, barriere, poteau, rambarde, BOIS };
 })();

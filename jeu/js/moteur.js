@@ -366,6 +366,7 @@ const Jeu = (() => {
   // ------------------------------------------------------------ dessin
   const LUM = {
     lamp: '#ffc874', halo: '#ffe2a0', shop: '#ffb05a', win: '#ffc66a', neon: '#cfe6ff', tree: '#ffd58a', xmas: '#ffdf9a', boat: '#ffc870', rose: '#ff7ab8',
+    feu: '#ffa048', luciole: '#e8ff90',
   };
   const lumCache = {};
   function sprLum(r, k) {
@@ -378,7 +379,8 @@ const Jeu = (() => {
     g.fillStyle = gr; g.fillRect(0, 0, r * 2, r * 2);
     return (lumCache[key] = c);
   }
-  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb', foret: '#f6ecd6' };
+  // crepuscule : la forêt en fin de journée, plus claire que la rue le soir, avec les mêmes lumières chaudes
+  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb', foret: '#f6ecd6', crepuscule: '#c7a9c3' };
 
   let eauTiles = null;
   function tuilesEau() {
@@ -456,13 +458,13 @@ const Jeu = (() => {
     lg.setTransform(1, 0, 0, 1, 0, 0);
     lg.globalCompositeOperation = 'source-over';
     lg.fillStyle = AMB[amb]; lg.fillRect(0, 0, V.w, V.h);
-    if (amb === 'soir') {
+    if (amb === 'soir' || amb === 'crepuscule') {
       lg.globalCompositeOperation = 'lighter';
       lg.setTransform(1, 0, 0, 1, -cx, -cy);
       for (let i = 0; i < carte.lumieres.length; i++) {
         const L = carte.lumieres[i];
         if (L.x + L.r < cx || L.x - L.r > cx + V.w || L.y + L.r < cy || L.y - L.r > cy + V.h) continue;
-        const fl = L.k === 'lamp' ? Math.sin(t * 9 + i) * 0.6 : 0;
+        const fl = L.k === 'lamp' ? Math.sin(t * 9 + i) * 0.6 : L.k === 'feu' ? Math.sin(t * 13 + i) * 2 + Math.sin(t * 7.3) * 1.5 : 0;
         const r = Math.round(L.r + fl);
         lg.globalAlpha = L.k === 'win' ? 0.55 : 0.8;
         lg.drawImage(sprLum(r, L.k), Math.round(L.x - r), Math.round(L.y - r));
@@ -475,9 +477,9 @@ const Jeu = (() => {
       g.globalCompositeOperation = 'lighter';
       g.setTransform(1, 0, 0, 1, -cx, -cy);
       for (const L of carte.lumieres) {
-        if (L.k !== 'halo' && L.k !== 'neon' && L.k !== 'xmas' && L.k !== 'rose') continue;
+        if (L.k !== 'halo' && L.k !== 'neon' && L.k !== 'xmas' && L.k !== 'rose' && L.k !== 'feu') continue;
         if (Math.abs(L.x - cx - V.w / 2) > V.w || Math.abs(L.y - cy - V.h / 2) > V.h) continue;
-        g.globalAlpha = 0.28; const r = L.k === 'halo' ? 12 : 16;
+        g.globalAlpha = 0.28; const r = L.k === 'halo' ? 12 : L.k === 'feu' ? 22 + Math.round(Math.sin(t * 11) * 1.5) : 16;
         g.drawImage(sprLum(r, L.k), Math.round(L.x - r), Math.round(L.y - r));
       }
       for (const e of carte.eaux) for (const L of carte.lumieres) {
@@ -501,6 +503,8 @@ const Jeu = (() => {
     }
     g.globalCompositeOperation = 'source-over';
     g.setTransform(1, 0, 0, 1, 0, 0);
+    // ce qui brille par-dessus l'éclairage (les lucioles de la forêt…)
+    if (carte.apresLumiere) { g.setTransform(1, 0, 0, 1, -cx, -cy); carte.apresLumiere(g, J, sprLum); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; }
     if (amb !== 'interieur') g.drawImage(vignette, 0, 0);
     // bulle « ! » au-dessus d'Ismae quand on peut interagir
     g.setTransform(1, 0, 0, 1, -cx, -cy);

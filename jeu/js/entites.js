@@ -176,7 +176,7 @@ const Entites = (() => {
       const img = poses ? poses[Math.floor(this.poseT * 3) % poses.length]
         : this.marche ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
       const dy = hauteurSaut(this.saut);
-      ombre(g, this.x, this.y, 6);
+      ombre(g, this.x, this.y, this.ombreR || 6);
       // la lance des gardes, tenue dans la main droite (derrière lui quand il s'éloigne)
       const lance = (devant) => {
         if (!this.lance || (this.dir === 'up') === devant) return;
