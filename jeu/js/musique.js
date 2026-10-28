@@ -229,7 +229,7 @@ const Musique = (() => {
   }
   function majMix() {
     if (!ctx) return;
-    const v = volumeVoulu * (0.45 + 0.55 * proximite) * (etouffe ? 0.55 : 1);
+    const v = volumeVoulu * (0.3 + 0.7 * proximite) * (etouffe ? 0.55 : 1);
     bus.gain.setTargetAtTime(v, ctx.currentTime, 0.3);
     filtre.frequency.setTargetAtTime(etouffe ? 650 : 18000, ctx.currentTime, 0.2);
   }

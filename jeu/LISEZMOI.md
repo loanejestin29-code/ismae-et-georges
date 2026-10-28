@@ -11,11 +11,12 @@ image ni aucun son externe.
 - **L'ambiance du dessin animé** : façades anciennes avec balcons en fer forgé, mansardes et
   cheminées qui fument, des chats aux fenêtres, sur les balcons et sur les toits, des affiches de
   concerts de jazz, un club de jazz, la neige, des pigeons qui s'envolent, des réverbères.
-- **Les chats musiciens** sur la petite place : contrebasse, piano, trompette (Charlie, le chef),
-  batterie et clarinette. Ils bougent en rythme et on peut parler à chacun d'eux.
+- **Les chats musiciens** sur la placette des Matous, cachée derrière les immeubles : contrebasse,
+  piano, trompette (Charlie, le chef), batterie et clarinette. Ils bougent en rythme et on peut
+  parler à chacun d'eux.
 - **La musique** : un morceau de jazz original joué en direct (piano, contrebasse, trompette,
-  clarinette, batterie aux balais). Il est plus fort près de la scène et étouffé dans la supérette.
-  Le bouton ♪ en haut à droite coupe le son.
+  clarinette, batterie aux balais). On l'entend à peine en arrivant, de plus en plus fort en
+  approchant de la placette : on peut la suivre. Étouffée dans la supérette. Le bouton ♪ coupe le son.
 - **Des habitants** qui se promènent ou travaillent : Mme Brioche (boulangère), Gaston (livreur),
   Colette, M. Fernand, un peintre dans la cour. Ils s'arrêtent quand Ismae est sur leur chemin.
 - **Ismae** : petits yeux, pas de bouche, silhouette fine (grosse tête ronde, bras et jambes
@@ -26,18 +27,24 @@ image ni aucun son externe.
   2. Quand on se promène dans la rue, Marie, Toulouse et Berlioz passent en courant. Georges les voit
      (bulle « ! ») et part à leur poursuite.
   3. Les chatons et Georges courent plus vite qu'Ismae (même quand il court) : Georges reste bien
-     devant et les guide par la ruelle à côté du café. S'il est vraiment trop loin d'Ismae, il
-     l'attend un instant. Si on part ailleurs, il revient vers Ismae et les chatons attendent dans
-     la cour.
-  4. Dans la cour intérieure, Duchesse arrive. Toulouse fait le dos rond, Georges essaie… et tombe
+     devant et les guide par la première ruelle, celle de l'hôtel. S'il est vraiment trop loin
+     d'Ismae, il l'attend un instant. Si on part ailleurs, il revient vers Ismae et les chatons
+     attendent au jardin.
+  4. Dans le jardin secret, Duchesse arrive. Toulouse fait le dos rond, Georges essaie… et tombe
      sur le dos. Berlioz rit.
-  5. Ismae parle de Tom : Toulouse l'a vu entrer dans la boutique au logo bleu et rouge, tout au
-     bout de la rue, là où les chats jouent du jazz.
-- **La quête de Tom** : après la rencontre, la boulangère, le livreur, Charlie et Duchesse donnent
-  des indices. Il faut traverser toute la rue pour trouver la supérette. On peut aussi y entrer
-  directement sans avoir parlé à personne.
-- **La supérette** : tout au bout de la rue, juste à côté de la place du concert. Petite épicerie
-  rétro (logo seul, aucun texte), enseigne suspendue visible de loin. À l'intérieur, les rayons
+  5. Ismae parle de Tom : Toulouse l'a vu entrer dans une boutique au logo bleu et rouge, sur une
+     placette cachée où les chats jouent du jazz.
+- **La quête de Tom** (sans flèche : il faut parler aux gens) :
+  - Duchesse conseille de demander aux habitants ; M. Fernand dit de suivre la musique.
+  - La boulangère : Tom disparaît derrière la grande porte verte, au bout de la rue (à côté du
+    club de jazz). La colonne d'affiches juste à côté le confirme.
+  - La porte est fermée à clé. Le livreur et le peintre (dans la cour, par la deuxième ruelle)
+    disent que c'est Colette qui a la clé ; elle se promène sur le quai.
+  - Colette prête la clé (seulement une fois la piste de Tom connue) ; on ouvre la porte verte.
+- **La placette des Matous** : derrière la porte verte, un passage mène à une petite place cachée.
+  Les musiciens jouent sur une scène posée juste devant la supérette : il faut passer derrière eux
+  pour atteindre sa porte.
+- **La supérette** : petite épicerie rétro (logo seul, aucun texte). À l'intérieur, les rayons
   forment un labyrinthe façon Pac-Man, sans aucune impasse, prêt pour la future course-poursuite.
 
 ## Tester sur l'iPhone

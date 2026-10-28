@@ -2,8 +2,9 @@
 //  carte-rue.js — ZONE 1 : la rue
 //
 //  Plan (coordonnées en pixels, y vers le bas) :
-//    y   0-300  toits (décor) + cour intérieure + jardin secret
-//    y 290-460  petite place avec le grand sapin (à l'ouest)
+//    y   0-300  toits (décor) + placette des Matous (cachée, à l'ouest) + cour + jardin secret
+//               · placette : les chats musiciens jouent devant la supérette ; on y entre
+//                 seulement par la porte cochère verte de la rue (clé de Colette)
 //    y 460-586  la rue : trottoir nord, chaussée pavée
 //    y 586-704  quai haut : platanes, fontaine, kiosque, bancs
 //    y 704-758  parapet et mur du quai (deux escaliers pour descendre)
@@ -20,10 +21,13 @@ Jeu.enregistrerCarte('rue', () => {
 
   // ---------------------------------------------------------------- SOL
   Sol.toits(P, 0, 0, W, 300, r);
-  // place (ouest)
-  Sol.paves(P, 0, 290, 300, 175, r, { base: ['#8a7f78', '#948880', '#7f766f', '#9a8c80'], hi: '#ada196', lo: '#6c635e', joint: '#544b4a' });
-  P.ellipse(150, 392, 46, 20, '#b4a894'); P.ellipse(150, 392, 43, 18, '#a2967f');
-  for (let a = 0; a < 64; a++) { const t = (a / 64) * Math.PI * 2; P.px(150 + Math.round(Math.cos(t) * 44), 392 + Math.round(Math.sin(t) * 19), '#d6ccb8'); }
+  // placette des Matous (cachée derrière les immeubles de la rue) et son passage
+  const PB = 150, PX0 = 50, PX1 = 420, PSUD = 268; // façades nord, bords ouest / est, limite sud
+  const GX = 280, GW = 40;                           // porte cochère sur la rue
+  Sol.paves(P, PX0, PB - 2, PX1 - PX0, PSUD - PB + 6, r, { base: ['#8a7f78', '#948880', '#7f766f', '#9a8c80'], hi: '#ada196', lo: '#6c635e', joint: '#544b4a' });
+  Sol.bande(P, PX0, PB, PSUD - PB, 10, 0.5, 'droite'); Sol.bande(P, PX1 - 10, PB, PSUD - PB, 10, 0.5, 'gauche');
+  Sol.paves(P, GX, PSUD - 4, GW, BASE - PSUD + 9, r, { base: ['#5f5b6d', '#666176', '#58546a'], hi: '#7a768c', lo: '#47435a', joint: '#34304a' });
+  Sol.bande(P, GX, PSUD, BASE - PSUD, 12, 0.6, 'droite'); Sol.bande(P, GX + 32, PSUD, BASE - PSUD, 8, 0.4, 'gauche');
   // cour intérieure
   Sol.dalles(P, 520, 160, 240, 140, r);
   Sol.bande(P, 520, 160, 140, 10, 0.5, 'droite'); Sol.bande(P, 750, 160, 140, 10, 0.5, 'gauche');
@@ -91,8 +95,9 @@ Jeu.enregistrerCarte('rue', () => {
   C.eaux.push({ x: 0, y: 860, w: W, h: H - 860 });
 
   // ---------------------------------------------------------------- COLLISIONS DU DÉCOR
-  C.solide(0, 0, 300, 290);
-  C.solide(300, 0, 220, 300); C.solide(760, 0, 340, 300); C.solide(1320, 0, 280, 300);
+  C.solide(0, 0, PX0, 300); C.solide(PX0, 0, PX1 - PX0, 40); C.solide(PX1, 0, 520 - PX1, 300);
+  C.solide(0, PSUD, GX, 50); C.solide(GX + GW, PSUD, 520 - GX - GW, 50); // dos des immeubles de la rue
+  C.solide(760, 0, 340, 300); C.solide(1320, 0, 280, 300);
   C.solide(520, 0, 240, 162); C.solide(1100, 0, 220, 160);
   C.solide(0, 702, 360, 58); C.solide(392, 702, 848, 58); C.solide(1272, 702, 328, 58);
   C.solide(0, 850, W, H - 850);
@@ -102,17 +107,20 @@ Jeu.enregistrerCarte('rue', () => {
   const B = (o) => Batiments.building(o);
   const bats = {};
   const poser = (cle, b, x, base) => { C.batiment(b, x, base); bats[cle] = { b, x, top: base - b.h, base }; };
-  // place
-  poser('pharmacie', B({ w: 150, facade: 'creme', boutique: 'pharmacie', seed: 31 }), 0, 290);
-  poser('atelier', B({ w: 150, facade: 'ocre', style: 'ancien', etages: 4, boutique: 'atelier', volets: '#3f6d8e', lierre: 'gauche', seed: 33 }), 150, 290);
+  // placette des Matous : la supérette au fond, juste derrière la scène des musiciens
+  poser('placeOuest', B({ w: 120, facade: 'ocre', style: 'ancien', etages: 2, boutique: 'porte', volets: '#3f6d8e', lierre: 'gauche', seed: 71, cheminees: 1 }), PX0, PB);
+  poser('carrefour', B({ w: 130, facade: 'gris', etages: 2, boutique: 'carrefour', seed: 57 }), 170, PB);
+  poser('placeEst', B({ w: 120, facade: 'rose', style: 'ancien', etages: 2, boutique: 'porte', volets: '#7a2a34', seed: 73, cheminees: 1 }), 300, PB);
+  C.zone(178, PB - 12, 114, 14, null, { dialogue: (J) => (J.quete.tom ? 'superetteVitrineTom' : 'superetteVitrine') });
   // cour
   poser('cour1', B({ w: 120, facade: 'ocre', style: 'ancien', etages: 3, boutique: 'porte', volets: '#5f7f5a', seed: 41, cheminees: 1 }), 520, 162);
   poser('cour2', B({ w: 120, facade: 'rose', style: 'ancien', etages: 3, boutique: 'porte', volets: '#8a5a5a', lierre: 'droite', seed: 43, cheminees: 1 }), 640, 162);
-  // la rue (de l'ouest vers l'est)
-  // la supérette est tout au bout, à côté de la place où jouent les chats musiciens ;
-  // Ismae arrive par l'autre bout et traverse le quartier pour la trouver
+  // la rue (de l'ouest vers l'est). Ismae arrive par l'est ; tout au bout, à l'ouest, une porte
+  // cochère verte (entre l'atelier et la maison voisine) mène à la placette cachée
   const rue = [
-    ['carrefour', 300, 130, { facade: 'gris', seed: 57 }],
+    ['pharmacie', 0, 150, { facade: 'creme', seed: 31 }],
+    ['atelier', 150, 130, { facade: 'ocre', style: 'ancien', etages: 4, volets: '#3f6d8e', lierre: 'gauche', seed: 33 }],
+    ['residence', 320, 110, { boutique: 'porte', facade: 'blanc', style: 'ancien', etages: 4, volets: '#5f7f5a', seed: 45 }],
     ['jazzclub', 430, 60, { facade: 'rose', style: 'ancien', etages: 4, volets: '#7a2a34', seed: 58, cheminees: 1 }],
     ['cafe', 490, 110, { facade: 'ocre', seed: 53 }],
     ['fleuriste', 640, 130, { facade: 'rose', seed: 55, etages: 4, lierre: 'droite' }],
@@ -126,26 +134,53 @@ Jeu.enregistrerCarte('rue', () => {
   for (const [type, x, w, o] of rue) {
     const b = B(Object.assign({ w, boutique: type }, o));
     poser(type, b, x, BASE);
-    if (type === 'carrefour') C.zone(x + 8, BASE - 12, w - 16, 14, null, { dialogue: (J) => (J.quete.tom ? 'superetteVitrineTom' : 'superetteVitrine') });
-    else C.zone(x + 8, BASE - 12, w - 16, 14, type);
+    C.zone(x + 8, BASE - 12, w - 16, 14, type);
     b.ampoules.forEach(([bx, by]) => C.scintille.push([x + bx, BASE - b.h + by]));
     // guirlande lumineuse sous l'enseigne
-    if (type !== 'carrefour' && type !== 'jazzclub') {
+    if (type !== 'jazzclub') {
       const gl = Objets.guirlande(w - 8, 4);
       C.dessusImg(gl.img, x + 4, BASE - 50);
       gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + 4 + bx, BASE - 50 + by]));
     }
   }
-  C.zone(10, 278, 130, 14, 'pharmacie'); C.zone(250, 278, 40, 14, 'atelier');
+
+  // ---------------------------------------------------------------- PORTE COCHÈRE VERTE (vers la placette)
+  // fermée à clé : il faut d'abord la piste de Tom, puis la clé que prête Colette sur le quai
+  const porche = Objets.porche();
+  C.objet(porche, GX, BASE, { dy: 0.2 });
+  C.solide(GX, BASE - 8, 5, 10); C.solide(GX + GW - 5, BASE - 8, 5, 10);
+  const verrou = { x: GX, y: BASE - 8, w: GW, h: 10 };
+  C.solides.push(verrou);
+  const OX = GX - porche.ax + porche.ouv.x, OY = BASE - porche.ay + porche.ouv.y;
+  C.dynamiques.push({
+    ouvert: 0, sortY: BASE + 0.1,
+    update(dt, J) {
+      const voulu = J.quete.porteOuverte ? 1 : 0;
+      this.ouvert = Math.max(0, Math.min(1, this.ouvert + (voulu ? dt * 0.8 : -dt)));
+      verrou.w = this.ouvert > 0.5 ? 0 : GW;
+    },
+    draw(g) { Objets.vantaux(g, OX, OY, porche, this.ouvert); },
+  });
+  C.zone(GX + 4, BASE - 10, GW - 8, 16, null, {
+    dialogue: (J) => {
+      const Q = J.quete;
+      if (Q.porteOuverte) return 'porcheOuvert';
+      if (!Q.cle) return Q.tom ? 'porcheFermeTom' : 'porcheFerme';
+      Q.porteOuverte = true; Musique.porte();
+      return 'porcheOuverture';
+    },
+  });
+  C.objet(Objets.lanterneMurale(), GX + 20, BASE - 60, { dy: 60.3 });
+  C.lumiere(GX + 20, BASE - 64, 34, 'lamp'); C.lumiere(GX + 20, PSUD + 30, 46, 'xmas');
 
   // ---------------------------------------------------------------- SUPÉRETTE : portes vitrées qui s'ouvrent seules
   const sup = bats.carrefour, door = sup.b.door;
   const DX = sup.x + door.x, DY = sup.top + door.y, DW = door.w, DH = door.h;
   const portes = {
-    ouvert: 0, sortY: BASE + 0.5, son: false,
+    ouvert: 0, sortY: PB + 0.5, son: false,
     update(dt, J) {
       const p = J.joueur;
-      const pres = Math.abs(p.x - (DX + DW / 2)) < 26 && p.y < BASE + 34;
+      const pres = Math.abs(p.x - (DX + DW / 2)) < 26 && p.y < PB + 34;
       if (pres && this.ouvert === 0) Musique.porte();
       this.ouvert = Math.max(0, Math.min(1, this.ouvert + (pres ? dt * 3 : -dt * 2.2)));
     },
@@ -163,19 +198,19 @@ Jeu.enregistrerCarte('rue', () => {
     },
   };
   C.dynamiques.push(portes);
-  C.porte(DX + 2, BASE - 8, DW - 4, 14, 'superette', 'entree', 'up');
+  C.porte(DX + 2, PB - 8, DW - 4, 14, 'superette', 'entree', 'up');
   C.portes[C.portes.length - 1].condition = () => portes.ouvert > 0.6;
-  C.arrivees.devantSuperette = { x: DX + DW / 2, y: BASE + 16, dir: 'down' };
-  P.rect(DX + 1, BASE + 1, DW - 2, 6, '#7a2a2e'); P.hline(DX + 1, BASE + 1, DW - 2, '#a8484a');
-  for (let x = DX + 2; x < DX + DW - 2; x += 3) P.px(x, BASE + 4, '#c9a040');
+  C.arrivees.devantSuperette = { x: DX + DW / 2, y: PB + 16, dir: 'down' };
+  P.rect(DX + 1, PB + 1, DW - 2, 6, '#7a2a2e'); P.hline(DX + 1, PB + 1, DW - 2, '#a8484a');
+  for (let x = DX + 2; x < DX + DW - 2; x += 3) P.px(x, PB + 4, '#c9a040');
 
   // ---------------------------------------------------------------- MOBILIER
   const lampe = (x, y) => {
     C.objet(Objets.lampadaire(), x, y, { solide: [-3, -3, 6, 4], ombre: [5, 2], lumiere: false });
     C.lumiere(x, y - 6, 74, 'lamp'); C.lumiere(x, y - 50, 10, 'halo');
   };
-  [312, 708, 1090, 1470].forEach((x) => lampe(x, 486));
-  [40, 262].forEach((x) => lampe(x, 452));
+  [342, 708, 1090, 1470].forEach((x) => lampe(x, 486));
+  [64, 406].forEach((x) => lampe(x, 252));
   [140, 520, 900, 1330].forEach((x) => lampe(x, 598));
   [300, 720, 1100, 1500].forEach((x) => lampe(x, 698));
   // platanes illuminés le long du quai
@@ -185,29 +220,32 @@ Jeu.enregistrerCarte('rue', () => {
     C.lumiere(x, 600, 42, 'tree');
   });
 
-  // ---------------------------------------------------------------- LA PLACE : scène des chats musiciens
-  const SX = 92, SW = 150, SBASE = 338;
+  // ---------------------------------------------------------------- LA PLACETTE : scène des chats musiciens
+  // la scène est posée devant la supérette : on passe derrière les musiciens pour atteindre sa porte
+  const SX = 160, SW = 150, SBASE = 222;
   C.objet(Objets.scene(SW, 30), SX, SBASE, {});
-  C.solide(SX, 290, SW, SBASE - 290);
-  C.objet(Objets.banderole('MATOUS SWING'), SX + 22, 302, { dy: -1 });
-  const gs = Objets.guirlande(SW, 9); C.dessusImg(gs.img, SX, 280); gs.bulbs.forEach(([bx, by]) => C.scintille.push([SX + bx, 280 + by]));
-  C.lumiere(SX + 40, 318, 64, 'lamp'); C.lumiere(SX + 110, 318, 64, 'lamp'); C.lumiere(SX + 75, 300, 30, 'xmas');
+  C.solide(SX, SBASE - 34, SW, 34);
+  C.objet(Objets.banderole('MATOUS SWING'), SX + 22, SBASE - 36, { dy: -1 });
+  const gs = Objets.guirlande(SW, 9); C.dessusImg(gs.img, SX, SBASE - 58); gs.bulbs.forEach(([bx, by]) => C.scintille.push([SX + bx, SBASE - 58 + by]));
+  C.lumiere(SX + 40, SBASE - 20, 64, 'lamp'); C.lumiere(SX + 110, SBASE - 20, 64, 'lamp'); C.lumiere(SX + 75, SBASE - 38, 30, 'xmas');
   C.sourceMusique = { x: SX + SW / 2, y: SBASE };
-  const groupe = [['contrebasse', 'contrebasse', 110], ['piano', 'pianiste', 138], ['trompette', 'charlie', 168], ['batterie', 'batteur', 198], ['clarinette', 'clarinette', 226]];
+  const groupe = [['contrebasse', 'contrebasse', SX + 18], ['piano', 'pianiste', SX + 46], ['trompette', 'charlie', SX + 76], ['batterie', 'batteur', SX + 106], ['clarinette', 'clarinette', SX + 134]];
   groupe.forEach(([type, id, x], i) => {
-    const m = new Entites.Musicien({ type, id, x, y: 326, sortYFixe: SBASE + 1 + i * 0.01, decalage: i * 0.13 });
+    const m = new Entites.Musicien({ type, id, x, y: SBASE - 12, sortYFixe: SBASE + 1 + i * 0.01, decalage: i * 0.13 });
     m.dialogue = (J) => Scenes.repliques(id, J);
     m.zone = () => ({ x: m.x - 12, y: SBASE - 6, w: 24, h: 16, dialogue: m.dialogue });
     C.pnj.push(m);
   });
   C.zone(SX + 4, SBASE - 6, 14, 16, 'scene');
-  // sapin et bancs de la place
-  C.objet(Objets.grandSapin(9), 42, 404, { solide: [-12, -6, 24, 8], ombre: [16, 4], texte: 'sapin', zw: 36, zh: 18 });
-  C.lumiere(42, 374, 80, 'tree'); C.lumiere(42, 340, 18, 'xmas');
-  for (const [x, y] of [[118, 448], [226, 448]]) C.objet(Objets.banc(), x, y, { solide: [-13, -6, 26, 6], ombre: [13, 2] });
-  C.objet(Objets.chevaletAffiche(3, 'JAZZ'), 268, 362, { solide: [-9, -3, 18, 4], ombre: [9, 2], texte: 'affiche', zw: 20 });
-  C.objet(Objets.colonneAffiches(5), 286, 482, { solide: [-10, -5, 20, 6], ombre: [11, 3], texte: 'colonne', zw: 22 });
-  C.objet(Objets.pot(3, 'sapin'), 46, 300, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
+  // sapin, bancs et caisses de livraison sur la placette
+  C.objet(Objets.grandSapin(9), 98, 262, { solide: [-12, -6, 24, 8], ombre: [16, 4], texte: 'sapin', zw: 36, zh: 18 });
+  C.lumiere(98, 232, 80, 'tree'); C.lumiere(98, 198, 18, 'xmas');
+  for (const [x, y] of [[140, 266], [372, 266]]) C.objet(Objets.banc(), x, y, { solide: [-13, -6, 26, 6], ombre: [13, 2] });
+  C.objet(Objets.chevaletAffiche(3, 'JAZZ'), 396, 214, { solide: [-9, -3, 18, 4], ombre: [9, 2], texte: 'affiche', zw: 20 });
+  C.objet(Objets.pot(3, 'sapin'), 160, 158, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
+  C.objet(Objets.caisses(11), 400, 172, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
+  // sur la rue, une colonne d'affiches juste avant la porte verte
+  C.objet(Objets.colonneAffiches(5), 252, 482, { solide: [-10, -5, 20, 6], ombre: [11, 3], texte: 'colonne', zw: 22 });
 
   // ---------------------------------------------------------------- DEVANTURES
   [[508, 478], [548, 476], [586, 478]].forEach(([x, y], i) => {
@@ -217,8 +255,6 @@ Jeu.enregistrerCarte('rue', () => {
   });
   C.objet(Objets.etalFleurs(7), 700, 479, { solide: [-15, -6, 30, 7], ombre: [15, 2], texte: 'fleuriste', zw: 30 });
   C.objet(Objets.pot(8), 652, 476, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
-  C.objet(Objets.caisses(11), 316, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
-  C.objet(Objets.caisses(12), 414, 480, { solide: [-10, -6, 20, 7], ombre: [11, 2] });
   C.objet(Objets.chevaletAffiche(8, 'CLUB'), 478, 486, { solide: [-9, -3, 18, 4], ombre: [9, 2], texte: 'jazzclub', zw: 20 });
   C.objet(Objets.velo(), 1146, 480, { solide: [-11, -3, 22, 4], ombre: [11, 2], texte: 'velo', zw: 24 });
   C.objet(Objets.pot(13, 'sapin'), 1272, 474, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
@@ -275,7 +311,7 @@ Jeu.enregistrerCarte('rue', () => {
   C.lumiere(1210, 220, 70, 'xmas'); C.lumiere(1205, 140, 30, 'lamp');
   C.objet(Objets.lanterneMurale(), 1218, 130, { dy: 40 });
   for (const ax of [600, 1180]) { C.objet(Objets.lanterneMurale(), ax + 4, 330, { dy: 140 }); C.lumiere(ax + 6, 330, 40, 'lamp'); C.lumiere(ax + 4, 326, 6, 'halo'); }
-  C.zoneRencontre = { x: 520, y: 162, w: 240, h: 128 }; // la cour intérieure
+  C.zoneRencontre = { x: 1100, y: 160, w: 220, h: 140 }; // le jardin secret (par la ruelle de l'hôtel)
 
   // ---------------------------------------------------------------- CHATS AUX FENÊTRES ET SUR LES TOITS
   const robes = ['blanc', 'roux', 'gris', 'tigre', 'siamois', 'smoking', 'matou'];
@@ -284,6 +320,7 @@ Jeu.enregistrerCarte('rue', () => {
     ['fromagerie', 2, 'assis'], ['cafe', 1, 'dort'], ['cafe', 6, 'assis'], ['fleuriste', 3, 'cote'], ['carrefour', 9, 'assis'],
     ['jazzclub', 2, 'assis'], ['boulangerie', 4, 'dort'], ['librairie', 5, 'assis'], ['hotel', 10, 'assis'], ['hotel', 3, 'cote'],
     ['patisserie', 1, 'assis'], ['antiquaire', 4, 'dort'], ['pharmacie', 7, 'assis'], ['atelier', 2, 'cote'], ['cour1', 4, 'assis'], ['cour2', 1, 'dort'],
+    ['placeEst', 2, 'assis'], ['placeOuest', 3, 'cote'], ['residence', 4, 'dort'],
   ];
   fenetres.forEach(([cle, idx, mode], k) => {
     const bt = bats[cle], f = bt.b.fenetres[idx % bt.b.fenetres.length];
@@ -298,9 +335,9 @@ Jeu.enregistrerCarte('rue', () => {
   const toit = (cle) => bats[cle].top + 16 + (bats[cle].b.h > 200 ? 9 : 6);
   C.pnj.push(
     new Entites.ChatPNJ({ nom: 'gris', x: 540, y: toit('cafe'), mode: 'promeneur', x1: 500, x2: 590, texte: 'chatToits', sortYFixe: BASE + 1, zoneFixe: [0, 0, 0, 0] }),
-    new Entites.ChatPNJ({ nom: 'roux', x: 340, y: toit('carrefour'), mode: 'promeneur', x1: 310, x2: 420, sortYFixe: BASE + 1 }),
+    new Entites.ChatPNJ({ nom: 'roux', x: 235, y: toit('carrefour'), mode: 'promeneur', x1: 185, x2: 290, sortYFixe: PB + 1 }),
     new Entites.ChatPNJ({ nom: 'smoking', x: 1300, y: toit('hotel'), mode: 'promeneur', x1: 1230, x2: 1350, sortYFixe: BASE + 1 }),
-    new Entites.ChatPNJ({ nom: 'blanc', x: 60, y: bats.pharmacie.top + 25, mode: 'cote', sortYFixe: 291 }),
+    new Entites.ChatPNJ({ nom: 'blanc', x: 60, y: bats.pharmacie.top + 25, mode: 'cote', sortYFixe: BASE + 1 }),
     new Entites.ChatPNJ({ nom: 'tigre', x: 1010, y: toit('boulangerie'), mode: 'dort', sortYFixe: BASE + 1 }),
   );
   // chats des recoins
@@ -323,7 +360,7 @@ Jeu.enregistrerCarte('rue', () => {
     },
   });
   for (let k = 0; k < 6; k++) C.pnj.push(new Entites.Pigeon(500 + Math.random() * 120, 615 + Math.random() * 60, [480, 610, 160, 70]));
-  for (let k = 0; k < 4; k++) C.pnj.push(new Entites.Pigeon(110 + Math.random() * 120, 370 + Math.random() * 40, [100, 365, 140, 50]));
+  for (let k = 0; k < 4; k++) C.pnj.push(new Entites.Pigeon(70 + Math.random() * 80, 236 + Math.random() * 20, [64, 230, 90, 30]));
 
   // ---------------------------------------------------------------- HABITANTS
   const habitant = (o) => { const h = new Entites.Passant(Object.assign({ dialogue: (J) => Scenes.repliques(o.id, J) }, o)); C.pnj.push(h); return h; };
@@ -332,7 +369,9 @@ Jeu.enregistrerCarte('rue', () => {
   habitant({ id: 'livreur', x: 340, y: 498, vitesse: 26,
     chemin: [{ x: 700, y: 498, pause: 2, regard: 'up' }, { x: 1040, y: 498, pause: 1.5, regard: 'up' }, { x: 340, y: 498, pause: 2, regard: 'left' }],
     cfg: { peau: '#d8a07a', cheveux: '#2a2020', coiffure: 'court', barbe: 'aucune', yeux: '#2a1d2e', chapeau: 'casquette', couleurChapeau: '#4a5a7a', ruban: '#2a3a5a', veste: '#5a7a5a', echarpe: '#e8c84a', pantalon: '#4a4a5a', chaussures: '#3a2a22' } });
+  // Colette prête la clé de la porte verte, une fois qu'Ismae cherche Tom
   habitant({ id: 'colette', x: 140, y: 614, vitesse: 18,
+    dialogue: (J) => { const l = Scenes.repliques('colette', J); if (J.quete.tom) J.quete.cle = true; return l; },
     chemin: [{ x: 560, y: 614, pause: 3, regard: 'up' }, { x: 820, y: 614, pause: 2.5, regard: 'up' }, { x: 1450, y: 614, pause: 2, regard: 'down' }, { x: 140, y: 614, pause: 2, regard: 'down' }],
     cfg: { peau: '#f2cdb0', cheveux: '#c8823a', coiffure: 'chignon', barbe: 'aucune', yeux: '#3a5a8a', chapeau: 'capeline', couleurChapeau: '#6a4a8a', ruban: '#e8b54a', fleur: '#ff9ac0', veste: '#4a5aa0', echarpe: '#f0e0d0', coupe: 'robe', pantalon: '#3a3a6a', chaussures: '#2a2026' } });
   habitant({ id: 'fernand', x: 1110, y: 514, vitesse: 11,
@@ -344,7 +383,7 @@ Jeu.enregistrerCarte('rue', () => {
   // ---------------------------------------------------------------- DUCHESSE ET LES CHATONS (cachés jusqu'à l'intro)
   const aristo = (o) => { const c = new Entites.ChatScript(Object.assign({ visible: false }, o)); C.pnj.push(c); return c; };
   C.aristochats = {
-    duchesse: aristo({ nom: 'duchesse', adulte: true, x: 580, y: 166, dir: 'down', vitesse: 30 }),
+    duchesse: aristo({ nom: 'duchesse', adulte: true, x: 1205, y: 164, dir: 'down', vitesse: 30 }),
     marie: aristo({ nom: 'marie', x: 0, y: 0 }),
     toulouse: aristo({ nom: 'toulouse', x: 0, y: 0 }),
     berlioz: aristo({ nom: 'berlioz', x: 0, y: 0 }),

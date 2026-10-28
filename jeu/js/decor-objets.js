@@ -352,6 +352,58 @@ const Objets = (() => {
     return { img: c, ax: 3, ay: 9 };
   }
 
+  // porche en pierre entre deux immeubles : arche ouverte (transparente) où se loge une porte cochère.
+  // ouv = l'ouverture { x, y, w, h } dans l'image, demi(j) = demi-largeur de l'arche à la ligne j
+  function porche() {
+    const W = 48, H = 72, { c, P } = mk(W, H);
+    const pierre = '#cfc3ab', clair = '#e4dac4', sombre = '#a4977f', joint = '#867a66';
+    const ouv = { x: 9, y: H - 44, w: 30, h: 44 };
+    const R = 8, demi = (j) => (j >= R ? 15 : Math.round(15 * Math.sqrt(1 - ((R - j) / R) ** 2)));
+    P.rect(0, 0, W, H, pierre);
+    for (let y = 6, k = 0; y < H; y += 6, k++) {
+      P.hline(0, y, W, joint);
+      for (let x = (k % 2) * 6 + 2; x < W; x += 12) P.vline(x, y + 1, 5, joint);
+    }
+    // corniche, chaînages d'angle plus clairs
+    P.rect(0, 0, W, 3, clair); P.hline(0, 3, W, sombre); P.hline(0, 4, W, joint);
+    for (let y = 8; y < H; y += 12) { P.rect(0, y, 4, 5, clair); P.rect(W - 4, y + 6, 4, 5, clair); }
+    // claveaux autour de l'arche et clé de voûte
+    for (let j = -3; j < 10; j++) {
+      const hw = demi(Math.max(0, j)) + 3;
+      P.hline(ouv.x + 15 - hw, ouv.y + j, 3, j % 3 ? clair : sombre); P.hline(ouv.x + 15 + hw - 3, ouv.y + j, 3, j % 3 ? clair : sombre);
+    }
+    P.rect(ouv.x + 12, ouv.y - 5, 6, 7, clair); P.hline(ouv.x + 12, ouv.y + 1, 6, sombre);
+    // piédroits ombrés et seuil
+    P.rect(ouv.x - 2, ouv.y + R, 2, ouv.h - R, sombre); P.rect(ouv.x + ouv.w, ouv.y + R, 2, ouv.h - R, sombre);
+    P.rect(ouv.x - 3, H - 2, ouv.w + 6, 2, sombre);
+    // l'ouverture elle-même est vide : on voit le passage (ou les battants) au travers
+    const g = c.getContext('2d');
+    for (let j = 0; j < ouv.h - 2; j++) { const hw = demi(j); g.clearRect(ouv.x + 15 - hw, ouv.y + j, hw * 2, 1); }
+    return { img: c, ax: 4, ay: H - 1, ouv, demi };
+  }
+
+  // les deux battants verts de la porte cochère, dessinés dans l'arche (ouvert : 0 = fermé, 1 = ouvert)
+  function vantaux(g, X, Y, def, ouvert) {
+    const { w, h } = def.ouv, moitie = w / 2;
+    const lw = Math.max(2, Math.round(moitie * (1 - 0.84 * ouvert)));
+    const bois = '#2f6a4f', fonce = '#1d4433', clair = '#4f8f6c', fer = '#22252e';
+    for (let j = 0; j < h - 2; j++) {
+      const hw = def.demi(j), a = X + moitie - hw, b = X + moitie + hw;
+      for (const [x0, sens] of [[X, 1], [X + w - lw, -1]]) {
+        for (let x = Math.max(a, x0); x < Math.min(b, x0 + lw); x++) {
+          // u = position dans le battant vu de face (0 au gond, 15 au milieu de la porte)
+          const u = Math.floor(((sens > 0 ? x - x0 : x0 + lw - 1 - x) / lw) * moitie);
+          let col = u % 5 === 4 ? fonce : bois;
+          if (j === 14 || j === 15 || j === 32 || j === 33) col = u % 4 === 1 ? '#c9a040' : fer;
+          if (u === moitie - 1 && ouvert < 0.1) col = fonce;
+          if (u === 0) col = clair;
+          g.fillStyle = col; g.fillRect(x, Y + j, 1, 1);
+        }
+      }
+    }
+    if (ouvert < 0.1) { g.fillStyle = '#d8b050'; g.fillRect(X + moitie - 3, Y + 24, 2, 2); g.fillRect(X + moitie + 1, Y + 24, 2, 2); }
+  }
+
   // corde à linge en surplomb (entre deux façades)
   function linge(w, seed) {
     const r = PX.rng(seed);
@@ -491,6 +543,6 @@ const Objets = (() => {
   return {
     FONTE, line, lampadaire, platane, arbreFeuillu, banc, fontaine, colonneAffiches, kiosque, tableCafe, chaiseBistrot,
     etalFleurs, boiteBouquiniste, borne, caisses, poubelles, velo, pompe, barriere, pot, lanterneMurale, linge, guirlande, peniche, grandSapin,
-    voiture, barque, echelle, tonneau, chevaletAffiche, scene, banderole, chevaletPeintre,
+    voiture, barque, echelle, tonneau, chevaletAffiche, scene, banderole, chevaletPeintre, porche, vantaux,
   };
 })();

@@ -286,10 +286,10 @@ const Jeu = (() => {
         majDialogue();
       }
     }
-    // la musique est plus forte près de la scène des chats musiciens
+    // la musique est plus forte près de la scène des chats musiciens (on peut la suivre dans la rue)
     if (carte.sourceMusique) {
       const d = Math.hypot(p.x - carte.sourceMusique.x, p.y - carte.sourceMusique.y);
-      Musique.proximite(Math.max(0, Math.min(1, 1 - (d - 60) / 380)));
+      Musique.proximite(Math.max(0, Math.min(1, 1 - (d - 60) / 640)));
     } else Musique.proximite(0);
     if (!J.bloque()) verifierPortes();
     if (transition) {

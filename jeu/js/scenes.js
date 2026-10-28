@@ -3,32 +3,36 @@
 //
 //  1. Ismae et Georges arrivent ; on explore librement.
 //  2. Trois chatons passent en courant ; Georges les voit (« ! ») et les suit.
-//  3. Georges guide Ismae jusqu'à la cour intérieure, bien devant lui.
+//  3. Georges guide Ismae par la première ruelle (celle de l'hôtel) jusqu'au jardin secret.
 //  4. Duchesse arrive ; Toulouse fait le dos rond ; Georges essaie… et tombe.
-//  5. Premier indice : Tom est entré dans la boutique au logo bleu et rouge.
-//  Ensuite, les habitants et les musiciens donnent d'autres indices.
+//  5. Premier indice : Tom travaille dans une boutique au logo bleu et rouge, sur une
+//     placette cachée où jouent les chats musiciens.
+//  Ensuite on interroge les habitants : la placette est derrière la porte verte, au bout
+//  de la rue, et c'est Colette (sur le quai) qui en a la clé.
 // =====================================================================
 'use strict';
 
 const Scenes = (() => {
-  const Q = { intro: 'attente', tom: false, entreeSuperette: false };
+  const Q = { intro: 'attente', tom: false, cle: false, porteOuverte: false, entreeSuperette: false };
   let temps = 0, parcouru = 0, avant = null, attenteLoin = 0, appel = 0;
-  // positions finales dans la cour intérieure (par la ruelle à côté du café)
+  // positions finales dans le jardin secret (par la ruelle de l'hôtel, la première depuis l'arrivée)
   const FIN = {
-    marie: { x: 618, y: 204 }, toulouse: { x: 636, y: 220 }, berlioz: { x: 610, y: 230 },
-    georges: { x: 666, y: 222 }, duchesse: { x: 600, y: 198 },
+    marie: { x: 1180, y: 210 }, toulouse: { x: 1198, y: 224 }, berlioz: { x: 1170, y: 230 },
+    georges: { x: 1228, y: 226 }, duchesse: { x: 1236, y: 200 },
   };
-  const ALLEE_X = 620;
+  const ALLEE_X = 1200;
   const VITESSE_CHATONS = 140;
 
   // réplique d'un personnage selon l'avancée de la quête
   function repliques(id, J) {
     const r = CONFIG.repliques[id];
     if (!r) return null;
-    return ((J || Jeu).quete.tom && r.apres) ? r.apres : (r.avant || r.apres);
+    const q = (J || Jeu).quete;
+    if (q.cle && r.cle) return r.cle;
+    return (q.tom && r.apres) ? r.apres : (r.avant || r.apres);
   }
 
-  // chemin des chatons : le long de la rue, puis la ruelle du café jusqu'à la cour
+  // chemin des chatons : le long de la rue, puis la ruelle de l'hôtel jusqu'au jardin
   function cheminVers(depart, voie, fin, decal) {
     return [
       { x: depart.x, y: voie }, { x: ALLEE_X + decal, y: voie }, { x: ALLEE_X + decal, y: 470 },
@@ -39,16 +43,19 @@ const Scenes = (() => {
   function lancerChatons(J) {
     const p = J.joueur, A = J.carte.aristochats;
     const voie = p.y < 586 ? Math.max(500, Math.min(560, p.y + 24)) : 612;
-    const x0 = Math.min(1540, p.x + 170);
+    // ils arrivent toujours de l'autre côté d'Ismae par rapport à la ruelle, pour passer devant lui
+    const est = p.x > ALLEE_X + 30, sens = est ? 1 : -1;
+    const x0 = est ? Math.min(1560, p.x + 170) : Math.max(40, p.x - 170);
     ['marie', 'toulouse', 'berlioz'].forEach((nom, i) => {
       const k = A[nom];
-      k.visible = true; k.x = x0 + i * 18; k.y = voie + [0, -6, 6][i]; k.dir = 'left';
+      k.visible = true; k.x = x0 + sens * i * 18; k.y = voie + [0, -6, 6][i]; k.dir = est ? 'left' : 'right';
       k.allerVers(cheminVers({ x: k.x, y: k.y }, voie + [0, -6, 6][i], FIN[nom], [0, -8, 8][i]), VITESSE_CHATONS);
     });
     Musique.miaou(1.5, 0.08);
     Q.intro = 'chatons';
     Q.voie = voie;
     Q.vu = 0;
+    Q.depuisEst = est;
   }
 
   function lancerPoursuite(J) {
@@ -60,7 +67,7 @@ const Scenes = (() => {
   }
 
   function abandonnerPoursuite(J) {
-    // Ismae n'a pas suivi : Georges revient vers lui, les chatons filent à la cour
+    // Ismae n'a pas suivi : Georges revient vers lui, les chatons filent au jardin
     J.georges.reprendreSuivi(J);
     J.georges.surprendre('?');
     Q.intro = 'chatonsPartis';
@@ -78,7 +85,7 @@ const Scenes = (() => {
     G.allerVers([FIN.georges], 60);
     J.jouerScript([
       { jusqua: () => !G.chemin || !G.chemin.length },
-      { faire: () => { G.dir = 'left'; D.visible = true; D.x = 580; D.y = 166; D.allerVers([{ x: 580, y: 184 }, FIN.duchesse], 32); Musique.miaou(0.9, 0.1); } },
+      { faire: () => { G.dir = 'left'; D.visible = true; D.x = 1205; D.y = 164; D.allerVers([{ x: 1205, y: 186 }, FIN.duchesse], 32); Musique.miaou(0.9, 0.1); } },
       { jusqua: () => !D.chemin },
       { faire: () => { D.dir = 'down'; } },
       { dire: lignes.accueil },
@@ -116,12 +123,13 @@ const Scenes = (() => {
 
     if (Q.intro === 'attente') {
       // les chatons passent quand on se promène dans la rue ou sur le quai
-      const surLaRue = p.y > 466 && p.y < 700 && p.x > 760 && p.x < 1500;
+      const surLaRue = p.y > 466 && p.y < 700 && p.x > 40 && p.x < 1560;
       if (temps > 5 && parcouru > 50 && surLaRue && !J.bloque()) lancerChatons(J);
     } else if (Q.intro === 'chatons') {
-      // Georges réagit quand les chatons arrivent à sa hauteur
-      const k = A.marie;
-      if (Math.abs(k.x - G.x) < 60 || k.x < G.x) lancerPoursuite(J);
+      // Georges réagit quand les chatons arrivent à sa hauteur (ou s'ils tournent déjà dans la ruelle)
+      const k = A.marie, passe = Q.depuisEst ? k.x < G.x : k.x > G.x;
+      Q.vu += dt;
+      if (Math.abs(k.x - G.x) < 60 || passe || k.y < Q.voie - 20 || Q.vu > 3) lancerPoursuite(J);
     } else if (Q.intro === 'surpris') {
       Q.vu -= dt;
       if (Q.vu <= 0) {
@@ -143,7 +151,7 @@ const Scenes = (() => {
       const d = Math.hypot(p.x - G.x, p.y - G.y);
       attenteLoin = d > 340 ? attenteLoin + dt : 0;
       if (attenteLoin > 10) abandonnerPoursuite(J);
-      // arrivé dans la cour, Georges appelle Ismae de temps en temps
+      // arrivé au jardin, Georges appelle Ismae de temps en temps
       if (!G.chemin || !G.chemin.length) {
         appel -= dt;
         if (d > 70 && appel < 0) { appel = 3; G.surprendre('!'); Musique.miaou(1.05, 0.07); }
