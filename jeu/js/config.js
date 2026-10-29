@@ -48,14 +48,15 @@ const CONFIG = {
     pantalon: '#2c2b38', chaussures: '#3a3846', semelles: '#d8d6e0',
   },
   loane: {
-    modele: 'loane',           // cheveux longs, manteau rouge, jupe, collants, bottines
+    modele: 'loane',           // chignon, frange ; polaire Carrefour (dessin dans characters.js)
     peau: '#f0c4a4',
     cheveux: '#5a3424',
-    veste: '#b8323c', reflets: '#d0505a', zips: '#e0646c', // manteau
-    tshirt: '#f2e6d0',         // pull crème
-    pantalon: '#2e2a3e',       // jupe
-    collants: '#3a2c3c',
-    chaussures: '#5a3a2a', semelles: '#2e2026',
+    veste: '#2452c8',          // polaire bleu roi…
+    echarpe: '#18224e',        // …épaules et manches bleu nuit
+    zips: '#0f1530',           // fermeture éclair
+    logo: '#121216',           // logo Carrefour en noir, sur le cœur
+    pantalon: '#2a2931',       // le même pantalon large qu'Ismae
+    chaussures: '#141418', semelles: '#141418', // chaussures toutes noires
   },
 
   // ------------------------------------------------------------------
@@ -98,7 +99,7 @@ const CONFIG = {
     { epreuve: 'Le bisou magique', texte: '(Premier indice à écrire ici)' },
     { epreuve: 'Le tournoi de Sherwood', texte: '(Deuxième indice à écrire ici)' },
     { epreuve: 'Le bonhomme de neige', texte: '(Troisième indice à écrire ici)' },
-    { epreuve: '???', texte: '' },
+    { epreuve: 'En route vers Montaigu', texte: '(Quatrième indice à écrire ici)' },
     { epreuve: '???', texte: '' },
     { epreuve: '???', texte: '' },
   ],
@@ -116,7 +117,7 @@ const CONFIG = {
   vitesseChatons: 120,        // vitesse de Georges pendant la poursuite (plus rapide qu'Ismae qui court ; les chatons encore plus)
   vitesseLoane: 96,           // course-poursuite au Carrefour : Ismae court à 104, Loane un peu moins vite
   // tournoi de tir à l'arc (épreuve 2) : nombre de flèches et score du shérif à battre (il faut faire plus)
-  tournoi: { fleches: 5, scoreSherif: 29 },
+  tournoi: { fleches: 5, scoreSherif: 40 },
 
   // ------------------------------------------------------------------
   //  PERSONNAGES QUI PARLENT (nom affiché + couleur de l'étiquette)
@@ -172,6 +173,7 @@ const CONFIG = {
     marchand: { nom: 'Un marchand', couleur: '#c8a070', bip: 420 },
     patineuse: { nom: 'Une patineuse', couleur: '#a8d0f0', bip: 800 },
     pecheur: { nom: 'Un pêcheur', couleur: '#9ab0c0', bip: 280 },
+    chauffeur: { nom: 'Le chauffeur', couleur: '#7ac8a0', bip: 340 },
   },
 
   // ------------------------------------------------------------------
@@ -232,9 +234,9 @@ const CONFIG = {
     ],
     tournoi: [
       ['sire', 'Messsieurs, mesdames ! Le grand tournoi de Sherwood va commencer !'],
-      ['roi', 'Ah, te voilà. Mon champion, le shérif de Nottingham, a fait 29 points.'],
-      ['sherif', 'Vingt-neuf ! Un record. Personne ne fait mieux.'],
-      ['roi', 'Cinq flèches. Fais plus de 29 points et ton chat est libre.'],
+      ['roi', 'Ah, te voilà. Mon champion, le shérif de Nottingham, a fait 40 points sur 50.'],
+      ['sherif', 'Quarante ! Un record. Personne ne fait mieux.'],
+      ['roi', 'Cinq flèches. Fais plus de 40 points et ton chat est libre.'],
       ['ismae', 'Et si je perds ?'],
       ['roi', 'Alors il deviendra le chat officiel du royaume. Avec une petite couronne. Plus petite que la mienne.'],
       ['sire', 'Chaque flèche se tire en deux temps. D\'abord, vise : arrête le viseur au centre de la cible.'],
@@ -270,7 +272,7 @@ const CONFIG = {
   arendelle: {
     // apparence des personnages (même corps qu'Ismae ; les dessins sont dans persos-neige.js)
     persos: {
-      anna: { peau: '#f2c8a8', cheveux: '#a8502a', yeux: '#3a6ad8', veste: '#b03a6a', reflets: '#c8508a', zips: '#e8b54a', tshirt: '#1d2a3a',
+      anna: { peau: '#f2c8a8', cheveux: '#b0542a', ruban: '#f6f2ee', yeux: '#3a6ad8', veste: '#b03a6a', reflets: '#c8508a', zips: '#e8b54a', tshirt: '#1d2a3a', // ruban = mèche blanche
         pantalon: '#2a5a6a', collants: '#2a2232', chaussures: '#5a3a2a', semelles: '#3a2418' },
       elsa: { peau: '#f6dccc', cheveux: '#f2eedc', yeux: '#3a8ad8', veste: '#7ac8f0', reflets: '#bfe8ff', zips: '#ffffff', pantalon: '#6ab8e8', chaussures: '#bfe8ff' },
       kristoff: { peau: '#e8b890', cheveux: '#e8c870', couleurChapeau: '#3a3446', veste: '#6a5040', reflets: '#8a6a54', zips: '#d8c8a8', tshirt: '#4a3a5a',
@@ -362,6 +364,23 @@ const CONFIG = {
     ],
     apres: [['olaf', 'Le bus pour la suite de ton voyage passe à la sortie d\'Arendelle, au sud-est. Reviens nous voir avec Jack !']],
     busAvant: ['Un arrêt de bus, au milieu de la neige. « Ligne 4 ».', 'Le prochain passage n\'est pas indiqué. Il attend sûrement que le bonhomme de neige soit fini.'],
+  },
+
+  // ------------------------------------------------------------------
+  //  ÉPREUVE 4 — EN ROUTE VERS MONTAIGU (voir bus.js et carte-montaigu.js)
+  // ------------------------------------------------------------------
+  route: {
+    attente: [['ismae', 'Le bus de la ligne 4… J\'ai l\'impression d\'avoir déjà fait ce trajet cent fois.'], 'Un klaxon retentit au bout de la rue.'],
+    chauffeur: [
+      ['chauffeur', 'Bonsoir ! Montez, montez, il fait froid. Le chat aussi, il a l\'air sage.'],
+      ['chauffeur', 'Prochain arrêt : Montaigu !'],
+      ['ismae', 'Montaigu… Georges, accroche-toi : c\'est long, mais ça vaut le coup.'],
+    ],
+    arrivee: [
+      ['ismae', 'Montaigu ! Enfin.'],
+      ['ismae', 'Combien de fois j\'ai fait ce trajet, juste pour la voir…'],
+      'Georges s\'étire longuement. Le voyage l\'a épuisé. Il a dormi tout du long.',
+    ],
   },
 
   // ------------------------------------------------------------------
@@ -497,9 +516,9 @@ const CONFIG = {
       apres: [['sire', 'Ne vous inquiétez pas, il ssse remettra. Il ssse remet toujours.']],
     },
     sherif: {
-      avant: [['sherif', 'Vingt-neuf points ! Personne ne battra jamais mon record.']],
-      pendant: [['sherif', 'Vingt-neuf points. Bonne chance pour faire mieux, mon garçon.']],
-      apres: [['sherif', 'Vingt-neuf points, c\'était quand même un record. Avant toi.']],
+      avant: [['sherif', 'Quarante points ! Personne ne battra jamais mon record.']],
+      pendant: [['sherif', 'Quarante points. Bonne chance pour faire mieux, mon garçon.']],
+      apres: [['sherif', 'Quarante points, c\'était quand même un record. Avant toi.']],
     },
     garde: {
       pendant: [['garde', 'Circulez ! Le chat est sous la garde du roi.']],
@@ -677,10 +696,19 @@ const CONFIG = {
     comptoirOaken: ['« Comptoir d\'Oaken… et sauna ». Une affiche annonce : « Grande liquidation d\'hiver ! »'],
     rocherTroll: ['Un rocher couvert de mousse. Il… ronfle ?'],
     maisonArendelle: ['Une maison aux volets peints. Ça sent la cannelle et le feu de bois.'],
+    banc: ['Un banc couvert de neige. Georges y laisse quatre petites empreintes.'],
+    buches: ['Une pile de bûches pour l\'hiver. De quoi tenir jusqu\'au printemps… ou jusqu\'à demain, avec Elsa.'],
+    boiteLettres: ['Une boîte aux lettres. Dedans, une lettre adressée au « Père Noël, pôle Nord, juste à côté ».'],
+    statue: ['La statue du premier roi d\'Arendelle. Il a un bonnet de neige sur la tête. Ça lui va bien.'],
     trouPeche: ['Un trou dans la glace, une ligne qui pend. Le pêcheur attend depuis ce matin.'],
     rayonsOaken: ['Des bonnets, des skis, des patins… et des maillots de bain. En promo.'],
     poeleOaken: ['Un gros poêle qui ronronne. Georges s\'installerait bien devant pour l\'hiver.'],
     sortieArendelle: ['Le chemin redescend vers la forêt.', ['ismae', 'Non, on a promis à Olaf. On reste.']],
+    // Montaigu
+    panneauMontaigu: ['« MONTAIGU »', 'Ismae connaît ce panneau par cœur.'],
+    egliseMontaigu: ['L\'église, toute illuminée pour Noël. Les cloches sonnent huit coups.'],
+    routeBarree: ['La rue est barrée par des barrières de travaux.', '« La suite de l\'aventure… bientôt ! »'],
+    abribusMontaigu: ['L\'arrêt de bus de Montaigu. Ismae l\'a attendu des dizaines de fois, ce bus.'],
     bonhommeNeige: ['Un bonhomme de neige à moitié fini. Il lui manque un nez… et une tête bien ronde.', 'On dirait qu\'il attend quelqu\'un pour le terminer.'],
   },
 };

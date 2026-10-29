@@ -39,7 +39,8 @@ const Indices = (() => {
 
   // écran « ÉPREUVE n/6 TERMINÉE ! » puis l'indice rejoint le carnet
   function gagner(i, fin) {
-    if (!gagnes.includes(i)) { gagnes.push(i); gagnes.sort((a, b) => a - b); sauver(); }
+    if (!gagnes.includes(i)) { gagnes.push(i); gagnes.sort((a, b) => a - b); }
+    sauver();
     const N = CONFIG.indices.length, ind = CONFIG.indices[i];
     $('vic-titre').textContent = `ÉPREUVE ${i + 1}/${N} TERMINÉE !`;
     $('vic-indice').textContent = `${ORDINAUX[i] || ''} INDICE OBTENU !`;
@@ -81,6 +82,13 @@ const Indices = (() => {
     ouvrir('suite', 'suite-ok', fin);
   }
 
+  // la progression : nombre d'épreuves réussies à la suite (le carnet sert aussi de sauvegarde)
+  function progression() { let n = 0; while (gagnes.includes(n)) n++; return n; }
+  // nouvelle partie : le carnet repart de zéro
+  function effacer() { gagnes = []; sauver(); majBouton(); }
+  // raccourcis d'essai (#sherwood, #arendelle…) : les épreuves d'avant comptent comme réussies, sans rien enregistrer
+  function simuler(n) { gagnes = Array.from({ length: n }, (_, i) => i); majBouton(); }
+
   function init() {
     if (location.hash === '#reset') { gagnes = []; sauver(); history.replaceState(null, '', location.pathname); }
     majBouton();
@@ -95,5 +103,5 @@ const Indices = (() => {
     });
   }
 
-  return { init, gagner, carnet, suite, obtenus: () => gagnes.slice() };
+  return { init, gagner, carnet, suite, obtenus: () => gagnes.slice(), progression, effacer, simuler };
 })();

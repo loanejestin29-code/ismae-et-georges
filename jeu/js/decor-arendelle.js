@@ -23,7 +23,10 @@ const Arendelle = (() => {
     Q: ['.#.', '#.#', '#.#', '##.', '.##'], R: ['##.', '#.#', '##.', '#.#', '#.#'], S: ['.##', '#..', '.#.', '..#', '##.'], T: ['###', '.#.', '.#.', '.#.', '.#.'],
     U: ['#.#', '#.#', '#.#', '#.#', '###'], V: ['#.#', '#.#', '#.#', '#.#', '.#.'], W: ['#.#', '#.#', '###', '###', '#.#'], X: ['#.#', '#.#', '.#.', '#.#', '#.#'],
     Y: ['#.#', '#.#', '.#.', '.#.', '.#.'], Z: ['###', '..#', '.#.', '#..', '###'], "'": ['.#.', '.#.', '...', '...', '...'], ' ': ['...', '...', '...', '...', '...'],
-    '-': ['...', '...', '###', '...', '...'], '!': ['.#.', '.#.', '.#.', '...', '.#.'], '.': ['...', '...', '...', '...', '.#.'], 4: ['#.#', '#.#', '###', '..#', '..#'],
+    '-': ['...', '...', '###', '...', '...'], '!': ['.#.', '.#.', '.#.', '...', '.#.'], '.': ['...', '...', '...', '...', '.#.'],
+    0: ['###', '#.#', '#.#', '#.#', '###'], 1: ['.#.', '##.', '.#.', '.#.', '###'], 2: ['###', '..#', '###', '#..', '###'], 3: ['###', '..#', '.##', '..#', '###'],
+    4: ['#.#', '#.#', '###', '..#', '..#'], 5: ['###', '#..', '###', '..#', '###'], 6: ['###', '#..', '###', '#.#', '###'], 7: ['###', '..#', '.#.', '.#.', '.#.'],
+    8: ['###', '#.#', '###', '#.#', '###'], 9: ['###', '#.#', '###', '..#', '###'],
   };
   function texte(P, mot, x, y, col) { [...mot].forEach((ch, k) => { const g = L[ch]; if (g) g.forEach((row, j) => [...row].forEach((c, i) => { if (c === '#') P.px(x + k * 4 + i, y + j, col); })); }); }
   const largeurTexte = (mot) => mot.length * 4 - 1;
@@ -33,91 +36,184 @@ const Arendelle = (() => {
   // neige bosselée posée sur un rebord
   function bourrelet(P, x0, x1, y) { for (let x = x0; x < x1; x++) { P.px(x, y, NEIGE); if ((x * 7) % 5 < 2) P.px(x, y - 1, '#ffffff'); } P.hline(x0, y + 1, x1 - x0, NEIGE3); }
 
-  // ------------------------------------------------------------ maison scandinave
-  // o : w (largeur du mur), couleur, style ('long' : toit vu d'en haut / 'pignon' : pignon en façade), volets, porte
+  // ------------------------------------------------------------ maison scandinave (comme les immeubles de la rue des chats : tout au pixel près)
+  // o : w (largeur du mur), couleur, style ('pignon' : pignon sur rue / 'long' : long pan de toit avec lucarne),
+  //     etages (1 à 3), boutique ('bageri', 'sjokolade', 'strikk', 'leker', 'kafe' ou rien), volets, porte, tuiles (toit de tuiles rouges)
+  // renvoie aussi : lumieres (fenêtres, lanterne), ampoules (guirlande du toit), fumee (cheminée)
+  const ENSEIGNES = {
+    bageri: { nom: 'BAGERI', fond: '#7a3a24', icone: 'bretzel' }, sjokolade: { nom: 'SJOKOLADE', fond: '#4a2a1e', icone: 'tasse' },
+    strikk: { nom: 'STRIKK', fond: '#2a4a6a', icone: 'moufle' }, leker: { nom: 'LEKER', fond: '#6a2a4a', icone: 'cheval' },
+    kafe: { nom: 'KAFE', fond: '#2f5a3a', icone: 'tasse' },
+    boulangerie: { nom: 'BOULANGERIE', fond: '#7a3a24', icone: 'bretzel' }, // (à Montaigu)
+  };
+  function icone(P, nom, x, y, col) {
+    if (nom === 'bretzel') { P.ellipse(x + 2, y + 2, 2, 2, col); P.ellipse(x + 6, y + 2, 2, 2, col); P.px(x + 2, y + 2, '#3a2418'); P.px(x + 6, y + 2, '#3a2418'); P.rect(x + 3, y + 4, 3, 2, col); }
+    else if (nom === 'tasse') { P.rect(x + 1, y + 2, 5, 4, col); P.px(x + 6, y + 3, col); P.px(x + 7, y + 4, col); P.px(x + 2, y, '#f4f8ff'); P.px(x + 4, y + 1, '#f4f8ff'); }
+    else if (nom === 'moufle') { P.rect(x + 2, y + 1, 4, 5, col); P.px(x + 1, y + 2, col); P.px(x, y + 3, col); P.hline(x + 2, y + 6, 4, '#f4efe6'); }
+    else { P.rect(x + 1, y + 2, 6, 2, col); P.px(x + 6, y + 1, col); P.px(x + 7, y + 1, col); P.vline(x + 2, y + 4, 2, col); P.vline(x + 5, y + 4, 2, col); P.hline(x, y + 6, 8, col); }
+  }
+  // fenêtre à petits bois : cadre blanc, carreaux éclairés (rideaux) ou sombres, volets, jardinière enneigée
+  function fenetreN(P, r, x, y, w, h, o, lumieres, decal) {
+    const BL = '#f4eee2', BLs = '#cfc4b0';
+    P.rect(x - 1, y - 1, w + 2, h + 2, BL); P.vline(x + w, y, h + 1, BLs);
+    if (o.arc) { P.rect(x, y - 2, w, 1, BL); P.rect(x + 1, y - 3, w - 2, 1, BL); }
+    const lit = r.chance(o.allumee ?? 0.75);
+    if (lit) {
+      P.rect(x, y, w, h, '#eaa24c'); P.rect(x + 1, y + 1, w - 2, h - 2, '#ffd27a'); P.dither(x + 1, y + 2, w - 2, h - 4, '#fff1bb', 5);
+      P.vline(x, y, h, '#f4e5c6'); P.vline(x + w - 1, y, h, '#f4e5c6'); P.hline(x, y, w, '#d6bd96');
+      if (r.chance(0.3)) { P.rect(x + 2, y + h - 4, 2, 3, '#c8343a'); P.px(x + 2, y + h - 5, '#2f6a3a'); } // une bougie, une étoile…
+      else if (r.chance(0.4)) { P.px(x + (w >> 1), y + 2, '#fff8d0'); P.px(x + (w >> 1) - 1, y + 3, '#fff8d0'); P.px(x + (w >> 1) + 1, y + 3, '#fff8d0'); P.px(x + (w >> 1), y + 4, '#fff8d0'); }
+      lumieres.push([x + w / 2 + decal.x, y + h / 2 + decal.y, 22, 'win']);
+    } else {
+      P.rect(x, y, w, h, '#283050'); P.dither(x, y, w, h >> 1, '#34406a', 9); P.px(x + w - 2, y + 1, '#8aa0d0'); P.px(x + 1, y + h - 2, '#5a6a9a');
+    }
+    P.vline(x + (w >> 1), y, h, BL); P.hline(x, y + Math.round(h * 0.4), w, BL);
+    if (o.volets) for (const vx of [x - 4, x + w + 1]) {
+      P.rect(vx, y, 3, h, o.volets); P.vline(vx, y, h, S(o.volets, 0.25)); P.vline(vx + 2, y, h, S(o.volets, -0.3));
+      for (let j = 2; j < h - 1; j += 3) P.px(vx + 1, y + j, S(o.volets, -0.3));
+      P.px(vx + 1, y + 3, '#2a1e2e'); // le petit cœur découpé
+    }
+    // rebord + jardinière avec branches de sapin, baies rouges et neige, petits glaçons
+    P.rect(x - 2, y + h + 1, w + 4, 2, BL); P.hline(x - 2, y + h + 2, w + 4, BLs);
+    P.rect(x - 1, y + h + 3, w + 2, 3, '#6a4428'); P.hline(x - 1, y + h + 3, w + 2, '#8a5a32');
+    for (let k = 0; k < w + 2; k++) { if (r.chance(0.6)) P.px(x - 1 + k, y + h + 2, r.pick(['#2f6a3a', '#3f7a45'])); if (r.chance(0.15)) P.px(x - 1 + k, y + h + 1, '#d8323a'); }
+    P.hline(x - 1, y + h, w + 2, NEIGE); for (let k = 0; k < w; k += 3) P.px(x + k, y + h + 6, GLACE);
+  }
   function maison(seed, o = {}) {
     const r = PX.rng(seed);
-    const w = o.w || 80, style = o.style || (r.chance(0.5) ? 'pignon' : 'long');
-    const mur = o.couleur || r.pick(MURS), murS = S(mur, -0.22), murC = S(mur, 0.2);
-    const volet = o.volets || r.pick(['#f4efe6', '#2a4a6a', '#3a6a3a', '#7a2a2a', '#e8c040']);
-    const porteC = o.porte || r.pick(['#3a4a8a', '#7a2a2a', '#2f5a3a', '#5a3a2a']);
-    const hMur = o.hMur || 44, hToit = style === 'long' ? 36 : 34;
-    const W = w + 12, H = hMur + hToit + 16, x0 = 6, x1 = 6 + w, base = H - 1, yMur = base - hMur, cx = Math.round(W / 2);
+    const w = o.w || 72, style = o.style || (r.chance(0.5) ? 'pignon' : 'long'), etages = o.etages || 2;
+    const mur = o.couleur || r.pick(MURS), murS = S(mur, -0.24), murC = S(mur, 0.16), murF = S(mur, -0.45);
+    const BL = '#f4eee2', BLs = '#cfc4b0';
+    const volets = o.volets === undefined ? r.pick(['#f4efe6', '#2a4a6a', '#3a6a3a', '#7a2a2a', '#e8c040', null]) : o.volets;
+    const porteC = o.porte || r.pick(['#3a4a8a', '#7a2a2a', '#2f5a3a', '#5a3a2a', '#2a5a6a']);
+    const toit = o.tuiles ? { a: '#9a4a36', b: '#7a3a2c', c: '#b8624a' } : { a: '#3e4660', b: '#2c3248', c: '#5a6480' };
+    const hRdc = 32, hEt = 24, hFrise = 5, hMur = hRdc + (etages - 1) * hEt + hFrise;
+    const hToit = style === 'long' ? 36 : Math.round(w * 0.5);
+    const W = w + 14, H = hMur + hToit + 22, x0 = 7, x1 = 7 + w, base = H - 1, yMur = base - hMur, cx = Math.round(W / 2);
     const { c, P } = mk(W, H);
-    const lumieres = [];
-    // mur en planches verticales, soubassement de pierre
+    const lumieres = [], ampoules = [], dec = { x: 0, y: 0 }; // tout est en coordonnées de l'image
+    // --- le mur en planches à clin
     P.rect(x0, yMur, w, hMur, mur);
-    for (let x = x0 + 3; x < x1; x += 4) P.vline(x, yMur + 3, hMur - 3, murS);
-    P.vline(x0, yMur, hMur, murC); P.vline(x1 - 1, yMur, hMur, S(mur, -0.4));
-    P.rect(x0, base - 5, w, 5, '#77738a'); for (let x = x0; x < x1; x += 7) P.vline(x + (x % 2), base - 5, 5, '#5a566a'); P.hline(x0, base - 5, w, '#9a96aa');
-    // bandeau blanc et frise de fleurs peintes
-    P.rect(x0, yMur, w, 3, '#f4efe6');
-    for (let x = x0 + 5; x < x1 - 3; x += 9) { P.px(x, yMur + 5, '#d8323a'); P.px(x - 1, yMur + 5, '#f2c230'); P.px(x + 1, yMur + 5, '#f2c230'); P.px(x, yMur + 4, '#3a8a4a'); P.px(x, yMur + 6, '#3a8a4a'); }
-    // porte avec couronne de Noël
-    const pw = 12, ph = 21, px0 = cx - 6;
-    P.rect(px0 - 1, base - ph - 1, pw + 2, ph + 1, '#f4efe6'); P.rect(px0, base - ph, pw, ph, porteC);
-    P.vline(cx, base - ph, ph, S(porteC, -0.35)); P.px(cx + 3, base - 10, '#e8b54a'); P.px(cx - 3, base - 10, '#e8b54a');
-    P.ellipse(cx, base - ph + 6, 4, 4, '#2f6a3a'); P.ellipse(cx, base - ph + 6, 2, 2, porteC); P.px(cx, base - ph + 9, '#d8323a'); P.px(cx - 1, base - ph + 10, '#d8323a'); P.px(cx + 1, base - ph + 10, '#d8323a');
-    P.rect(px0 - 3, base - 1, pw + 6, 2, '#9a96aa'); // marche
-    lumieres.push([cx, base - 8, 24, 'win']);
-    // fenêtres éclairées, volets, jardinières enneigées
-    const nf = Math.max(1, Math.floor((w - 20) / 26));
-    const pos = [];
-    for (let k = 0; k < nf; k++) { const fx = x0 + Math.round(((k + 0.5) * w) / nf); if (Math.abs(fx - cx) > 13) pos.push(fx); else { pos.push(fx - 20 > x0 + 6 ? fx - 20 : null); } }
-    if (!pos.some((p) => p && p > cx)) pos.push(Math.min(x1 - 12, cx + 22));
-    if (!pos.some((p) => p && p < cx)) pos.push(Math.max(x0 + 12, cx - 22));
-    for (const fx of pos) {
-      if (!fx) continue;
-      const fy = yMur + 11;
-      P.rect(fx - 6, fy - 1, 12, 15, '#f4efe6');
-      const allumee = r.chance(0.8);
-      P.rect(fx - 5, fy, 10, 13, allumee ? '#ffcf72' : '#3a4a6a');
-      if (allumee) { P.rect(fx - 4, fy + 1, 3, 3, '#fff0b8'); lumieres.push([fx, fy + 7, 26, 'win']); }
-      P.vline(fx, fy, 13, '#f4efe6'); P.hline(fx - 5, fy + 6, 10, '#f4efe6');
-      P.rect(fx - 9, fy, 3, 13, volet); P.rect(fx + 6, fy, 3, 13, volet); P.vline(fx - 8, fy + 1, 11, S(volet, -0.3)); P.vline(fx + 7, fy + 1, 11, S(volet, -0.3));
-      P.rect(fx - 6, fy + 13, 12, 3, '#6a4428'); P.hline(fx - 6, fy + 12, 12, NEIGE); P.px(fx - 3, fy + 12, '#d8323a'); P.px(fx + 2, fy + 12, '#d8323a');
+    for (let y = yMur + hFrise; y < base - 5; y += 3) { P.hline(x0, y, w, murC); P.hline(x0, y + 2, w, murS); }
+    for (let k = 0; k < w / 6; k++) P.px(x0 + r.int(w), yMur + hFrise + r.int(hMur - hFrise - 6), murS);
+    P.dither(x1 - 10, yMur, 10, hMur, murF, 3);
+    P.rect(x0, yMur, 2, hMur, BL); P.rect(x1 - 2, yMur, 2, hMur, BL); P.vline(x1 - 1, yMur, hMur, BLs);
+    // la frise peinte sous l'avant-toit (rosemaling : fleurs rouges et jaunes, feuilles vertes)
+    P.rect(x0, yMur, w, hFrise, BL); P.hline(x0, yMur + hFrise - 1, w, BLs);
+    for (let x = x0 + 4; x < x1 - 3; x += 8) { P.px(x, yMur + 2, '#d8323a'); P.px(x - 1, yMur + 2, '#f2c230'); P.px(x + 1, yMur + 2, '#f2c230'); P.px(x + 3, yMur + 1, '#3a8a4a'); P.px(x + 4, yMur + 2, '#3a8a4a'); P.px(x + 3, yMur + 3, '#3a8a4a'); }
+    // --- étages
+    const nf = Math.max(2, Math.floor((w - 8) / 22));
+    const fx = (k) => x0 + Math.round(((k + 0.5) * w) / nf) - 5;
+    for (let e = 1; e < etages; e++) {
+      const y = yMur + hFrise + (etages - 1 - e) * hEt + 5;
+      for (let k = 0; k < nf; k++) fenetreN(P, r, fx(k), y, 10, 13, { volets, arc: style === 'pignon' }, lumieres, dec);
+      P.rect(x0, y + hEt - 6, w, 2, BL); P.hline(x0, y + hEt - 5, w, BLs); // le bandeau entre deux étages
     }
+    // --- rez-de-chaussée : boutique ou porte d'entrée
+    const yR = base - hRdc + 2, porteX = o.boutique ? x1 - 22 : cx - 6;
+    if (o.boutique) {
+      const E = ENSEIGNES[o.boutique];
+      // grande vitrine éclairée et ses marchandises
+      const vx = x0 + 6, vw = porteX - vx - 6, vy = yR + 9, vh = 16;
+      P.rect(vx - 2, vy - 2, vw + 4, vh + 4, '#3a2a22'); P.rect(vx, vy, vw, vh, '#ffcf72'); P.dither(vx, vy, vw, vh, '#fff1bb', 4);
+      for (let x = vx + 2; x < vx + vw - 3; x += 6) {
+        const k = (x >> 2) % 3;
+        if (E.icone === 'bretzel') { P.ellipse(x + 2, vy + vh - 4, 2, 2, '#b8743e'); P.px(x + 2, vy + vh - 4, '#ffcf72'); }
+        else if (E.icone === 'tasse') { P.rect(x, vy + vh - 6, 4, 4, ['#6a3a24', '#f4efe6', '#c8343a'][k]); P.hline(x, vy + vh - 6, 4, '#f4efe6'); }
+        else if (E.icone === 'moufle') { P.rect(x, vy + 3, 4, 8, ['#c8343a', '#3a6aa8', '#f2c230'][k]); for (let y = vy + 5; y < vy + 11; y += 3) P.hline(x, y, 4, '#f4efe6'); }
+        else { P.rect(x, vy + vh - 7, 4, 5, ['#c8343a', '#3a6aa8', '#4f8a5a'][k]); P.px(x + 1, vy + vh - 8, '#f2c230'); }
+      }
+      P.rect(vx, vy + vh - 2, vw, 2, '#8a5a32'); P.vline(vx + (vw >> 1), vy, vh, '#3a2a22');
+      lumieres.push([vx + vw / 2 + dec.x, vy + vh / 2 + dec.y, 34, 'shop']);
+      // store rayé enneigé et enseigne
+      for (let x = x0 + 3; x < x1 - 3; x++) { const col = Math.floor((x - x0) / 4) % 2 ? E.fond : BL; P.vline(x, yR + 2, 5, col); if ((x - x0) % 4 < 2) P.px(x, yR + 7, col); }
+      P.hline(x0 + 3, yR + 1, w - 6, NEIGE); P.hline(x0 + 3, yR, w - 6, '#ffffff');
+      const tw = largeurTexte(E.nom) + 6, tx = x0 + 6 + Math.max(0, ((porteX - x0 - 12) - tw) >> 1);
+      P.rect(tx, yR - 9, tw, 8, E.fond); P.hline(tx, yR - 9, tw, S(E.fond, 0.25)); texte(P, E.nom, tx + 3, yR - 8, '#f6e6c0');
+      // enseigne en potence
+      P.hline(x1 - 2, yR - 6, 6, '#2a2632'); P.rect(x1 + 1, yR - 5, 5, 8, E.fond); icone(P, E.icone, x1 - 1, yR - 4, '#f2c230');
+    } else {
+      for (const k of [0, nf - 1]) if (Math.abs(fx(k) + 5 - cx) > 12) fenetreN(P, r, fx(k), yR + 6, 10, 13, { volets }, lumieres, dec);
+    }
+    // la porte : encadrement blanc, imposte, couronne de Noël, lanterne, marches enneigées, sapins en pot
+    const pw = 12, ph = 22, py = base - ph - 2;
+    P.rect(porteX - 2, py - 4, pw + 4, ph + 4, BL); P.vline(porteX + pw + 1, py - 4, ph + 4, BLs);
+    P.rect(porteX, py - 2, pw, 2, '#ffcf72');
+    P.rect(porteX, py, pw, ph, porteC);
+    P.rect(porteX + 2, py + 2, 3, 7, S(porteC, -0.25)); P.rect(porteX + 7, py + 2, 3, 7, S(porteC, -0.25)); P.rect(porteX + 2, py + 12, 3, 7, S(porteC, -0.25)); P.rect(porteX + 7, py + 12, 3, 7, S(porteC, -0.25));
+    P.px(porteX + 9, py + 11, '#e8b54a');
+    P.ellipse(porteX + 6, py + 6, 4, 4, '#2f6a3a'); P.ellipse(porteX + 6, py + 6, 2, 2, porteC);
+    for (const [dx, dy] of [[-3, -1], [3, 1], [0, 3], [-2, 3]]) P.px(porteX + 6 + dx, py + 6 + dy, '#d8323a');
+    P.rect(porteX + 5, py + 10, 3, 2, '#d8323a');
+    lumieres.push([porteX + pw / 2 + dec.x, py - 1 + dec.y, 16, 'win']);
+    const lx = porteX + pw + 5;
+    if (lx < x1 - 3) { P.rect(lx, py + 4, 3, 5, '#2a2632'); P.px(lx + 1, py + 5, '#ffd27a'); P.px(lx + 1, py + 6, '#ffd27a'); P.hline(lx - 1, py + 3, 5, NEIGE); lumieres.push([lx + 1 + dec.x, py + 6 + dec.y, 26, 'lamp']); }
+    P.rect(porteX - 4, base - 2, pw + 8, 2, '#9a96aa'); P.rect(porteX - 2, base - 4, pw + 4, 2, '#aeaabe'); P.hline(porteX - 4, base - 2, pw + 8, NEIGE);
+    if (!o.boutique || r.chance(0.5)) for (const sx of [porteX - 7, porteX + pw + 4]) {
+      if (sx < x0 + 2 || sx > x1 - 5) continue;
+      P.rect(sx, base - 4, 4, 4, '#8a4a32'); for (let j = 0; j < 7; j++) P.rect(sx + 2 - Math.floor(j / 2), base - 5 - 7 + j, Math.floor(j / 2) * 2 + 1, 1, j % 2 ? '#2f6a3a' : '#3f7a45');
+      P.px(sx + 2, base - 12, NEIGE); P.px(sx + 1, base - 9, '#d8323a');
+    }
+    // soubassement de pierre et congère
+    P.rect(x0, base - 5, w, 5, '#77738a'); for (let x = x0; x < x1; x += 6) P.vline(x + (x % 2), base - 5, 5, '#5a566a'); P.hline(x0, base - 5, w, '#9a96aa');
+    for (let x = x0 - 4; x < x1 + 4; x++) { if (x > porteX - 5 && x < porteX + pw + 5) continue; const h = 2 + Math.round(Math.abs(Math.sin(x * 0.3 + seed)) * 2); P.rect(x, base - h + 1, 1, h, NEIGE); P.px(x, base - h + 1, '#ffffff'); }
+    // --- le toit
     let fumee = null;
     if (style === 'long') {
-      // pente du toit vue d'en haut, toute blanche de neige
       const yT = yMur - hToit;
       for (let j = 0; j < hToit; j++) {
-        const inset = Math.round((hToit - j) * 0.22);
-        P.rect(x0 - 5 + inset, yT + j, w + 10 - inset * 2, 1, j % 6 === 5 ? NEIGE2 : NEIGE);
-        if (j > hToit * 0.55) P.dither(x0 - 5 + inset, yT + j, w + 10 - inset * 2, 1, NEIGE2, 4);
+        const inset = Math.round((hToit - j) * 0.18), xa = x0 - 6 + inset, wa = w + 12 - inset * 2;
+        P.rect(xa, yT + j, wa, 1, NEIGE);
+        if (j % 7 === 6) P.dither(xa, yT + j, wa, 1, NEIGE2, 8);
+        if (j > hToit - 5) { P.rect(xa, yT + j, wa, 1, j % 2 ? toit.a : toit.b); for (let x = xa + (j % 2) * 2; x < xa + wa; x += 4) P.px(x, yT + j, toit.c); P.dither(xa, yT + j, wa, 1, NEIGE, 16 - (hToit - j) * 3); }
       }
-      P.hline(x0 - 5 + Math.round(hToit * 0.22), yT, w + 10 - Math.round(hToit * 0.22) * 2, '#ffffff');
-      P.rect(x0 - 6, yMur - 3, w + 12, 4, BOIS); P.hline(x0 - 6, yMur - 3, w + 12, BOIS2);
-      bourrelet(P, x0 - 6, x1 + 6, yMur - 4);
-      glacons(P, r, x0 - 4, x1 + 4, yMur + 1);
-      // cheminée de pierre
-      const chx = x0 + 8 + r.int(Math.max(1, w - 28));
-      P.rect(chx, yT - 8, 9, 16, '#8a7a6a'); P.vline(chx, yT - 8, 16, '#a89a8a'); P.vline(chx + 8, yT - 8, 16, '#6a5a4a');
+      P.hline(x0 - 6 + Math.round(hToit * 0.18), yT, w + 12 - Math.round(hToit * 0.18) * 2, '#ffffff');
+      // lucarne
+      if (w >= 56) {
+        const lcx = x0 + Math.round(w * (r.chance(0.5) ? 0.3 : 0.7)), ly = yT + 10;
+        P.rect(lcx - 7, ly + 6, 14, 14, mur); P.rect(lcx - 7, ly + 6, 2, 14, BL); P.rect(lcx + 5, ly + 6, 2, 14, BL);
+        for (let j = 0; j < 8; j++) P.rect(lcx - j - 1, ly + j - 2, j * 2 + 2, 1, j < 3 ? '#ffffff' : NEIGE);
+        P.hline(lcx - 9, ly + 6, 18, NEIGE2);
+        P.rect(lcx - 3, ly + 9, 6, 8, '#ffcf72'); P.vline(lcx, ly + 9, 8, BL); P.hline(lcx - 3, ly + 12, 6, BL); lumieres.push([lcx + dec.x, ly + 13 + dec.y, 18, 'win']);
+      }
+      // cheminée de pierre, chapeau de neige
+      const chx = x0 + 6 + r.int(Math.max(1, w - 24));
+      P.rect(chx, yT - 8, 9, 16, '#8a7a6a'); P.vline(chx, yT - 8, 16, '#a89a8a'); P.vline(chx + 8, yT - 8, 16, '#6a5a4a'); for (let y = yT - 5; y < yT + 8; y += 3) P.hline(chx + 1, y, 7, '#7a6a5a');
       P.rect(chx - 1, yT - 10, 11, 3, NEIGE); P.hline(chx - 1, yT - 11, 11, '#ffffff');
       fumee = [chx + 4, yT - 11];
+      // avant-toit, gouttière, glaçons, guirlande lumineuse
+      P.rect(x0 - 6, yMur - 3, w + 12, 3, BOIS); P.hline(x0 - 6, yMur - 3, w + 12, BOIS2); P.hline(x0 - 6, yMur - 1, w + 12, '#2a1e18');
+      bourrelet(P, x0 - 6, x1 + 6, yMur - 4); glacons(P, r, x0 - 4, x1 + 4, yMur, 4);
+      for (let x = x0 - 3; x < x1 + 3; x += 4) { const y = yMur + 1 + (((x - x0) >> 2) % 2); P.px(x, y, '#2a2632'); ampoules.push([x, y + 1]); }
     } else {
-      // pignon en façade : triangle de planches, petite fenêtre ronde, rives enneigées
+      // pignon sur rue : triangle en planches, œil-de-bœuf éclairé, rives épaisses enneigées, têtes de dragon
       const apex = yMur - hToit;
       for (let j = 0; j <= hToit; j++) {
         const half = Math.round((j / hToit) * (w / 2 + 1));
-        P.rect(cx - half, apex + j, half * 2, 1, j % 4 === 3 ? murS : mur);
+        P.rect(cx - half, apex + j, half * 2, 1, j % 3 === 2 ? murS : mur);
       }
+      for (let j = 4; j < hToit; j += 3) { const half = Math.round((j / hToit) * (w / 2 + 1)); P.vline(cx, apex + j, 2, murS); P.px(cx - half + 2, apex + j, murS); }
       const gy = Math.round(yMur - hToit * 0.42);
-      P.ellipse(cx, gy, 5, 5, '#f4efe6'); P.ellipse(cx, gy, 4, 4, '#ffcf72'); P.vline(cx, gy - 4, 9, '#f4efe6'); P.hline(cx - 4, gy, 9, '#f4efe6');
-      lumieres.push([cx, gy, 18, 'win']);
-      for (const s of [-1, 1]) {
-        line(P, cx, apex - 2, cx + s * (w / 2 + 6), yMur + 1, BOIS, 4);
-        line(P, cx, apex - 4, cx + s * (w / 2 + 6), yMur - 1, NEIGE, 3);
-        line(P, cx, apex - 5, cx + s * (w / 2 + 6), yMur - 2, '#ffffff', 1);
+      P.ellipse(cx, gy, 6, 6, BL); P.ellipse(cx, gy, 5, 5, '#ffcf72'); P.dither(cx - 4, gy - 4, 9, 9, '#fff1bb', 4); P.vline(cx, gy - 5, 11, BL); P.hline(cx - 5, gy, 11, BL);
+      lumieres.push([cx + dec.x, gy + dec.y, 20, 'win']);
+      for (const sgn of [-1, 1]) {
+        const xb = cx + sgn * (w / 2 + 7);
+        line(P, cx, apex - 3, xb, yMur + 2, toit.b, 7);
+        line(P, cx, apex - 4, xb, yMur + 1, toit.a, 5);
+        line(P, cx, apex - 6, xb, yMur - 1, NEIGE, 4);
+        line(P, cx, apex - 7, xb, yMur - 2, '#ffffff', 1);
+        line(P, cx, apex + 1, xb, yMur + 4, BL, 1); // planche de rive blanche
+        // guirlande lumineuse sous la rive
+        const n = Math.round(Math.hypot(xb - cx, yMur - apex) / 5);
+        for (let k = 1; k < n; k++) { const t = k / n, bx = Math.round(cx + (xb - cx) * t), by = Math.round(apex + 2 + (yMur + 5 - apex - 2) * t); P.px(bx, by, '#2a2632'); ampoules.push([bx, by + 1]); }
       }
       // têtes de dragon sculptées au sommet
-      line(P, cx - 1, apex - 3, cx - 7, apex - 10, BOIS2, 2); line(P, cx + 1, apex - 3, cx + 7, apex - 10, BOIS2, 2);
-      P.px(cx - 8, apex - 11, NEIGE); P.px(cx + 8, apex - 11, NEIGE);
-      glacons(P, r, x0 - 2, cx - 12, yMur + 1, 3); glacons(P, r, cx + 12, x1 + 2, yMur + 1, 3);
+      line(P, cx - 1, apex - 4, cx - 8, apex - 12, BOIS2, 2); line(P, cx + 1, apex - 4, cx + 8, apex - 12, BOIS2, 2);
+      P.px(cx - 9, apex - 13, BOIS2); P.px(cx + 9, apex - 13, BOIS2); P.px(cx - 8, apex - 14, NEIGE); P.px(cx + 8, apex - 14, NEIGE);
+      glacons(P, r, x0 - 2, cx - 14, yMur + 3, 3); glacons(P, r, cx + 14, x1 + 2, yMur + 3, 3);
+      if (r.chance(0.6)) { const chx = cx + (r.chance(0.5) ? -1 : 1) * Math.round(w * 0.22) - 4; const chy = apex + Math.round(hToit * 0.35); P.rect(chx, chy - 12, 8, 14, '#8a7a6a'); P.vline(chx, chy - 12, 14, '#a89a8a'); P.rect(chx - 1, chy - 14, 10, 3, NEIGE); fumee = [chx + 4, chy - 15]; }
     }
-    // congère au pied du mur
-    for (let x = x0 - 4; x < x1 + 4; x++) { const h = 2 + Math.round(Math.abs(Math.sin(x * 0.3 + seed)) * 2); if (Math.abs(x - cx) < 8) continue; P.rect(x, base - h + 1, 1, h, NEIGE); P.px(x, base - h + 1, '#ffffff'); }
-    return { img: c, ax: cx, ay: base, lumieres, porte: { dx: 0, w: pw }, fumee, largeur: W, mur: w };
+    return { img: c, ax: cx, ay: base, lumieres, ampoules, porte: { dx: porteX + pw / 2 - cx, w: pw }, fumee, largeur: W, mur: w };
   }
 
   // ------------------------------------------------------------ le château d'Arendelle
@@ -386,6 +482,54 @@ const Arendelle = (() => {
     return { img: c, ax: Math.floor(w / 2), ay: base };
   }
 
+  // ------------------------------------------------------------ petit mobilier des rues
+  function banc() {
+    const { c, P } = mk(30, 18), base = 17;
+    P.rect(2, 4, 26, 3, '#6a4428'); P.hline(2, 4, 26, '#8a5a32'); P.rect(2, 9, 26, 3, '#7a4a2a'); P.hline(2, 9, 26, '#9a6a3a');
+    for (const x of [4, 24]) { P.rect(x, 7, 2, 10, '#2a2632'); P.px(x, 16, '#4a4658'); }
+    P.rect(1, 2, 28, 2, NEIGE); P.hline(2, 1, 26, '#ffffff'); P.rect(2, 8, 26, 1, NEIGE);
+    return { img: c, ax: 15, ay: base };
+  }
+  function buches() {
+    const { c, P } = mk(28, 18), base = 17;
+    for (let row = 0; row < 3; row++) for (let k = 0; k < 6 - row; k++) {
+      const x = 2 + k * 4 + row * 2, y = 12 - row * 4;
+      P.ellipse(x + 1, y + 1, 2, 2, '#6a4428'); P.ellipse(x + 1, y + 1, 1, 1, '#c89058'); P.px(x + 1, y + 1, '#8a5a32');
+    }
+    P.rect(2, 15, 24, 2, '#4a3020');
+    for (let x = 3; x < 26; x++) P.px(x, 3 + Math.round(Math.abs(Math.sin(x)) * 2) + (x > 14 ? 2 : 0), NEIGE);
+    return { img: c, ax: 14, ay: base };
+  }
+  function tonneaux() {
+    const { c, P } = mk(26, 16), base = 15;
+    for (const x of [1, 13]) { P.rect(x, 2, 11, 13, '#8a5a34'); P.ellipse(x + 5, 2, 5, 1, '#b07a48'); P.hline(x, 5, 11, '#3a3646'); P.hline(x, 11, 11, '#3a3646'); P.vline(x, 2, 13, '#b07a48'); P.ellipse(x + 5, 1, 5, 1, NEIGE); }
+    return { img: c, ax: 13, ay: base };
+  }
+  // mât à bannière violette au crocus doré (les armoiries d'Arendelle)
+  function banniere() {
+    const { c, P } = mk(16, 60), base = 59;
+    P.rect(2, 2, 2, 58, '#4a4658'); P.vline(2, 2, 58, '#7a7690'); P.ellipse(3, 1, 2, 1, '#e8b54a');
+    P.rect(4, 6, 11, 24, '#6a3a8a'); P.vline(4, 6, 24, '#8a5aaa'); P.hline(4, 6, 11, '#e8b54a');
+    for (let k = 0; k < 5; k++) P.px(5 + k * 2, 30, '#6a3a8a');
+    P.ellipse(9, 16, 2, 4, '#e8b54a'); P.px(9, 11, '#7ac85a'); P.px(7, 21, '#7ac85a'); P.px(11, 21, '#7ac85a'); P.px(8, 14, '#fff0a0');
+    P.rect(0, 56, 6, 4, '#77738a');
+    return { img: c, ax: 3, ay: base };
+  }
+  function boiteLettres() {
+    const { c, P } = mk(10, 18), base = 17;
+    P.rect(4, 8, 2, 10, '#2a2632'); P.rect(1, 1, 8, 8, '#c8343a'); P.hline(1, 1, 8, '#e85a50'); P.rect(2, 4, 6, 1, '#2a2632'); P.rect(1, 0, 8, 1, NEIGE);
+    return { img: c, ax: 5, ay: base };
+  }
+  // statue du roi fondateur, sur la place (manteau de neige sur les épaules)
+  function statue() {
+    const { c, P } = mk(28, 50), base = 49;
+    P.rect(2, 36, 24, 14, '#8a8498'); P.hline(2, 36, 24, '#a8a4b8'); P.rect(0, 46, 28, 4, '#77738a'); P.rect(6, 40, 16, 4, '#6a6478');
+    P.rect(10, 14, 8, 22, '#7a8a8a'); P.rect(8, 18, 12, 14, '#6a7a7a'); P.ellipse(14, 10, 4, 4, '#7a8a8a'); P.rect(11, 5, 6, 2, '#e8b54a'); P.px(12, 4, '#e8b54a'); P.px(15, 4, '#e8b54a');
+    Objets.line(P, 19, 18, 23, 8, '#6a7a7a', 2); P.ellipse(24, 7, 1, 1, '#e8b54a');
+    P.hline(8, 17, 12, NEIGE); P.hline(10, 6, 8, NEIGE); P.hline(2, 35, 24, NEIGE); P.hline(1, 45, 26, NEIGE);
+    return { img: c, ax: 14, ay: base };
+  }
+
   // ------------------------------------------------------------ l'arrêt de bus, à la sortie d'Arendelle
   function arretBus() {
     const { c, P } = mk(56, 56), base = 55;
@@ -441,5 +585,6 @@ const Arendelle = (() => {
   return {
     texte, largeurTexte, maison, chateau, muraille, portail, fontaineGelee, etal, lampadaire, ecurie, traineau, blocsGlace, comptoirOaken,
     bateauGele, puits, tasNeige, bonhommeEnfants, luge, rocher, transat, pancarte, arretBus, fond, palais, MURS, NEIGE, NEIGE2, NEIGE3, GLACE,
+    banc, buches, tonneaux, banniere, boiteLettres, statue, glacons, bourrelet,
   };
 })();

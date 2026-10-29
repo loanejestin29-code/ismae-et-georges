@@ -138,6 +138,7 @@ const Entites = (() => {
     }
     get sortY() { return this.y; }
     draw(g) {
+      if (this.visible === false) return; // (dans le bus, par exemple)
       const set = (this.tenue === 'tablier' ? ismaeTablier() : SPR.ismae)[this.dir];
       const img = this.moving ? set.walk[Math.floor(this.anim) % 4] : this.blink ? set.blink : set.idle;
       const dy = hauteurSaut(this.saut);
@@ -291,6 +292,7 @@ const Entites = (() => {
     get sortY() { return this.y; }
     zone() { return { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.texteScript || (this.mode === 'script' ? 'georgesPoursuite' : 'georges'), chat: this }; }
     draw(g) {
+      if (this.visible === false) return;
       const s = SPR.georges, y0 = this.y;
       if (this.h) this.y -= this.h; // porté dans sa cage : on le dessine plus haut, l'ombre reste au sol
       let img;

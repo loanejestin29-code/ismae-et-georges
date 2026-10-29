@@ -155,6 +155,11 @@ const EpreuveNeige = (() => {
       installerObjets(J);
     }
     majInventaire();
+    // reprise d'une partie après l'épreuve : Jack Snow est sur la place, Olaf à côté de lui
+    if (Q.neige === 'gagne' && !S.jackObj) {
+      installerJack(J);
+      Object.assign(S.olaf, { visible: true, x: S.jack.x + 24, y: S.jack.y + 6, dir: 'left', chemin: null });
+    }
     if (Q.neige !== 'aVenir') return;
     Q.neige = 'arrivee';
     const p = J.joueur, o = S.olaf;
@@ -206,9 +211,16 @@ const EpreuveNeige = (() => {
     S.echarpeObj = { pris: false, sortY: S.fontaine.y + 1,
       draw(g, j) {
         if (this.pris) return;
-        const t = j.t || 0, x = S.fontaine.x + 2, y = S.fontaine.y - 50, f = Math.round(Math.sin(t * 4) * 1.5);
-        g.fillStyle = '#1d1a22'; g.fillRect(x - 3, y, 7, 2); g.fillRect(x + 2, y + 2, 2, 7 + f); g.fillRect(x - 3, y + 2, 2, 4 - f);
-        g.fillStyle = '#4a4658'; g.fillRect(x - 3, y, 7, 1);
+        // une grande écharpe noire accrochée à la pointe de glace, qui flotte au vent (liseré clair pour la voir de loin)
+        const t = j.t || 0, x = S.fontaine.x + 1, y = S.fontaine.y - 54;
+        const pts = [];
+        for (let k = 0; k < 16; k++) pts.push([x - 3 + k, y + 1 + Math.round(Math.sin(t * 5 - k * 0.6) * (k / 6))]);
+        for (let k = 0; k < 9; k++) pts.push([x + 1 + Math.round(Math.sin(t * 4 - k * 0.7) * (k / 4)), y + 2 + k]);
+        g.fillStyle = '#e8f2ff'; for (const [px, py] of pts) g.fillRect(px - 1, py - 1, 4, 4);
+        g.fillStyle = '#121016'; for (const [px, py] of pts) g.fillRect(px, py, 2, 2);
+        g.fillStyle = '#4a4660'; for (const [px, py] of pts.slice(0, 16)) g.fillRect(px, py, 1, 1);
+        for (let k = 0; k < 3; k++) { const [fx, fy] = pts[15]; g.fillStyle = '#121016'; g.fillRect(fx + 1 + k, fy + 1 + (k % 2), 1, 2); }
+        if (Math.sin(t * 3) > 0.4) { const sx = x + 8 + Math.round(Math.sin(t) * 6), sy = y - 4; g.fillStyle = '#ffffff'; g.fillRect(sx, sy - 1, 1, 3); g.fillRect(sx - 1, sy, 3, 1); }
       } };
     C.dynamiques.push(S.echarpeObj);
     S.branchesObj = { pris: false, sortY: S.branches.y,
@@ -299,15 +311,7 @@ const EpreuveNeige = (() => {
   function victoire(J) {
     const S = F(), p = J.joueur, o = S.olaf, e = S.elsa;
     Q.neige = 'victoire';
-    // Jack Snow, dans la rue, à côté du sapin
-    const tout = { base: 1, corps: 1, tete: 1, yeux: 1, nez: 1, brasG: 1, brasD: 1, boutons: 1, echarpe: 1 };
-    const jack = { x: S.jack.x, y: S.jack.y, vie: 0, saut: 0, get sortY() { return this.y; }, img: Neige.jack(tout),
-      update(dt) { if (this.vie > 0) { this.vie += dt; this.img = Neige.jack(tout, { vie: this.vie }); } },
-      draw(g) { Entites.ombre(g, this.x, this.y, 12); const dy = this.vie > 0 ? -Math.round(Math.abs(Math.sin(this.vie * 5)) * 3) : 0; Entites.poser(g, this.img, this.x, this.y + 1 + dy); },
-      zone() { return { x: this.x - 12, y: this.y - 20, w: 24, h: 22, dialogue: () => (Q.neige === 'gagne' ? ['Jack Snow. Il a l\'air très fier de son écharpe.', 'Ismae et Loane l\'ont construit ensemble, un soir de neige.'] : null) }; } };
-    J.carte.pnj.push(jack);
-    S.jackObj = jack;
-    Entites.portraits.jack = jack.img;
+    const jack = installerJack(J), tout = TOUT;
     p.x = S.jack.x - 26; p.y = S.jack.y + 10; p.dir = 'right'; p.chemin = null;
     o.x = S.jack.x + 24; o.y = S.jack.y + 6; o.chemin = null; o.dir = 'left';
     J.georges.x = p.x - 14; J.georges.y = p.y + 4; J.trace = [{ x: J.georges.x, y: J.georges.y }, { x: p.x, y: p.y }];
@@ -332,6 +336,20 @@ const EpreuveNeige = (() => {
       { faire: () => { Musique.victoire(); Indices.gagner(2, () => apresVictoire(J)); } },
     ]);
   }
+  // Jack Snow, dans la rue, à côté du sapin
+  const TOUT = { base: 1, corps: 1, tete: 1, yeux: 1, nez: 1, brasG: 1, brasD: 1, boutons: 1, echarpe: 1 };
+  function installerJack(J) {
+    const S = F(), tout = TOUT;
+    const jack = { x: S.jack.x, y: S.jack.y, vie: 0, saut: 0, get sortY() { return this.y; }, img: Neige.jack(tout),
+      update(dt) { if (this.vie > 0) { this.vie += dt; this.img = Neige.jack(tout, { vie: this.vie }); } },
+      draw(g) { Entites.ombre(g, this.x, this.y, 12); const dy = this.vie > 0 ? -Math.round(Math.abs(Math.sin(this.vie * 5)) * 3) : 0; Entites.poser(g, this.img, this.x, this.y + 1 + dy); },
+      zone() { return { x: this.x - 12, y: this.y - 20, w: 24, h: 22, dialogue: () => (Q.neige === 'gagne' ? ['Jack Snow. Il a l\'air très fier de son écharpe.', 'Ismae et Loane l\'ont construit ensemble, un soir de neige.'] : null) }; } };
+    J.carte.pnj.push(jack);
+    S.jackObj = jack;
+    Entites.portraits.jack = jack.img;
+    return jack;
+  }
+
   function apresVictoire(J) {
     Q.neige = 'gagne';
     J.cinematique = false;
@@ -340,10 +358,10 @@ const EpreuveNeige = (() => {
     J.dire(B().apres);
   }
 
-  // l'arrêt de bus : la suite de l'aventure (épreuve 4, pas encore faite)
-  function arretBus() {
+  // l'arrêt de bus : le départ de l'épreuve 4 (bus.js)
+  function arretBus(J) {
     if (Q.neige !== 'gagne') return B().busAvant;
-    Indices.suite({ titre: 'ÉPREUVE 4/6', lieu: '???', texte: 'Le bus de la ligne 4 arrive bientôt… La suite de l\'aventure est en préparation.', bouton: 'Rester à Arendelle' });
+    Bus.depart(J);
     return null;
   }
 

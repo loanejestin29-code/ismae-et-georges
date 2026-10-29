@@ -21,9 +21,10 @@ Jeu.enregistrerCarte('foret', () => {
   const C = new Carte('foret', W, H, { ambiance: 'crepuscule', fond: '#10201a' });
   const P = C.P, O = C.O, r = PX.rng(1404);
   const AUTOMNE = ['#c8802e', '#e0a83a', '#b8562a', '#d89a3a'];
-  C.feuilles = 2.4;
+  C.feuilles = 0.7;
   // il neige un peu près du chemin des montagnes (coin nord-ouest)
-  C.neige = (J) => Math.max(0, Math.min(1, 1.25 - Math.hypot(J.joueur.x - 60, J.joueur.y - 40) / 230));
+  // il neige doucement sur toute la forêt (c'est Noël), et beaucoup près du chemin des montagnes
+  C.neige = (J) => Math.max(0.55, Math.min(1.4, 1.6 - Math.hypot(J.joueur.x - 60, J.joueur.y - 40) / 230));
 
   // ---------------------------------------------------------------- où l'on peut marcher
   const NC = W / CW, NR = Math.ceil(H / CW);
@@ -103,6 +104,9 @@ Jeu.enregistrerCarte('foret', () => {
       P.px(x, y + 1, '#3f7a35'); P.px(x, y, col); P.px(x - 1, y, col); P.px(x + 1, y, col); P.px(x, y - 1, col); P.px(x, y, '#fff6c0');
     }
   };
+  // des plaques de neige sur l'herbe
+  const rn = PX.rng(2512);
+  for (let k = 0; k < 110; k++) eclaircir(rn.int(W), 60 + rn.int(H - 60), 14 + rn.int(36), 7 + rn.int(16), '#ffffff', 0.85);
   fleurs(830, 850, 140, 80, 260); fleurs(640, 740, 70, 30, 40); fleurs(200, 470, 80, 40, 50); fleurs(700, 200, 40, 30, 20); fleurs(330, 200, 30, 20, 16);
   // champignons (un cercle de fées dans la prairie)
   const champi = (x, y) => { P.px(x, y, '#f4efe6'); P.rect(x - 1, y - 2, 3, 2, '#d8323a'); P.px(x - 1, y - 2, '#ff8a7a'); P.px(x + 1, y - 1, '#ffffff'); };
@@ -357,6 +361,14 @@ Jeu.enregistrerCarte('foret', () => {
   };
   torche(484, 322); torche(574, 322); torche(TRIB.x + 62, TRIB.y + TRIB.h + 18); torche(TRIB.x + 106, TRIB.y + TRIB.h + 18); torche(396, 150); torche(664, 150);
   C.lumiere(236, 104, 26, 'win'); C.lumiere(900, 104, 26, 'win'); // le dedans des tentes
+  // sapins de Noël décorés : au campement de Robin et à l'entrée du tournoi
+  for (const [x, y, seed] of [[152, 874, 3], [420, 306, 4], [650, 306, 6]]) {
+    C.objet(Objets.grandSapin(seed), x, y, { solide: [-7, -4, 14, 5], ombre: [16, 4], rayon: 60, k: 'xmas' });
+  }
+  // guirlandes lumineuses : devant la tribune royale et au-dessus de l'entrée du tournoi
+  for (const [x, y, w, creux] of [[TRIB.x + 4, TRIB.y + TRIB.h - 10, TRIB.w - 8, 6], [486, 300, 86, 7], [200, 96, 76, 6], [864, 96, 76, 6]]) {
+    const gl = Objets.guirlande(w, creux); C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by]));
+  }
   // guirlandes de fanions, au premier plan
   C.dessusImg(Foret.fanions(100, 8, ['#c8343a', '#f2c230', '#3a5aa8', '#f4efe6']), 480, 290);
   C.dessusImg(Foret.fanions(286, 16, ['#f2c230', '#c8343a', '#f4efe6', '#3a5aa8']), 388, 52);

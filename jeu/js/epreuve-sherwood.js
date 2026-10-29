@@ -97,7 +97,6 @@ const Sherwood = (() => {
     ], () => {
       J.cinematique = false;
       Q.sherwood = 'tournoi';
-      banniere('Gagne le tournoi !');
     });
   }
 

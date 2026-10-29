@@ -376,6 +376,18 @@ Jeu.enregistrerCarte('superette', () => {
   C.solide(0, 434, 208, 14); C.solide(240, 434, W - 240, 14);
 
   const gl = Objets.guirlande(W - 32, 5); C.dessusImg(gl.img, 16, 40); gl.bulbs.forEach(([bx, by]) => C.scintille.push([16 + bx, 40 + by]));
+  // Noël au Carrefour : guirlandes au-dessus des caisses et de l'entrée, paquets cadeaux
+  for (const [x, y, w] of [[24, 372, 176], [248, 372, 176], [200, 410, 48]]) {
+    const g2 = Objets.guirlande(w, 6); C.dessusImg(g2.img, x, y); g2.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by]));
+  }
+  const cadeaux = () => {
+    const c = PX.canvas(24, 14), Q = PX.painter(c);
+    [[0, 5, 10, 9, '#c8343a', '#f2c230'], [9, 2, 9, 12, '#2a6a3a', '#f4efe6'], [16, 7, 8, 7, '#1d4f9c', '#e8b54a']].forEach(([x, y, w, h, col, rub]) => {
+      Q.rect(x, y, w, h, col); Q.hline(x, y, w, PX.shade(col, 0.3)); Q.vline(x + (w >> 1), y, h, rub); Q.hline(x, y + (h >> 1), w, rub); Q.px(x + (w >> 1) - 1, y - 1, rub); Q.px(x + (w >> 1) + 1, y - 1, rub);
+    });
+    return { img: c, ax: 12, ay: 13 };
+  };
+  C.objet(cadeaux(), 390, 428, { solide: [-12, -3, 24, 4] });
 
   // ---------------------------------------------------------------- personnages
   // répliques du magasin : avant l'épreuve, puis une fois Loane attrapée

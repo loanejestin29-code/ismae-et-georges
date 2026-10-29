@@ -19,11 +19,11 @@ const TirArc = (() => {
   // difficulté de chaque flèche : taille de la cible, ampleur et vitesse du viseur,
   // durée d'un aller-retour de la jauge (s), demi-largeur de la zone rouge (part de la jauge)
   const NIVEAUX = [
-    { taille: 1.00, amp: 0.58, vit: 0.85, periode: 1.90, rouge: 0.12 },
-    { taille: 1.00, amp: 0.67, vit: 0.95, periode: 1.75, rouge: 0.11 },
-    { taille: 0.90, amp: 0.77, vit: 1.05, periode: 1.60, rouge: 0.10 },
-    { taille: 0.90, amp: 0.86, vit: 1.15, periode: 1.50, rouge: 0.09 },
-    { taille: 0.80, amp: 0.96, vit: 1.25, periode: 1.40, rouge: 0.08 },
+    { taille: 1.00, amp: 0.58, vit: 1.70, periode: 1.05, rouge: 0.066 },
+    { taille: 1.00, amp: 0.67, vit: 1.90, periode: 0.96, rouge: 0.060 },
+    { taille: 0.90, amp: 0.77, vit: 2.10, periode: 0.88, rouge: 0.055 },
+    { taille: 0.90, amp: 0.86, vit: 2.30, periode: 0.83, rouge: 0.050 },
+    { taille: 0.80, amp: 0.96, vit: 2.50, periode: 0.77, rouge: 0.044 },
   ];
   const MARGE = 0.09; // zone orange de part et d'autre du rouge
   let E = null;
@@ -212,6 +212,14 @@ const TirArc = (() => {
     [['lapin', w - 16], ['lapin', w - 38]].forEach(([type, x], k) => tete(x, h - 4 - saute(k + 3), type));
   }
 
+  // la neige qui tombe sur le tournoi
+  function flocons(g, w, h, t) {
+    g.fillStyle = '#f4f6ff';
+    for (let k = 0; k < 46; k++) {
+      const v = 14 + (k % 5) * 5, x = Math.round((k * 97.3 + t * (4 + (k % 3) * 3) + Math.sin(t * 1.3 + k) * 6) % w), y = Math.round((k * 53.7 + t * v) % h);
+      g.fillRect(x, y, k % 4 ? 1 : 2, k % 4 ? 1 : 2);
+    }
+  }
   function draw(g, V, t) {
     if (!E) return;
     const w = V.w, h = V.h, P = PX.painter(g.canvas);
@@ -274,6 +282,7 @@ const TirArc = (() => {
       ecrire(P, '+' + d.pts, px, py, d.pts === 10 ? '#ffd24a' : d.pts >= 8 ? '#ff8a7a' : '#ffffff', 2);
     }
     publicDevant(P, w, h, t);
+    flocons(g, w, h, t);
     // la jauge de force (étape 2), juste à droite de la cible : on garde les yeux au même endroit
     if (!bloque) return;
     const gw = 10, gh = Math.max(2 * R + 8, Math.round(h * 0.4)), gx = tx + R + 16, gy = ty - (gh >> 1);

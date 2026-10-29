@@ -63,22 +63,34 @@ Jeu.enregistrerCarte('arendelle', () => {
   C.solide(426, 756, 8, 4); C.zone(420, 748, 20, 14, 'longueVue');
 
   // ---------------------------------------------------------------- rues et place pavées sous la neige
-  // neige tassée, quelques pavés qui dépassent, des traces de pas et de traîneaux
-  const pavesNeige = (x, y, w, h) => {
-    P.rect(x, y, w, h, '#d6deeb');
-    P.speckle(x, y, w, h, ['#e4ebf5', '#cad4e4', '#dfe6f1'], 0.18, r);
-    for (let k = 0; k < (w * h) / 90; k++) {
-      const px = x + r.int(w - 4), py = y + r.int(h - 3);
-      P.rect(px, py, 4 + r.int(2), 3, r.pick(['#a8b2c6', '#b2bccf', '#9ea8bc'])); P.hline(px, py, 4, '#c4cddc'); P.hline(px, py + 2, 4, '#8e98ac');
-      P.rect(px - 1, py - 1, 3 + r.int(3), 1, '#eef3fb');
+  // rue pavée déneigée au milieu (vieux pavés, traces de traîneau), poudrée de neige, congères sur les bords
+  const pavesNeige = (x, y, w, h, place = false) => {
+    Sol.paves(P, x, y, w, h, r, { base: ['#7c7c90', '#86869c', '#74748a', '#8c8698'], hi: '#a4a4b8', lo: '#606076', joint: '#525268' });
+    const horiz = w >= h, L = horiz ? h : w;
+    const img = P.g.getImageData(x, y, w, h), d = img.data;
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      // t : 0 au milieu de la rue (déneigé), 1 sur les bords ; sur la place, on part du centre
+      const t = place ? Math.hypot((i / w - 0.5) * 2, (j / h - 0.5) * 2) / 1.2 : Math.abs(((horiz ? j : i) + 0.5) / L - 0.5) * 2;
+      const traces = !place && Math.abs(t - 0.42) < 0.07; // les ornières des traîneaux, plus sombres
+      let a = traces ? 0.12 : Math.min(0.92, Math.max(0.3, (t - 0.15) * 1.25));
+      a += ((PX.bayer(x + i, y + j) / 16) - 0.5) * 0.12; // un grain très léger
+      const k = (j * w + i) * 4;
+      d[k] = d[k] * (1 - a) + 0xe6 * a; d[k + 1] = d[k + 1] * (1 - a) + 0xec * a; d[k + 2] = d[k + 2] * (1 - a) + 0xf6 * a;
     }
-    for (let k = 0; k < (w * h) / 1400; k++) { const px = x + r.int(w), py = y + r.int(h); P.rect(px, py, 2, 1, '#bcc6d8'); P.rect(px + 3, py + 4, 2, 1, '#bcc6d8'); }
-    P.hline(x, y, w, '#eef3fb'); P.hline(x, y + h - 1, w, '#c4cee0');
+    P.g.putImageData(img, x, y);
+    if (place) return;
+    // congères le long des bords
+    for (let k = 0; k < (horiz ? w : h); k += 2) {
+      const a = 2 + Math.round(Math.abs(Math.sin(k * 0.13 + x)) * 3);
+      if (horiz) { P.rect(x + k, y, 2, a, N); P.rect(x + k, y + h - a, 2, a, N); P.px(x + k, y + a, N3); P.px(x + k, y + h - a - 1, N3); }
+      else { P.rect(x, y + k, a, 2, N); P.rect(x + w - a, y + k, a, 2, N); P.px(x + a, y + k, N3); P.px(x + w - a - 1, y + k, N3); }
+    }
+    for (let k = 0; k < (w * h) / 700; k++) { const px = x + r.int(w), py = y + r.int(h); P.rect(px, py, 2, 1, '#9aa4bc'); P.rect(px + 2, py + 4, 2, 1, '#9aa4bc'); }
   };
   pavesNeige(590, 330, 420, 112);           // cour du château
   pavesNeige(776, 440, 48, 70);             // pont
   pavesNeige(450, 600, 730, 44);            // rue du nord, devant les maisons
-  pavesNeige(640, 640, 320, 170);           // la grande place
+  pavesNeige(640, 640, 320, 170, true);     // la grande place
   pavesNeige(760, 810, 80, 380);            // la grand-rue jusqu'à l'arrivée
   pavesNeige(450, 830, 730, 40);            // rue du sud
   // sentiers tassés dans la neige
@@ -148,6 +160,7 @@ Jeu.enregistrerCarte('arendelle', () => {
       C.objet(m, cx, base, {});
       C.solide(cx - m.mur / 2, d.fond ?? base - 26, m.mur, base - (d.fond ?? base - 26));
       m.lumieres.forEach(([lx, ly, rr, k]) => C.lumiere(cx - m.ax + lx, base - m.ay + ly, rr, k));
+      m.ampoules.forEach(([bx, by]) => C.scintille.push([cx - m.ax + bx, base - m.ay + by]));
       if (m.fumee) C.fumees.push({ x: cx - m.ax + m.fumee[0], y: base - m.ay + m.fumee[1], t: r() * 2 });
       C.zone(cx - 8, base - 6, 16, 10, 'maisonArendelle');
       maisons.push({ x: cx, y: base });
@@ -155,16 +168,28 @@ Jeu.enregistrerCarte('arendelle', () => {
     }
   };
   rangee(452, 600, [
-    { seed: 11, w: 64, style: 'long', couleur: '#a8343a', fond: 508 }, { seed: 12, w: 56, style: 'pignon', couleur: '#d8a838', fond: 508 },
-    { seed: 13, w: 66, style: 'long', couleur: '#3a6aa8', fond: 508 }, { seed: 14, w: 52, style: 'pignon', couleur: '#4f8a5a', fond: 508 },
-    { saut: 74 },
-    { seed: 15, w: 56, style: 'pignon', couleur: '#c86a3a', fond: 508 }, { seed: 16, w: 66, style: 'long', couleur: '#8a4a8a', fond: 508 },
-    { seed: 17, w: 54, style: 'pignon', couleur: '#2f7a8a', fond: 508 }, { seed: 18, w: 64, style: 'long', couleur: '#e8d8b8', fond: 508 },
+    { seed: 11, w: 62, style: 'long', couleur: '#a8343a', fond: 508 }, { seed: 12, w: 56, style: 'pignon', couleur: '#d8a838', fond: 508, boutique: 'bageri' },
+    { seed: 13, w: 64, style: 'long', couleur: '#3a6aa8', fond: 508 }, { seed: 14, w: 50, style: 'pignon', couleur: '#4f8a5a', fond: 508 },
+    { saut: 72 },
+    { seed: 15, w: 56, style: 'pignon', couleur: '#c86a3a', fond: 508, boutique: 'sjokolade' }, { seed: 16, w: 62, style: 'long', couleur: '#8a4a8a', fond: 508 },
+    { seed: 17, w: 54, style: 'pignon', couleur: '#2f7a8a', fond: 508, boutique: 'strikk' }, { seed: 18, w: 60, style: 'long', couleur: '#e8d8b8', fond: 508 },
   ]);
-  rangee(452, 830, [{ seed: 21, w: 68, style: 'pignon', couleur: '#3a6aa8' }, { seed: 22, w: 72, style: 'long', couleur: '#d8a838' }]);
-  rangee(986, 830, [{ seed: 23, w: 70, style: 'long', couleur: '#4f8a5a' }, { seed: 24, w: 56, style: 'pignon', couleur: '#a8343a' }]);
+  rangee(452, 830, [{ seed: 21, w: 66, style: 'pignon', couleur: '#3a6aa8', etages: 3, boutique: 'leker' }, { seed: 22, w: 66, style: 'long', couleur: '#d8a838', etages: 3 }]);
+  rangee(986, 830, [{ seed: 23, w: 66, style: 'long', couleur: '#4f8a5a', etages: 3, boutique: 'kafe' }, { seed: 24, w: 56, style: 'pignon', couleur: '#a8343a', etages: 3 }]);
   rangee(452, 1000, [{ seed: 25, w: 60, style: 'long', couleur: '#8a4a8a' }]);
   rangee(1000, 1000, [{ seed: 26, w: 64, style: 'pignon', couleur: '#c86a3a' }]);
+  rangee(646, 960, [{ seed: 27, w: 60, style: 'pignon', couleur: '#e8d8b8', boutique: 'bageri' }]);
+  rangee(856, 960, [{ seed: 28, w: 62, style: 'long', couleur: '#2f7a8a' }]);
+  // le petit mobilier : bancs, bûches, tonneaux, boîte aux lettres, bannières, statue
+  const mobilier = [
+    [A.banc(), 560, 640, [-13, -3, 26, 4], 'banc'], [A.banc(), 1040, 640, [-13, -3, 26, 4], 'banc'], [A.banc(), 612, 880, [-13, -3, 26, 4], 'banc'],
+    [A.buches(), 540, 612, [-12, -3, 24, 4], 'buches'], [A.buches(), 1100, 842, [-12, -3, 24, 4], 'buches'], [A.buches(), 620, 972, [-12, -3, 24, 4], 'buches'],
+    [A.tonneaux(), 1150, 612, [-12, -3, 24, 4], null], [A.tonneaux(), 960, 840, [-12, -3, 24, 4], null],
+    [A.boiteLettres(), 902, 614, [-3, -2, 6, 3], 'boiteLettres'], [A.boiteLettres(), 728, 974, [-3, -2, 6, 3], 'boiteLettres'],
+    [A.banniere(), 642, 646, [-1, -2, 4, 3], null], [A.banniere(), 958, 646, [-1, -2, 4, 3], null], [A.banniere(), 642, 806, [-1, -2, 4, 3], null], [A.banniere(), 958, 806, [-1, -2, 4, 3], null],
+    [A.statue(), 1000, 780, [-12, -10, 24, 11], 'statue'],
+  ];
+  for (const [obj, x, y, sol, texte] of mobilier) C.objet(obj, x, y, { solide: sol, ombre: [Math.max(4, obj.img.width / 2 - 2), 3], texte, zw: Math.max(16, obj.img.width) });
   // guirlandes lumineuses au-dessus des rues
   for (const [x, y, w] of [[640, 606, 120], [840, 606, 120], [640, 812, 110], [850, 812, 110]]) {
     const gl = Objets.guirlande(w, 6); C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by]));
@@ -218,7 +243,7 @@ Jeu.enregistrerCarte('arendelle', () => {
   }
   // une rangée de sapins au pied des montagnes et quelques-uns au bord du lac
   for (let x = 450; x < W; x += 34 + r.int(16)) { if (x > 560 && x < 1040) continue; planter(x, 212 + r.int(14), 30); }
-  for (const [x, y] of [[460, 260], [470, 380], [460, 470], [430, 1112], [520, 1150], [690, 1150], [930, 1140], [1060, 1120], [1180, 1160], [700, 920], [430, 1150], [1150, 1060]]) planter(x, y, 24);
+  for (const [x, y] of [[460, 260], [470, 380], [460, 470], [430, 1112], [520, 1150], [690, 1150], [930, 1140], [1060, 1120], [1180, 1160], [430, 1150], [1150, 1060]]) planter(x, y, 24);
   for (let k = 0; k < 40; k++) { const a = r() * 6.28, d = 60 + r.int(40); P.px(1400 + Math.cos(a) * d * 1.3, 560 + Math.sin(a) * d * 0.9, '#6a8a6a'); }
   C.solide(W - 8, HAUT, 8, H - HAUT - 70);
 
@@ -249,6 +274,7 @@ Jeu.enregistrerCarte('arendelle', () => {
   // ---------------------------------------------------------------- l'arrivée (sud)
   C.objet(A.pancarte(['ARENDELLE', 'BIENVENUE']), 852, 1140, { solide: [-2, -2, 4, 3], texte: 'bienvenue', zw: 20 });
   C.arrivees.entree = { x: 800, y: 1150, dir: 'up' };
+  C.arrivees.arret = { x: 1486, y: 1162, dir: 'right' };
   C.porte(770, 1188, 60, 12, 'arendelle', 'entree', 'down');
   C.portes[C.portes.length - 1].condition = () => { Jeu.dire('sortieArendelle'); Jeu.joueur.y -= 8; return false; };
   // secret : le gant d'Elsa, au bord du canal

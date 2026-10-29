@@ -56,6 +56,12 @@ const Foret = (() => {
     line(P, cx, haut + 4, cx + 2, haut - 20, BOIS.moyen, 4);
     // feuillage
     const blobs = feuillage(P, r, cx, 40, W / 2 - 14, 30, Math.round(W / 3), { automne: o.automne ?? 0.6 });
+    // un peu de neige posée sur le haut du feuillage (Noël !)
+    if (o.neige !== false) for (const [bx, by, b] of blobs) {
+      if (r() > 0.75) continue;
+      const w = Math.max(2, b - 4);
+      for (let x = -w; x <= w; x++) { const h = Math.max(0, Math.round(1.6 - Math.abs(x) / w * 1.6)); P.rect(bx - 2 + x, by - b + 2 - h, 1, h + 1, Math.abs(x) > w * 0.6 ? '#c8d6ea' : '#eef3fb'); }
+    }
     // détails sur le tronc
     if (o.trou) { P.ellipse(cx, base - 26, 3, 5, '#1d1410'); P.ellipse(cx, base - 27, 2, 3, '#0e0a08'); P.hline(cx - 3, base - 21, 7, BOIS.clair); }
     if (o.coeur) {
@@ -207,6 +213,10 @@ const Foret = (() => {
     for (let x = cx - 23; x < cx + 23; x += 8) P.rect(x, 35, 4, 25, c2);
     P.dither(cx - 23, 35, 46, 6, '#24183a', 5);
     P.trap(cx - 2, 4, cx - 8, 16, 42, 18, '#2a1e2e'); P.trap(cx - 1, 2, cx - 6, 12, 44, 16, '#3a2a3a');
+    // la neige sur le toit pointu, et une couronne de houx au-dessus de l'entrée
+    for (let j = 0; j < 9; j++) { const w = Math.round(2 + j * 1.15) - (j > 6 ? 2 : 0); P.rect(cx - w, 10 + j, w * 2 + 1, 1, j === 8 ? '#c8d6ea' : '#eef3fb'); }
+    for (let x = cx - 12; x <= cx + 12; x += 3) P.px(x, 19 + (x % 2), '#eef3fb');
+    P.ellipse(cx, 38, 4, 3, '#2f6a3a'); P.ellipse(cx, 38, 2, 1, '#3a2a3a'); P.px(cx - 2, 40, '#d8323a'); P.px(cx + 2, 40, '#d8323a'); P.px(cx, 41, '#d8323a');
     line(P, cx - 2, 42, cx - 10, 59, S(c1, -0.3)); line(P, cx + 2, 42, cx + 10, 59, S(c1, -0.3));
     P.hline(cx - 23, 59, 46, S(c1, -0.4));
     void r;

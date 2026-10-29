@@ -56,24 +56,33 @@ const Neige = (() => {
   const olaf = () => jeu(OLAF, OLAF_PAL, OLAF_JAMBES);
 
   // ------------------------------------------------------------ SVEN (le renne)
-  // F pelage, f ombre, D clair (museau, ventre), a bois, E œil, N truffe, h sabots, t queue
+  // un grand renne : F pelage brun, f ombre, L reflet du dos, D crème (cou, museau, ventre),
+  // a/A bois, E œil, N grosse truffe, h sabots, t queue blanche
+  const larg = (n) => (rows) => rows.map((r) => r.padEnd(n, '.'));
   const SVEN = {
-    side: ['..................a...a.....', '.................aa..aa.....', '..................aaaa......', '..................FFFF......', '.................FFFFFF.....',
-      '.................FFEFFDD....', '.................FFFFDDDN...', '................FFFF.DD.....', '..FFFFFFFFFFFFFFFFF.........', '.FFFFFFFFFFFFFFFFFFF........',
-      't.FFFFFFFFFFFFFFFFF.........', 'tFFFFFFFFFFFFFFFFFF.........', '..fDDDDDDDDDDDDDff..........', '...FF..FF.....FF..FF........', '...FF..FF.....FF..FF........',
-      '...Ff..Ff.....Ff..Ff........', '...hh..hh.....hh..hh........'],
-    down: ['..a..........a..', '..aa........aa..', '...aa.FFFF.aa...', '....aFFFFFFa....', '..ff.FFFFFF.ff..', '.....FEFFEF.....', '.....FFFFFF.....',
-      '.....FDDDDF.....', '......DNND......', '......DDDD......', '....FFFFFFFF....', '...FFFFFFFFFF...', '...FDDDDDDDDF...', '...FF......FF...',
-      '...FF......FF...', '...Ff......Ff...', '...hh......hh...'],
+    side: larg(38)([
+      '.....................a....a...a', '.....................a....a..aa', '...................aa.a..aa.a', '....................aaa.a.aAa..a',
+      '......................aAa..aaaa', '.......................aa..aa', '........................aaaa', '.......................fFFFFFf',
+      '......................ffFFFFFFFf', '.......................FFFFEFFFFF', '.......................FFFFFFFDDDDD', '.......................FFFFFFDDDDDDN',
+      '......................DDFFFFFDDDDDNN', '......................DDDFFFF.DDDD', '.ttt.FFFFFFFFFFFFFFFFDDDDFFF', 'tttFFFFLLLLLLLLLLFFFFDDDDDFF',
+      '..FFFFFFFFFFFFFFFFFFFDDDDDF', '..FFFFFFFFFFFFFFFFFFFFDDDDF', '..fFFFFFFFFFFFFFFFFFFFFDDF', '..fFFFFFFFFFFFFFFFFFFFFFF',
+      '...fFFFFDDDDDDDDDDDDDFFFf', '...fFF.fF.........fFF.fF', '...fF..fF.........fF..fF', '...fF..fF.........fF..fF',
+      '...fF..fF.........fF..fF', '...ff..ff.........ff..ff', '...hh..hh.........hh..hh']),
+    down: larg(24)([
+      '..a..a............a..a', '..aa.a...........a.aa', '...aaa..a......a..aaa', '....aaaa........aaaa', '......aaa......aaa', '........aa....aa',
+      '.......ff.FFFF.ff', '........fFFFFFFf', '.........FFFFFF', '.........FEFFEF', '.........FFFFFF', '.........FDDDDF', '..........DNND',
+      '..........DDDD', '.......DDDDDDDDDD', '......FFDDDDDDDDFF', '.....FFFFDDDDDDFFFF', '.....FFFFFDDDDFFFFF', '.....FFFFFFFFFFFFFF',
+      '.....fFFFFFFFFFFFFf', '.....fFFFFFFFFFFFFf', '......fFF......FFf', '......fF........Ff', '......fF........Ff', '......ff........ff', '......hh........hh']),
   };
   SVEN.up = SVEN.down.map((r) => r.replace(/[EDN]/g, 'F'));
   const SVEN_JAMBES = {
-    side: [['....FF..FF...FF..FF........', '....FF..FF...FF..FF........', '....Ff..Ff...Ff..Ff........', '....hh..hh...hh..hh........'].map((r) => r + '.'),
-      [['..FF....FF..FF....FF.......', '..FF....FF..FF....FF.......', '..Ff....Ff..Ff....Ff.......', '..hh....hh..hh....hh.......'].map((r) => r + '.')][0]],
-    down: [['...FF.......FF..', '...Ff.......Ff..', '...hh.......hh..'].map((r) => r.slice(0, 16)), ['....FF....FF....', '....Ff....Ff....', '....hh....hh....']],
+    side: [larg(38)(['..fF....fF.......fF....fF', '..fF....fF.......fF....fF', '.fF......fF.....fF......fF', '.ff......ff.....ff......ff', '.hh......hh.....hh......hh']),
+      larg(38)(['....fFfF............fFfF', '....fFfF............fFfF', '....fFfF............fFfF', '....ffff............ffff', '....hhhh............hhhh'])],
+    down: [larg(24)(['......fF........Ff', '.....fF..........Ff', '.....ff..........ff', '.....hh..........hh']),
+      larg(24)(['.......fF......Ff', '.......fF......Ff', '.......ff......ff', '.......hh......hh'])],
   };
   SVEN_JAMBES.up = SVEN_JAMBES.down;
-  const SVEN_PAL = { F: '#8a6a4a', f: '#6a4a32', D: '#e0c8a8', a: '#d0b890', E: '#1d1626', N: '#2a1a14', h: '#3a2a20', t: '#e0c8a8', w: '#6a4a32' };
+  const SVEN_PAL = { F: '#7a5838', f: '#523a26', L: '#9a7450', D: '#ecdcc0', a: '#d8c49c', A: '#f2e4c4', E: '#1d1626', N: '#2a1a14', h: '#2a1e18', t: '#f4ecdc', w: '#7a5838' };
   const sven = () => jeu(SVEN, SVEN_PAL, SVEN_JAMBES);
 
   // ------------------------------------------------------------ petits figurants : trolls et enfants
@@ -105,7 +114,7 @@ const Neige = (() => {
   }
 
   // ------------------------------------------------------------ Anna, Elsa, Kristoff, Oaken, les gardes
-  const ST = Sprites.ISMAE_STYLE, LO = Sprites.LOANE_STYLE, TO = Sprites.TOM_STYLE, JU = Sprites.JUPE;
+  const ST = Sprites.ISMAE_STYLE, TO = Sprites.TOM_STYLE, JU = Sprites.JUPE;
   const ferme = (rows) => rows.map((r) => r.replace(/I/g, 'T').replace(/i/g, 't'));
   // longue robe (Elsa)
   const ROBE = {
@@ -122,12 +131,29 @@ const Neige = (() => {
   });
   const TORSE_OUVERT = { down: ST.down.torse, up: ST.up.torse, side: ST.side.torse };
   const TORSE_FERME = { down: ST.down.torse.map(ferme), up: ST.up.torse.map(ferme), side: ST.side.torse.map(ferme) };
-  const TETE_LONGS = { down: LO.down.tete, up: LO.up.tete, side: LO.side.tete };
-  // Anna : deux tresses qui tombent devant les épaules
+  // cheveux longs (Elsa)
+  const TETE_LONGS = {
+    down: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.', '.hHHHHHHHHhHHHh.', '.hHHhKKKKKKhHHh.',
+      '.HHhKKKKKKKKhHH.', '.HHKKEKKKKEKKHH.', '.HHKKEKKKKEKKHH.', '.HHkmKKKKKKmkHH.', '.hHHkkKKKKkkHHh.'],
+    up: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.', '.hHHHHHHHLHHHHh.', '.hHHHHHHHHHHHHh.',
+      '.HHHHLHHHHHHHHH.', '.HHHHHHHHHHHHHH.', '.HHHHHHHHHLHHHH.', '.HHHHHHHHHHHHHH.', '.hHHHHHHHHHHHHh.'],
+    side: ['.....hHHHHh.....', '...hHHHLLHHh....', '..hHHHLLHHHHh...', '.hHHHLHHHHHHHh..', '.hHHHHHHHHHHHHh.', '.hHHHHHHhHHhKh..', '.HHHHHHhKKKKKK..',
+      '.HHHHHkKKKKEKK..', '.HHHHHkKKKKEKKK.', '.HHHHHKKKKmKK...', '.hHHHhkKKKKKKk..', '.hHHHh.kkKKkk...'],
+  };
+  // Anna : raie au milieu, mèche blanche (Y) sur le côté, cheveux tirés derrière les oreilles…
+  const TETE_ANNA = {
+    down: ['.....hHHHHh.....', '...hHYHLLHHHh...', '..hHYHLLHHHHHh..', '..HYHLHHHHHHHH..', '.hHYHHHHHHHHHHh.', '.hHHHHHHHhHHHHh.', '.hHHhKKKKKKhHHh.',
+      '..HhKKKKKKKKhH..', '..HKKEKKKKEKKH..', '..HKKEKKKKEKKH..', '..HkmKKKKKKmkH..', '..hHkkKKKKkkHh..'],
+    up: ['.....hHHHHh.....', '...hHHHLLHYHh...', '..hHHHLLHHHYHh..', '..HHHLHHHHHHYH..', '.hHHLHHHHHHHHHh.', '.hHHHHHHHLHHHHh.', '.hHHHHHHHHHHHHh.',
+      '..HHHLHHHHHHHH..', '..HHHHHHHHHHHH..', '..hHHHHHHHLHHh..', '..khHHHHHHHHhk..', '...kKKKKKKKKk...'],
+    side: ['.....hHHHHh.....', '...hHHYYLHHh....', '..hHHHLLYHHHh...', '.hHHHLHHHHYHHh..', '.hHHHHHHHHHHHHh.', '.hHHHHHHhHHhKh..', '.hHHHHHhKKKKKK..',
+      '..hHHHkKKKKEKK..', '..hHHHkKKKKEKKK.', '..hHHHKKKKmKK...', '...hHhkKKKKKKk..', '....h..kkKKkk...'],
+  };
+  // … et deux grosses tresses tressées qui tombent devant les épaules
   const TRESSES = {
-    down: ['..hH........Hh..', '..HL........LH..', '..hH........Hh..', '..HL........LH..', '..hH........Hh..', '...h........h...'],
-    up: ['.hHHHHHHHHHHHHh.', '..hHHHHHHHHHHh..', '...hH......Hh...', '...HL......LH...', '...hH......Hh...', '....h......h....'],
-    side: ['.hHHh...........', '.hHLh...........', '..hH............', '..HL............', '..hH............', '...h............'],
+    down: ['.hHh........hHh.', '.HLH........HLH.', '..hHh......hHh..', '..HLH......HLH..', '..hHh......hHh..', '..HLH......HLH..', '..hHh......hHh..', '...h........h...'],
+    up: ['.hHh........hHh.', '..hh........hh..'],
+    side: ['......hHh.......', '......HLH.......', '.......hHh......', '.......HLH......', '.......hHh......', '.......HLH......', '........h.......'],
   };
   // Elsa : une grosse tresse sur l'épaule
   const TRESSE = {
@@ -156,7 +182,7 @@ const Neige = (() => {
   const TETE_GARDE = { down: TO.down.tete, up: TO.up.tete, side: TO.side.tete };
   const JAMBES_PANTALON = { down: ST.down.jambes, up: ST.down.jambes, side: ST.side.jambes };
   const MODELES = {
-    anna: modele(TETE_LONGS, TORSE_OUVERT, { down: JU.down, up: JU.down, side: JU.side }, TRESSES),
+    anna: modele(TETE_ANNA, TORSE_OUVERT, { down: JU.down, up: JU.down, side: JU.side }, TRESSES),
     elsa: modele(TETE_LONGS, TORSE_FERME, ROBE, TRESSE),
     kristoff: modele(TETE_KRISTOFF, TORSE_OUVERT, JAMBES_PANTALON),
     oaken: modele(TETE_OAKEN, TORSE_FERME, JAMBES_PANTALON),
@@ -165,51 +191,52 @@ const Neige = (() => {
   const humain = (nom, cfg) => Sprites.person(Object.assign({}, cfg, { modele: MODELES[nom] }));
 
   // ------------------------------------------------------------ JACK SNOW
-  // dessin à la taille du jeu (28 × 44) ; morceaux = { base, corps, tete, yeux, nez, brasG, brasD, boutons, echarpe }
+  // dessin à la taille du jeu (34 × 46) ; morceaux = { base, corps, tete, yeux, nez, brasG, brasD, boutons, echarpe }
+  // Comme sur la photo, il penche vers la droite : chaque boule est un peu décalée par rapport à celle du dessous.
   // o.vie : 0 (immobile) ou le temps de l'animation quand il prend vie ; o.contour : silhouettes des places vides
-  const JACK = { W: 30, H: 46, cx: 15, sol: 44 };
+  const JACK = { W: 34, H: 46, cx: 15, sol: 44 };
   const N1 = '#f4f8ff', N2 = '#d8e4f4', N3 = '#aec2dc', N4 = '#8aa0c0';
   function boule(P, cx, cy, rx, ry) {
     P.ellipse(cx, cy, rx + 1, ry + 1, N4); P.ellipse(cx, cy, rx, ry, N3); P.ellipse(cx - 1, cy - 1, rx - 1, ry - 1, N2);
     P.ellipse(cx - 2, cy - 2, Math.max(1, rx - 3), Math.max(1, ry - 3), N1); P.px(cx - Math.round(rx * 0.5), cy - Math.round(ry * 0.5), '#ffffff');
   }
+  const PENCHE = { corps: 2, haut: 4, tete: 6 }; // décalage vers la droite du ventre, du haut du corps et de la tête
   // où va chaque morceau (aussi utilisé par le mini-jeu pour les places à remplir)
   const PLACES = {
-    base: { x: 15, y: 36, rx: 11, ry: 7 }, corps: { x: 15, y: 23, rx: 9, ry: 7 }, tete: { x: 15, y: 9, rx: 7, ry: 7 },
-    yeux: { x: 15, y: 7, rx: 5, ry: 2 }, nez: { x: 15, y: 11, rx: 5, ry: 2 }, brasG: { x: 4, y: 19, rx: 4, ry: 3 }, brasD: { x: 26, y: 17, rx: 4, ry: 4 },
-    boutons: { x: 15, y: 24, rx: 2, ry: 5 }, echarpe: { x: 15, y: 16, rx: 8, ry: 4 },
+    base: { x: 15, y: 36, rx: 11, ry: 7 }, corps: { x: 18, y: 23, rx: 9, ry: 7 }, tete: { x: 21, y: 9, rx: 7, ry: 7 },
+    yeux: { x: 21, y: 7, rx: 5, ry: 2 }, nez: { x: 21, y: 12, rx: 5, ry: 2 }, brasG: { x: 7, y: 19, rx: 4, ry: 3 }, brasD: { x: 30, y: 16, rx: 3, ry: 4 },
+    boutons: { x: 18, y: 24, rx: 2, ry: 5 }, echarpe: { x: 20, y: 17, rx: 8, ry: 5 },
   };
   function jack(m, o = {}) {
     const { c, P } = (() => { const cc = PX.canvas(JACK.W, JACK.H); return { c: cc, P: PX.painter(cc) }; })();
-    const vie = o.vie || 0, bouge = vie > 0;
-    const leve = bouge ? Math.round(Math.abs(Math.sin(vie * 6)) * 3) : 0;
+    const vie = o.vie || 0, bouge = vie > 0, { corps: dc, haut: dh, tete: dt } = PENCHE;
     const B = '#6a4428', B2 = '#3a2618';
-    if (m.brasG) { const a = bouge ? Math.sin(vie * 8) * 3 : 0; line(P, 8, 21, 1, 17 - a, B); line(P, 4, 19 - a / 2, 2, 15 - a, B); line(P, 3, 18 - a / 2, 0, 19 - a, B2); }
-    if (m.brasD) { const a = bouge ? Math.sin(vie * 8 + 1.5) * 4 : 0; line(P, 22, 20, 28, 13 - a, B); line(P, 25, 16 - a / 2, 29, 17 - a, B); line(P, 27, 14 - a, 28, 10 - a, B2); }
+    if (m.brasG) { const a = bouge ? Math.sin(vie * 8) * 3 : 0, x0 = 9 + dc; line(P, x0, 21, x0 - 7, 17 - a, B); line(P, x0 - 4, 19 - a / 2, x0 - 6, 15 - a, B); line(P, x0 - 5, 18 - a / 2, x0 - 8, 19 - a, B2); }
+    if (m.brasD) { const a = bouge ? Math.sin(vie * 8 + 1.5) * 4 : 0, x0 = 21 + dh; line(P, x0, 20, x0 + 6, 13 - a, B); line(P, x0 + 3, 16 - a / 2, x0 + 7, 17 - a, B); line(P, x0 + 5, 14 - a, x0 + 6, 10 - a, B2); }
     if (m.base) { boule(P, 15, 36, 11, 7); P.ellipse(15, 42, 13, 2, N3); P.ellipse(15, 41, 12, 1, N2); }
-    if (m.corps) { boule(P, 15, 25, 9, 6); boule(P, 15, 18, 7, 4); }
-    if (m.boutons) for (const y of [21, 25, 29]) { P.rect(14, y, 2, 2, '#2a2632'); P.px(14, y, '#5a5668'); }
-    if (m.tete) boule(P, 15, 9 - leve * 0, 7, 7);
+    if (m.corps) { boule(P, 15 + dc, 25, 9, 6); boule(P, 15 + dh, 18, 7, 4); }
+    if (m.boutons) for (const [y, dx] of [[21, dh - 1], [25, dc], [29, dc - 1]]) { P.rect(14 + dx, y, 2, 2, '#2a2632'); P.px(14 + dx, y, '#5a5668'); }
+    if (m.tete) boule(P, 15 + dt, 9, 7, 7);
     if (m.yeux) {
       const cligne = bouge && Math.floor(vie * 3) % 4 === 3;
       // deux cuillères ovales, argentées et brillantes
-      for (const ex of [12, 18]) {
+      for (const ex of [12 + dt, 18 + dt]) {
         if (cligne) { P.hline(ex - 1, 7, 3, '#4a4658'); continue; }
         P.rect(ex - 1, 5, 3, 4, '#6a6678'); P.px(ex - 1, 5, N1); P.px(ex + 1, 5, N1); P.px(ex - 1, 8, N2); P.px(ex + 1, 8, N2);
         P.rect(ex - 1, 6, 2, 2, '#c8ccd8'); P.px(ex, 5, '#e8eaf2'); P.px(ex - 1, 6, '#ffffff');
       }
     }
     if (m.nez) {
-      P.hline(14, 10, 3, B2); P.px(17, 9, B2);
+      P.hline(14 + dt, 10, 3, B2); P.px(17 + dt, 9, B2);
       const ouvert = bouge && Math.floor(vie * 4) % 2;
-      for (const [x, y] of [[10, 12], [11, 13], [12, 13], [13, 14], [14, 14], [15, 14], [16, 14], [17, 13], [18, 13], [19, 12]]) P.px(x, y, B);
-      if (ouvert) { P.hline(13, 15, 4, '#5a3a4a'); }
+      for (const [x, y] of [[10, 12], [11, 13], [12, 13], [13, 14], [14, 14], [15, 14], [16, 14], [17, 13], [18, 13], [19, 12]]) P.px(x + dt, y, B);
+      if (ouvert) { P.hline(13 + dt, 15, 4, '#5a3a4a'); }
     }
     if (m.echarpe) {
-      const k = '#1d1a22', h = '#3a3644';
-      P.rect(8, 14, 15, 3, k); P.hline(8, 14, 15, h);
-      P.rect(18, 16, 3, 13, k); P.vline(18, 16, 13, h); for (let x = 18; x < 21; x++) P.px(x, 29 + (x % 2), k);
-      P.rect(10, 16, 2, 5, k); P.px(10, 21, k); P.px(11, 22, k);
+      const k = '#1d1a22', h = '#3a3644', x0 = 8 + dh + 1;
+      P.rect(x0, 14, 15, 3, k); P.hline(x0, 14, 15, h);
+      P.rect(x0 + 10, 16, 3, 13, k); P.vline(x0 + 10, 16, 13, h); for (let x = x0 + 10; x < x0 + 13; x++) P.px(x, 29 + (x % 2), k);
+      P.rect(x0 + 2, 16, 2, 5, k); P.px(x0 + 2, 21, k); P.px(x0 + 3, 22, k);
     }
     // les places encore libres : une ombre bleutée et des pointillés foncés (bien visibles sur la neige)
     if (o.contour) for (const [nom, p] of Object.entries(PLACES)) {

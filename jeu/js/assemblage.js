@@ -164,6 +164,8 @@ const Assemblage = (() => {
     if (E.prise) { const p = E.prise.p; g.drawImage(p.img, Math.round(E.prise.x - E.prise.fx * p.w * L.s), Math.round(E.prise.y - E.prise.fy * p.h * L.s), p.w * L.s, p.h * L.s); }
     // étincelles
     for (const s of E.etincelles) { const d = s.t * 40; g.fillStyle = '#fff4c0'; g.fillRect(Math.round(s.x + Math.cos(s.a) * d), Math.round(s.y + Math.sin(s.a) * d), 2, 2); }
+    g.fillStyle = '#f4f6ff'; // la neige qui tombe
+    for (let k = 0; k < 50; k++) { const x = Math.round((k * 97.3 + t * 5 + Math.sin(t + k) * 5) % w), y = Math.round((k * 53.7 + t * (12 + (k % 4) * 6)) % h); g.fillRect(x, y, k % 4 ? 1 : 2, k % 4 ? 1 : 2); }
     if (E.fini) for (let k = 0; k < 12; k++) { const a = k / 12 * 6.28 + t * 2, d = 20 + E.fini * 30; g.fillStyle = k % 2 ? '#ffffff' : '#bfe8ff'; g.fillRect(Math.round(L.ox + 15 * L.s + Math.cos(a) * d), Math.round(L.oy + 20 * L.s + Math.sin(a) * d * 0.7), 2, 2); }
   }
 

@@ -355,9 +355,11 @@ const Sprites = (() => {
     },
   };
 
-  // ------------------------------------------------------------ LOANE (même style, cheveux longs, manteau, jupe)
-  // les mèches (M) retombent sur les épaules ; N/n collants, B/b/W bottines
-  const JUPE = {
+  // ------------------------------------------------------------ LOANE (même style qu'Ismae)
+  // chignon (posé un peu plus bas sur le haut de la tête), frange, deux mèches très fines ; polaire Carrefour
+  // (bleu roi T, bleu nuit X aux épaules et aux manches, fermeture Z, logo S en noir sur le cœur),
+  // même pantalon large qu'Ismae, chaussures toutes noires
+  const JUPE = { // (ancienne tenue, gardée pour d'autres personnages)
     down: [
       ['.....pPPPPp.....', '....pPOPPOPp....', '...pPOPPPPOPp...', '....nN....Nn....', '....nN....Nn....', '....nN....Nn....', '...bBBB..BBBb...', '...WWWW..WWWW...'],
       ['.....pPPPPp.....', '....pPOPPOPp....', '...pPOPPPPOPp...', '....nN....Nn....', '....nN...bBBb...', '....nN...WWWW...', '...bBBB.........', '...WWWW.........'],
@@ -369,28 +371,41 @@ const Sprites = (() => {
       ['......PPPPP.....', '.....pPPOPPp....', '....pPPPOPPPp...', '.....NN..nN.....', '....NN....nN....', '...NN......nN...', '..BBBb....bBBBB.', '..WWWW....WWWWW.'],
     ],
   };
+  const POLAIRE = {
+    down: [
+      ['.......kk.......', '.....xXZZXx.....', '....xXXZZXXx....', '...xXTTZZSSXx...', '...XxTTZZSTxX...', '...XxTTZZTTxX...', '...XxTTZZTTxX...', '...kK.tTTt.Kk...', '......PPPP......'],
+      ['.......kk.......', '.....xXZZXx.....', '....xXXZZXXx....', '...xXTTZZSSXx...', '...XxTTZZSTxX...', '...XxTTZZTTxX...', '...XxTTZZTTKk...', '...kK.tTTt......', '......PPPP......'],
+      ['.......kk.......', '.....xXZZXx.....', '....xXXZZXXx....', '...xXTTZZSSXx...', '...XxTTZZSTxX...', '...XxTTZZTTxX...', '...kKTTZZTTxX...', '......tTTt.Kk...', '......PPPP......'],
+    ],
+    up: [
+      ['.......kk.......', '.....xXXXXx.....', '....xXXXXXXx....', '...xXTTTTTTXx...', '...XxTTTTTTxX...', '...XxTTTTTTxX...', '...XxTTTTTTxX...', '...kK.tTTt.Kk...', '......PPPP......'],
+      ['.......kk.......', '.....xXXXXx.....', '....xXXXXXXx....', '...xXTTTTTTXx...', '...XxTTTTTTxX...', '...XxTTTTTTxX...', '...XxTTTTTTKk...', '...kK.tTTt......', '......PPPP......'],
+      ['.......kk.......', '.....xXXXXx.....', '....xXXXXXXx....', '...xXTTTTTTXx...', '...XxTTTTTTxX...', '...XxTTTTTTxX...', '...kKTTTTTTxX...', '......tTTt.Kk...', '......PPPP......'],
+    ],
+    side: ISMAE_STYLE.side.torse.map((rows) => rows.map((r, y) => {
+      let t = r.replace(/I/g, 'T').replace(/U/g, 'X');
+      if (y === 1 || y === 2) t = t.replace(/t/g, 'x').replace(/T/g, 'X');
+      if (y === 3) t = t.slice(0, 9) + 'S' + t.slice(10);
+      return t;
+    })),
+  };
   const LOANE_STYLE = {
-    largeur: 16, hauteur: 30,
+    largeur: 16, hauteur: 31, decalage: 1,
     down: {
-      tete: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.',
-        '.hHHHHHHHHhHHHh.', '.hHHhKKKKKKhHHh.', '.HHhKKKKKKKKhHH.', '.HHKKEKKKKEKKHH.', '.HHKKEKKKKEKKHH.',
-        '.HHkmKKKKKKmkHH.', '.hHHkkKKKKkkHHh.'],
-      meches: ['.hHH........HHh.', '.hHH........HHh.', '.hHh........hHh.', '..hh........hh..'],
-      torse: ISMAE_STYLE.down.torse, jambes: JUPE.down,
+      tete: ['......hHHh......', '.....hHLHHh.....', '......hhhh......', '....hhHHHHhh....', '...hHHLHHHLHh...', '..hHHHHHHHHHHh..', '..hHHHHHHHHHHh..',
+        '..hHhHHhHHhHHh..', '..HKKKKKKKKKKH..', '..HKKEKKKKEKKH..', '..HKKEKKKKEKKH..', '..HkKKKKKKKKkH..', '..h.kkKKKKkk.h..'],
+      meches: ['..h..........h..'], // deux mèches très fines de chaque côté du visage
+      torse: POLAIRE.down, jambes: ISMAE_STYLE.down.jambes,
     },
     up: {
-      tete: ['.....hHHHHh.....', '...hHHHLLHHHh...', '..hHHHLLHHHHHh..', '..HHHLHHHHHHHH..', '.hHHLHHHHHHHHHh.',
-        '.hHHHHHHHLHHHHh.', '.hHHHHHHHHHHHHh.', '.HHHHLHHHHHHHHH.', '.HHHHHHHHHHHHHH.', '.HHHHHHHHHLHHHH.',
-        '.HHHHHHHHHHHHHH.', '.hHHHHHHHHHHHHh.'],
-      meches: ['.hHHHHHHHHHHHHh.', '.hHHHHHHHHHHHHh.', '..hHHHHHHHHHHh..', '..hHHHHHHHHHHh..', '...hhHHHHHHhh...', '.....hhhhhh.....'],
-      torse: ISMAE_STYLE.up.torse, jambes: JUPE.down,
+      tete: ['......hHHh......', '.....hHLHHh.....', '......hhhh......', '....hhHHHHhh....', '...hHHLHHHLHh...', '..hHHHHHHHHHHh..', '..hHHHLHHHHHHh..',
+        '..hHHHHHHHHHHh..', '..hHHHHHHLHHHh..', '...hHHHHHHHHh...', '...khHHHHHHhk...', '...kKKKKKKKKk...', '....kkKKKKkk....'],
+      torse: POLAIRE.up, jambes: ISMAE_STYLE.down.jambes,
     },
     side: {
-      tete: ['.....hHHHHh.....', '...hHHHLLHHh....', '..hHHHLLHHHHh...', '.hHHHLHHHHHHHh..', '.hHHHHHHHHHHHHh.',
-        '.hHHHHHHhHHhKh..', '.HHHHHHhKKKKKK..', '.HHHHHkKKKKEKK..', '.HHHHHkKKKKEKKK.', '.HHHHHKKKKmKK...',
-        '.hHHHhkKKKKKKk..', '.hHHHh.kkKKkk...'],
-      meches: ['.hHHHh..........', '.hHHHh..........', '.hHHh...........', '..hh............'],
-      torse: ISMAE_STYLE.side.torse, jambes: JUPE.side,
+      tete: ['...hHHh.........', '..hHLHHh........', '...hhhhhh.......', '...hhHHHHhh.....', '...hHHLHHHHh....', '..hHHHHHHHHHh...', '..hHHHHHHHHHHh..',
+        '..hHHHHHHHhHHh..', '..hHHHHHkKKKK...', '..hHHHkHKKKEK...', '..hHHkKHKKKEKK..', '...hHkKHKKKKK...', '....kkKhKKKkk...'],
+      torse: POLAIRE.side, jambes: ISMAE_STYLE.side.jambes,
     },
   };
 
@@ -426,6 +441,7 @@ const Sprites = (() => {
       E: '#1a1322', e: c.yeux, r: PX.shade(c.cheveux, -0.42), D: c.couleurBarbe || c.cheveux,
       ...(c.zips ? { Z: c.zips } : {}),
       ...(c.collants ? { N: c.collants, n: PX.shade(c.collants, -0.3) } : {}),
+      ...(c.logo ? { S: c.logo } : {}),
     });
     return PX.outline(PX.fromRows(grid.map((r) => r.join('')), pal), '#1d1626');
   }

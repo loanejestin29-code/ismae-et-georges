@@ -1,4 +1,4 @@
-# Juste un indice… — la rue des chats, le Carrefour, la forêt de Sherwood, Arendelle
+# Juste un indice… — la rue des chats, le Carrefour, Sherwood, Arendelle, la route de Montaigu
 
 Petit jeu d'aventure en pixel art, vue de dessus en trois quarts, à jouer sur iPhone, à
 l'horizontale. Tout le décor, les personnages et la musique sont générés par le code : aucune
@@ -84,7 +84,7 @@ image ni aucun son externe.
   temps (A, toucher l'écran, ou Espace), pour ne regarder qu'une chose à la fois : d'abord on arrête
   le viseur, qui bouge tout seul, au centre de la cible ; puis une jauge de force apparaît à côté de
   la cible et on tire quand elle passe dans le rouge. Trop fort, la flèche part trop haut ; pas assez, trop bas.
-  Cinq flèches, de plus en plus difficiles ; il faut battre les 29 points du shérif. En cas d'échec,
+  Cinq flèches, de plus en plus difficiles ; il faut battre les 40 points du shérif. En cas d'échec,
   le roi laisse recommencer, et c'est un peu plus facile à chaque fois.
 - **La victoire** : le roi trépigne, boude, suce son pouce et pleure en appelant sa maman. Un garde
   ouvre la cage, Georges court retrouver Ismae. Robin des Bois sort des arbres, le félicite et lui
@@ -123,7 +123,31 @@ image ni aucun son externe.
   écharpe noire. Son dessin est la fonction `jack()` de `js/persos-neige.js`.
 - **La victoire** : Olaf est ravi, Elsa arrive et donne vie à Jack Snow quelques secondes, puis
   remet le troisième indice (« ÉPREUVE 3/6 TERMINÉE ! — TROISIÈME INDICE OBTENU ! »).
-- **La suite** : l'arrêt de bus, à la sortie d'Arendelle (sud-est), annonce l'épreuve 4 (pas encore faite).
+- **La suite** : l'arrêt de bus, à la sortie d'Arendelle (sud-est), lance l'épreuve 4.
+
+## Épreuve 4 : « En route vers Montaigu » (le bus)
+
+- **Le départ** : à l'arrêt de bus d'Arendelle, le bus arrive en klaxonnant ; Ismae et Georges montent.
+  Le chauffeur annonce : « Prochain arrêt : Montaigu ! »
+- **Le trajet** (vue du dessus, rétro) : le bus avance tout seul ; on change de file avec les flèches
+  (ou A / D) au clavier, ou en touchant la moitié gauche ou droite de l'écran sur iPhone. Voitures,
+  camions, tracteurs, chasse-neige, travaux, nids-de-poule, cerfs et vaches à éviter ; il reste
+  toujours une file libre. Trois vies (♥), la vitesse augmente ; en panne, on repart aussitôt du
+  début du paysage en cours. Des cadeaux à ramasser, et parfois un cœur qui rend une vie.
+- **Les paysages** : montagnes enneigées (jalons à neige, chalets), forêt, campagne (le bocage, les
+  moulins, les vaches, les bottes de foin), petites villes illuminées pour Noël, puis Montaigu.
+  Des panneaux « MONTAIGU … km » et une barre de progression montrent la distance qui reste.
+- **Les clins d'œil** : une voiture de course rouge n° 95 qui double à toute allure (« Ka-chow ! »),
+  une vieille dépanneuse rouillée sur le bas-côté, la station-service « Radiator Springs » (route 66).
+- **L'arrivée** : le bus ralentit et s'arrête à Montaigu, puis « ÉPREUVE 4/6 TERMINÉE ! — QUATRIÈME
+  INDICE OBTENU ! ». Ismae et Georges descendent du bus dans une petite rue illuminée de Montaigu ;
+  un écran annonce l'épreuve 5 (la zone de Montaigu n'est pas encore faite, les rues sont barrées).
+
+## Sauvegarde
+
+Le carnet d'indices sert aussi de sauvegarde. Sur l'écran titre, s'il y a déjà des épreuves réussies,
+le bouton devient « Reprendre l'aventure » (on repart au début de l'épreuve suivante), avec en dessous
+« Recommencer depuis le début » (qui vide le carnet).
   (le bonhomme de neige, pas encore faite).
 
 ## Tester sur l'iPhone
@@ -153,7 +177,7 @@ se met à jour tout seul en moins d'une minute.
 - `tom` et `loane` : leurs couleurs (cheveux, peau, tenue). Les dessins sont `TOM_STYLE` et
   `LOANE_STYLE` dans `js/characters.js`.
 - `indices` : le texte des six indices, **à remplir** (le premier s'affiche à la fin de l'épreuve 1,
-  le deuxième à la fin du tournoi). Ne jamais y écrire la destination.
+  le deuxième à la fin du tournoi…). Ne jamais y écrire la destination.
 - `bisou` : toutes les répliques de l'épreuve 1.
 - `sherwood` : toutes les répliques de l'épreuve 2 (capture, tournoi, colère du roi, Robin).
 - `tournoi` : nombre de flèches et score du shérif à battre. La difficulté de chaque flèche est le
@@ -191,6 +215,8 @@ se met à jour tout seul en moins d'une minute.
 | `js/assemblage.js` | le mini-jeu d'assemblage de Jack Snow (glisser-déposer) |
 | `js/persos-neige.js` | Olaf, Sven, Anna, Elsa, Kristoff, Oaken, les trolls, les enfants, et Jack Snow |
 | `js/decor-arendelle.js` | maisons scandinaves, château, fontaine gelée, marché, écurie, palais de glace… |
+| `js/bus.js` | l'épreuve 4 : le départ en bus, le mini-jeu de conduite, l'arrivée à Montaigu |
+| `js/carte-montaigu.js` | l'arrêt de bus de Montaigu (la zone à explorer viendra plus tard) |
 | `js/musique.js` | l'orchestre de jazz, la musique de poursuite, l'air de la forêt et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
@@ -204,9 +230,10 @@ se met à jour tout seul en moins d'une minute.
   qui servira à offrir le jeu).
 - `#sherwood` à la fin de l'adresse : commence directement dans la forêt (pour essayer l'épreuve 2).
 - `#arendelle` à la fin de l'adresse : commence directement à Arendelle (pour essayer l'épreuve 3).
+- `#bus` : directement à l'arrêt de bus d'Arendelle (épreuve 4) ; `#montaigu` : à l'arrivée à Montaigu.
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- Le texte des trois premiers indices (`indices` dans `js/config.js`).
-- Les épreuves 4 à 6, à commencer par celle de l'arrêt de bus.
+- Le texte des quatre premiers indices (`indices` dans `js/config.js`).
+- La zone de Montaigu et les épreuves 5 et 6.

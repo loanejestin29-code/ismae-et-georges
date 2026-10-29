@@ -105,6 +105,9 @@
   #btn-jouer:focus-visible { outline: 3px dashed var(--encre); outline-offset: 10px; }
   #btn-jouer:active { transform: translateY(4px); box-shadow: 0 -3px 0 0 #fff1c0 inset, 0 -4px 0 0 #0b0816, 0 4px 0 0 #0b0816, -4px 0 0 0 #0b0816, 4px 0 0 0 #0b0816, 0 4px 0 0 var(--or-2); }
   #btn-jouer:disabled { opacity: 0.6; animation: none; }
+  #btn-recommencer { font-family: var(--pixel); font-size: 14px; color: var(--encre-2); background: none; border: 0; padding: 6px 10px; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 2px 0 #0b0816; }
+  #btn-recommencer:focus-visible { outline: 2px dashed var(--encre); outline-offset: 4px; }
   @keyframes appel { 50% { transform: translateY(-2px); } }
   .commandes { margin: 0; font-size: 13px; color: var(--encre-2); text-shadow: 0 2px 0 #0b0816; }
   .commandes kbd { font-family: var(--pixel); color: var(--encre); background: var(--nuit-2); padding: 0 5px; }
@@ -164,6 +167,25 @@
   #asm-message { position: absolute; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: 40vw; font-size: 15px; font-weight: 700;
     line-height: 1.25; color: #fff6dc; text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816; }
   #asm-message.arrive { animation: rebond 0.5s steps(2) 2; }
+  /* la route vers Montaigu */
+  #route { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  .route-haut { position: absolute; left: 50%; top: calc(8px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; gap: 8px; white-space: nowrap; }
+  .route-haut span { font-size: 15px; font-weight: 700; padding: 5px 10px 4px; background: rgba(18, 13, 34, 0.86); color: var(--encre); box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
+  #route-vies { color: #ff6a8a; letter-spacing: 2px; }
+  .route-barre { position: absolute; left: 50%; top: calc(44px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); width: min(300px, 46vw); height: 8px; background: rgba(18, 13, 34, 0.86);
+    box-shadow: 0 0 0 2px #0b0816; }
+  #route-progres { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--f, 0) * 100%); background: #7ac8a0; }
+  #route-progres::after { content: ""; position: absolute; right: -5px; top: -3px; width: 10px; height: 14px; background: #f2f2f6; box-shadow: 0 0 0 2px #0b0816; }
+  .route-barre b { position: absolute; top: 12px; font-size: 11px; color: var(--encre-2); text-shadow: 1px 1px 0 #0b0816; }
+  .route-barre b:first-of-type { left: 0; } .route-barre b:last-of-type { right: 0; }
+  #route-message { position: absolute; left: 50%; top: 34%; transform: translateX(-50%); margin: 0; font-size: 22px; font-weight: 700; white-space: nowrap; color: #fff6dc;
+    text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816; }
+  #route-message.course { color: #ff5a4a; } #route-message.choc { color: #ffb0a0; } #route-message.bonus { color: #9ae8b0; } #route-message.panne { color: #ffd24a; }
+  #route-message.arrive { animation: tirMsg 0.35s steps(4) both; }
+  .route-aide { position: absolute; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0; display: flex; justify-content: space-between;
+    padding: 0 calc(18px + env(safe-area-inset-left, 0px)); font-size: 14px; color: rgba(246, 234, 210, 0.75); text-shadow: 1px 1px 0 #0b0816; }
+  body.route #btn-b, body.route #btn-a, body.route #btn-indices, body.route #aide, body.route #inventaire { display: none; }
+  @media (max-height: 460px) { .route-haut span { font-size: 13px; } #route-message { font-size: 18px; } }
   body.assemblage #btn-b, body.assemblage #btn-a, body.assemblage #btn-indices, body.assemblage #aide, body.assemblage #inventaire { display: none; }
   @media (max-height: 460px) { .tir-haut span { font-size: 13px; } #tir-message { top: calc(44px + env(safe-area-inset-top, 0px)); font-size: 15px; } #tir-message.grand { font-size: 22px; } }
   #banniere { position: fixed; z-index: 4; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
@@ -226,7 +248,7 @@
     .carnet-texte { font-size: 13px; }
   }
 
-  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #route-message.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
@@ -247,6 +269,13 @@
 <div id="assemblage" hidden>
   <p id="asm-titre">Jack Snow</p>
   <p id="asm-message"></p>
+</div>
+
+<div id="route" hidden>
+  <div class="route-haut"><span id="route-vies">♥♥♥</span><span id="route-km">Montaigu : 128 km</span><span id="route-cadeaux">🎁 0</span></div>
+  <div class="route-barre"><i id="route-progres"></i><b>Arendelle</b><b>Montaigu</b></div>
+  <p id="route-message" hidden></p>
+  <p class="route-aide"><span>◀ gauche</span><span>droite ▶</span></p>
 </div>
 
 <div id="tir" hidden>
@@ -307,6 +336,7 @@
   </div>
   <div class="titre-bas">
     <button id="btn-jouer" type="button" disabled>Commencer l'aventure</button>
+    <button id="btn-recommencer" type="button" hidden>Recommencer depuis le début</button>
     <p class="commandes">Pouce gauche : marcher · pouce droit : <kbd>A</kbd> pour interagir</p>
     <p id="titre-erreur" hidden></p>
   </div>
@@ -337,6 +367,8 @@
 <script src="js/carte-oaken.js"></script>
 <script src="js/assemblage.js"></script>
 <script src="js/epreuve-neige.js"></script>
+<script src="js/bus.js"></script>
+<script src="js/carte-montaigu.js"></script>
 <script src="js/indices.js"></script>
 <script src="js/titre.js"></script>
 <script src="js/main.js"></script>

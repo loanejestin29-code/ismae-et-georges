@@ -258,6 +258,7 @@ const Jeu = (() => {
     if (J.onCarte) J.onCarte(carte);
     if (carte.onEntree) carte.onEntree(J);
   }
+  J.teleporter = (id, arrivee) => placer(id, arrivee); // sans fondu (reprise d'une partie)
   J.allerA = (id, arrivee) => {
     if (transition) return;
     transition = { t: 0, phase: 'out', cb: () => placer(id, arrivee) };

@@ -16,7 +16,7 @@ const Musique = (() => {
   const MORCEAUX = {
     jazz: { bpm: 132, swing: true }, poursuite: { bpm: 172, swing: false, plein: 0.8 },
     foret: { bpm: 108, swing: false, plein: 0.62 }, tournoi: { bpm: 126, swing: false, plein: 0.72 },
-    arendelle: { bpm: 132, swing: false, plein: 0.6 },
+    arendelle: { bpm: 132, swing: false, plein: 0.6 }, route: { bpm: 150, swing: false, plein: 0.7 },
   };
   let morceau = 'jazz', suivant = null, NOIRE = 60 / MORCEAUX.jazz.bpm;
   let ctx = null, master, bus, sfx, filtre, reverb, wet, debut = 0, prochaine = 0, pas = 0, timer = null;
@@ -328,6 +328,29 @@ const Musique = (() => {
     }
   }
 
+  // ------------------------------------------------------------ la route vers Montaigu (sol majeur, 150 à la noire)
+  const GRILLE_R = ['G', 'D', 'E', 'C', 'G', 'D', 'C', 'D'];
+  const AIR_R = [
+    [0, 0, 2, 74], [0, 2, 2, 79], [0, 4, 2, 83], [0, 6, 2, 81], [1, 0, 3, 78], [1, 3, 1, 76], [1, 4, 4, 74],
+    [2, 0, 2, 76], [2, 2, 2, 79], [2, 4, 2, 83], [2, 6, 2, 86], [3, 0, 3, 84], [3, 3, 1, 83], [3, 4, 4, 79],
+    [4, 0, 1, 83], [4, 1, 1, 81], [4, 2, 2, 79], [4, 4, 2, 74], [4, 6, 2, 79], [5, 0, 2, 81], [5, 2, 2, 78], [5, 4, 4, 81],
+    [6, 0, 2, 79], [6, 2, 2, 76], [6, 4, 2, 72], [6, 6, 2, 76], [7, 0, 4, 74], [7, 4, 2, 78], [7, 6, 2, 81],
+  ];
+  function jouerPasRoute(i, t) {
+    const mesure = Math.floor(i / 8) % 16, croche = i % 8, mm = mesure % 8, nom = GRILLE_R[mm], r0 = NOTES[nom], tierce = nom === 'E' ? 3 : 4;
+    if (croche === 0 || croche === 4 || (croche === 7 && mm % 2)) grosseCaisse(t);
+    if (croche === 2 || croche === 6) caisseClaire(t, 0.06);
+    charley(t);
+    if (mesure === 0 && croche === 0) crash(t);
+    contrebasse(noteBasse(r0, 43) + [0, 12, 7, 12, 0, 12, 7, 10][croche], t, croche % 2 ? 0.18 : 0.28);
+    if (croche % 2 === 1) piano([0, tierce, 7].map((iv) => { let m = 60 + ((r0 + iv) % 12); while (m > 71) m -= 12; return m; }), t, 0.09, 0.03);
+    for (const [b, c, d, n] of AIR_R) {
+      if (b !== mm || c !== croche) continue;
+      const dur = dureeCroches(i, d) * 0.88;
+      if (mesure < 8) clarinette(n + 12, t, dur); else { trompette(n, t, dur); clochette(n + 12, t, dur, 0.02); }
+    }
+  }
+
   function planifier() {
     if (suivant) {
       // changement de morceau : on repart du début, sans laisser de trou
@@ -336,7 +359,7 @@ const Musique = (() => {
       majMix();
     }
     while (prochaine < ctx.currentTime + 0.15) {
-      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : jouerPas)(pas, prochaine);
+      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : morceau === 'route' ? jouerPasRoute : jouerPas)(pas, prochaine);
       prochaine += dureeCroche(pas);
       pas++;
     }
@@ -501,6 +524,25 @@ const Musique = (() => {
     souffleSfx(t, 'highpass', 6000, 0.6, 0.03, 1.4);
   }
 
+  // ---- la route
+  function klaxon() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    [0, 0.22].forEach((d) => { const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1200; g.connect(lp); lp.connect(sfx); env(g, t + d, 0.01, 0.05, 0.16); osc('sawtooth', 330, t + d, 0.18, g); osc('sawtooth', 415, t + d, 0.18, g); });
+  }
+  function vroum() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    g.connect(lp); lp.connect(sfx); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.15); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(260, t + 0.5); o.frequency.exponentialRampToValueAtTime(120, t + 1.1);
+    o.connect(g); o.start(t); o.stop(t + 1.2);
+  }
+  function choc() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    souffleSfx(t, 'lowpass', 700, 0.7, 0.25, 0.25); note('square', 110, t, 0.2, 0.05); souffleSfx(t + 0.05, 'highpass', 3000, 0.8, 0.06, 0.2);
+  }
+
   // coup de sifflet du départ
   function partez() {
     if (!ctx || coupe) return;
@@ -569,6 +611,6 @@ const Musique = (() => {
       if (!ctx || !timer) { morceau = nom; NOIRE = 60 / MORCEAUX[nom].bpm; return; }
       if (nom !== morceau || suivant) suivant = nom === morceau ? null : nom;
     },
-    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie,
+    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie, klaxon, vroum, choc,
   };
 })();
