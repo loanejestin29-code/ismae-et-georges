@@ -22,9 +22,10 @@
     { carte: 'arendelle', arrivee: 'entree', quete: Object.assign({}, FINI1, { sherwood: 'gagne' }) }, // 2 : Arendelle
     { carte: 'arendelle', arrivee: 'arret', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne' }) }, // 3 : l'arrêt de bus
     { carte: 'montaigu', arrivee: 'bus', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne', bus: 'gagne' }) }, // 4 : Montaigu
+    { carte: 'montaigu', arrivee: 'devantResto', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne', bus: 'gagne', caramel: 'gagne' }) }, // 5 : après le caramel
   ];
-  // raccourcis d'essai : #sherwood, #arendelle, #bus, #montaigu
-  const RACCOURCIS = { sherwood: 1, arendelle: 2, bus: 3, montaigu: 4 };
+  // raccourcis d'essai : #sherwood, #arendelle, #bus, #montaigu, #caramel (après l'épreuve 5)
+  const RACCOURCIS = { sherwood: 1, arendelle: 2, bus: 3, montaigu: 4, caramel: 5 };
   function etapeDe() {
     const k = Object.keys(RACCOURCIS).find((n) => location.hash.includes(n));
     if (k) { Indices.simuler(RACCOURCIS[k]); return RACCOURCIS[k]; }
@@ -46,6 +47,7 @@
       Sherwood.init(Jeu);
       EpreuveNeige.init(Jeu);
       Bus.init(Jeu);
+      EpreuveCaramel.init(Jeu);
       Indices.init();
       etape = etapeDe();
       Jeu.init('rue', 'depart');

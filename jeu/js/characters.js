@@ -165,6 +165,7 @@ const Sprites = (() => {
     capeline: ['................', '.....AAAAAA.....', '....AAAAAAVV....', '.AAAAYYYYYYAAAA.', '..aaaaaaaaaaaa..'],
     casquette: ['................', '................', '.....AAAAAA.....', '....AAAAAAAA....', '...aYYYYYYYYa...'],
     bonnet: ['......VV........', '.....AAAAA......', '....AAAAAAAA....', '...AAAAAAAAAA...', '...aYaYaYaYaYa..'], // bonnet tricoté à pompon
+    toque: ['....AAAAAAAA....', '...AAAAAAAAAA...', '...AAAaAAaAAA...', '....aAAAAAAa....', '....aaaaaaaa....'], // toque de cuisinier
   };
   // tablier blanc par-dessus le torse (vue de face / de profil)
   const APRON = {

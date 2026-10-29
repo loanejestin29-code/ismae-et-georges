@@ -169,6 +169,24 @@
   #asm-message { position: absolute; left: calc(12px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: 40vw; font-size: 15px; font-weight: 700;
     line-height: 1.25; color: #fff6dc; text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816; }
   #asm-message.arrive { animation: rebond 0.5s steps(2) 2; }
+  /* Montaigu : le mini-jeu du caramel */
+  #cuisine { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  #cui-titre { position: absolute; left: 50%; top: calc(8px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); margin: 0; padding: 5px 12px 4px; font-size: 15px; font-weight: 700;
+    color: #f6d27a; background: rgba(18, 13, 34, 0.86); box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; white-space: nowrap; }
+  #cui-message { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); margin: 0; white-space: nowrap; font-size: 26px; font-weight: 700; color: #fff6dc;
+    text-shadow: 2px 0 0 #0b0816, -2px 0 0 #0b0816, 0 2px 0 #0b0816, 0 -2px 0 #0b0816, 0 4px 0 #0b0816; }
+  #cui-message.bon { color: #9ae8b0; } #cui-message.rate { color: #ffb0a0; }
+  #cui-message.arrive { animation: tirMsg 0.35s steps(4); }
+  #cui-bulle { position: absolute; left: calc(10px + env(safe-area-inset-left, 0px)); bottom: 47%; margin: 0; max-width: min(300px, 34vw); padding: 7px 10px 6px;
+    font-size: 16px; font-weight: 700; line-height: 1.25; color: #2a1e18; background: #fff8ec; box-shadow: 0 -2px 0 0 #1d1626, 0 2px 0 0 #1d1626, -2px 0 0 0 #1d1626, 2px 0 0 0 #1d1626; }
+  #cui-bulle::after { content: ""; position: absolute; left: 22px; bottom: -8px; border: 5px solid transparent; border-top-color: #1d1626; }
+  #cui-bulle.arrive { animation: bullePop 0.25s steps(3); }
+  @keyframes bullePop { 0% { transform: scale(0.5); transform-origin: 20px 100%; } 100% { transform: scale(1); transform-origin: 20px 100%; } }
+  #cui-aide { position: absolute; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0; white-space: nowrap;
+    font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebondCentre 0.8s steps(2) infinite;
+    box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
+  body.cuisine #btn-b, body.cuisine #btn-a, body.cuisine #btn-indices, body.cuisine #aide, body.cuisine #inventaire { display: none; }
+  @media (max-height: 460px) { #cui-message { font-size: 21px; } #cui-bulle { font-size: 15px; } #cui-aide { font-size: 13px; } }
   /* la route vers Montaigu */
   #route { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
   .route-haut { position: absolute; left: 50%; top: calc(8px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; gap: 8px; white-space: nowrap; }
@@ -250,7 +268,7 @@
     .carnet-texte { font-size: 13px; }
   }
 
-  @media (prefers-reduced-motion: reduce) { #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #route-message.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #cui-aide, #cui-message.arrive, #cui-bulle.arrive, #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #route-message.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
@@ -268,6 +286,13 @@
 
 <div id="inventaire" hidden aria-label="Les éléments du bonhomme de neige"></div>
 <div id="toast" hidden role="status"></div>
+<div id="cuisine" hidden>
+  <p id="cui-titre">Le caramel</p>
+  <p id="cui-message" hidden></p>
+  <p id="cui-bulle" hidden></p>
+  <p id="cui-aide"></p>
+</div>
+
 <div id="assemblage" hidden>
   <p id="asm-titre">Jack Snow</p>
   <p id="asm-message"></p>
@@ -370,7 +395,12 @@
 <script src="js/assemblage.js"></script>
 <script src="js/epreuve-neige.js"></script>
 <script src="js/bus.js"></script>
+<script src="js/persos-resto.js"></script>
+<script src="js/decor-montaigu.js"></script>
 <script src="js/carte-montaigu.js"></script>
+<script src="js/carte-restaurant.js"></script>
+<script src="js/caramel.js"></script>
+<script src="js/epreuve-caramel.js"></script>
 <script src="js/indices.js"></script>
 <script src="js/titre.js"></script>
 <script src="js/main.js"></script>

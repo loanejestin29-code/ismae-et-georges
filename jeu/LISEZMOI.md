@@ -154,15 +154,59 @@ image ni aucun son externe.
 - **Les clins d'œil** : une voiture de course rouge n° 95 qui double à toute allure (« Ka-chow ! »),
   une vieille dépanneuse rouillée sur le bas-côté, la station-service « Radiator Springs » (route 66).
 - **L'arrivée** : le bus ralentit et s'arrête à Montaigu, puis « ÉPREUVE 4/6 TERMINÉE ! — QUATRIÈME
-  INDICE OBTENU ! ». Ismae et Georges descendent du bus dans une petite rue illuminée de Montaigu ;
-  un écran annonce l'épreuve 5 (la zone de Montaigu n'est pas encore faite, les rues sont barrées).
+  INDICE OBTENU ! ». Ismae et Georges descendent du car sur la Grande Rue de Montaigu ;
+  un écran annonce l'épreuve 5.
+
+## Épreuve 5 : « Le caramel raté » (à Montaigu)
+
+- **Montaigu un soir de Noël** : en descendant du car, Ismae et Georges arrivent sur la Grande Rue.
+  Au fond, les remparts du vieux château et un croissant de lune. Deux rangées de maisons
+  vendéennes et de vieux immeubles de pierre (boulangerie, pharmacie, fleuriste, librairie,
+  fromagerie, café, pâtisserie, antiquaire, atelier de peinture, maison de la presse, mairie et
+  son drapeau), tous décorés de guirlandes et de couronnes. Au milieu, l'église illuminée et son
+  clocher. La place de l'église a son grand sapin, un manège de chevaux de bois qui tourne, des
+  bancs et des réverbères. À l'ouest, le jardin enneigé (fontaine gelée, bonhomme de neige,
+  abribus) ; à l'est, le marché de Noël et ses chalets (chocolat chaud, marrons, crêpes, santons).
+  Deux ruelles mènent à la petite rue du bas. À l'est, la route est barrée : la sixième épreuve
+  viendra plus tard. Une musique de Noël originale (clochettes, piano, grelots).
+- **Les habitants** : Mamie Jeannette, la marchande de chocolat, un petit garçon qui jure avoir vu
+  un rat cuisiner, le facteur, un monsieur au béret, une dame et son chien. Ils parlent d'une odeur
+  de caramel et d'un chef « tout petit », puis du caramel réussi une fois l'épreuve gagnée.
+  Plus de 25 choses à regarder (vitrines, ardoise du menu, boîte aux lettres jaune, manège…).
+- **Le restaurant du chef Gusteau** (sur la place, à côté de l'église ; on y entre librement) :
+  devanture bleu nuit et lettres dorées, vitrines aux chandelles. Dedans : parquet en chevrons,
+  papier peint bordeaux et doré, cheminée et ses chaussettes, sapin, le portrait de Gusteau
+  (« Tout le monde peut cuisiner »), six tables dressées aux chandelles, la vitrine des desserts
+  (une bûche… sans caramel). Anton Ego attend son dessert, un couple dîne, et Linguini fait le
+  tour de la salle en patins à roulettes. Au fond, les portes battantes de la cuisine.
+- **La cuisine** : carrelage noir et blanc, casseroles en cuivre, le grand fourneau et ses flammes
+  bleues, les légumes de la ratatouille, les fromages, les épices, le livre de Gusteau, le
+  passe-plat, les sacs de sucre, une guirlande et une couronne. Colette coupe des légumes.
+  **Rémy** attend sur son plan de travail, près de sa petite casserole.
+- **La rencontre** : Rémy explique qu'il manque le caramel du dîner de Noël, et lance à Ismae
+  qu'une certaine Loane lui a parlé de son dernier caramel… « un morceau de charbon ».
+- **Le mini-jeu** (façon Cooking Mama, avec Rémy à gauche qui commente tout) :
+  1. *Le sucre* : la jauge se remplit toute seule ; on arrête quand elle est dans la zone verte
+     (toucher l'écran, ou Espace / clic).
+  2. *Mélanger* : on fait des cercles dans la casserole, au doigt ou à la souris (ou avec les
+     flèches) ; le sucre fond et blondit. Cinq tours en moins de 14 secondes.
+  3. *La cuisson* : le caramel passe de clair à doré, ambré, puis brûlé ; on retire la casserole du
+     feu quand le curseur est dans le crochet vert (environ 0,8 seconde pour réagir).
+- **Les échecs**, à regarder : trop peu de sucre (une fourmi vient chercher sa part), trop de
+  sucre (il déborde et ensevelit Rémy), sucre pris en bloc, caramel tout pâle (Rémy goûte, déçu),
+  caramel brûlé (fumée noire, alarme, Rémy panique puis tousse). On recommence l'étape ratée autant
+  de fois qu'on veut. Les réglages de difficulté sont `REGLAGES`, en haut de `js/caramel.js`.
+- **La victoire** : « Incroyable ! Cette fois, tu ne l'as même pas brûlé ! », Linguini emporte le
+  caramel en salle, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE OBTENU ! ». Ismae peut ensuite
+  ressortir et se promener dans Montaigu (les habitants ont de nouvelles répliques).
+- **La suite** : un écran annonce l'épreuve 6, qui n'est pas encore faite (la route est barrée).
 
 ## Sauvegarde
 
 Le carnet d'indices sert aussi de sauvegarde. Sur l'écran titre, s'il y a déjà des épreuves réussies,
 le bouton devient « Reprendre l'aventure » (on repart au début de l'épreuve suivante), avec en dessous
-« Recommencer depuis le début » (qui vide le carnet).
-  (le bonhomme de neige, pas encore faite).
+« Recommencer depuis le début » (qui vide le carnet). Après l'épreuve 5, on reprend devant le
+restaurant, à Montaigu.
 
 ## Tester sur l'iPhone
 
@@ -198,6 +242,7 @@ se met à jour tout seul en moins d'une minute.
 - `tournoi` : nombre de flèches et score du shérif à battre. La difficulté de chaque flèche est le
   tableau `NIVEAUX` de `js/tir-arc.js`.
 - `animaux` et `figurants` : les couleurs des personnages de la forêt (les dessins sont dans `js/betes.js`).
+- `caramel` : l'épreuve 5 (habitants de Montaigu, gens du restaurant, Rémy, textes du mini-jeu).
 - `arendelle` : les répliques de l'épreuve 3, les couleurs d'Anna, Elsa, Kristoff, Oaken et des gardes,
   les enfants, et les noms des sept éléments du bonhomme de neige.
 - `vitesseLoane` : vitesse de Loane pendant la poursuite (Ismae court à 104) ; plus bas = plus facile.
@@ -231,8 +276,13 @@ se met à jour tout seul en moins d'une minute.
 | `js/persos-neige.js` | Olaf, Sven, Anna, Elsa, Kristoff, Oaken, les trolls, les enfants, et Jack Snow |
 | `js/decor-arendelle.js` | maisons scandinaves, château, fontaine gelée, marché, écurie, palais de glace… |
 | `js/bus.js` | l'épreuve 4 : le départ en bus, le mini-jeu de conduite, l'arrivée à Montaigu |
-| `js/carte-montaigu.js` | l'arrêt de bus de Montaigu (la zone à explorer viendra plus tard) |
-| `js/musique.js` | l'orchestre de jazz, la musique de poursuite, l'air de la forêt et les bruitages |
+| `js/carte-montaigu.js` | Montaigu : les rues, l'église, la place et son manège, le marché de Noël |
+| `js/decor-montaigu.js` | le restaurant Gusteau, l'église, les chalets, le manège, les remparts… |
+| `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (tables, fourneau, plans de travail…) |
+| `js/persos-resto.js` | Rémy (petit sur la carte, grand dans le mini-jeu) et le portrait de Gusteau |
+| `js/epreuve-caramel.js` | l'épreuve 5 : les habitants, la rencontre avec Rémy, la victoire |
+| `js/caramel.js` | le mini-jeu du caramel (sucre, mélange, cuisson) et ses échecs |
+| `js/musique.js` | l'orchestre de jazz, la poursuite, la forêt, la valse d'Arendelle, la route, Montaigu, la valse musette du restaurant, et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
 | `js/entites.js` | Ismae, Georges, les chats, les musiciens, les habitants |
@@ -245,10 +295,11 @@ se met à jour tout seul en moins d'une minute.
   qui servira à offrir le jeu).
 - `#sherwood` à la fin de l'adresse : commence directement dans la forêt (pour essayer l'épreuve 2).
 - `#arendelle` à la fin de l'adresse : commence directement à Arendelle (pour essayer l'épreuve 3).
-- `#bus` : directement à l'arrêt de bus d'Arendelle (épreuve 4) ; `#montaigu` : à l'arrivée à Montaigu.
+- `#bus` : directement à l'arrêt de bus d'Arendelle (épreuve 4) ; `#montaigu` : à l'arrivée à Montaigu
+  (épreuve 5) ; `#caramel` : devant le restaurant, l'épreuve 5 déjà réussie.
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- Le texte des quatre premiers indices (`indices` dans `js/config.js`).
-- La zone de Montaigu et les épreuves 5 et 6.
+- Le texte des cinq premiers indices (`indices` dans `js/config.js`).
+- L'épreuve 6 (la route barrée, à l'est de Montaigu, est prévue pour y mener).

@@ -587,8 +587,8 @@ const Bus = (() => {
   }
   function arriveeMontaigu(J) {
     const C = J.carte, p = J.joueur, G = J.georges, B = CONFIG.route;
-    Musique.morceau('jazz');
-    if (C.busFait) return;
+    Musique.morceau('montaigu');
+    if (C.busFait || Q.caramel === 'gagne') { C.busFait = true; return; }
     C.busFait = true;
     const S = C.montaigu, bus = objetBus(C, S.bus.x, S.bus.y);
     bus.porte = 1;
@@ -604,7 +604,7 @@ const Bus = (() => {
       { dire: B.arrivee },
     ], () => {
       J.cinematique = false;
-      Indices.suite({ haut: 'À suivre…', titre: 'ÉPREUVE 5/6', lieu: 'Montaigu', texte: 'Bientôt disponible. En attendant, Georges découvre les odeurs de la ville.', bouton: 'Se promener à Montaigu' });
+      Indices.suite(CONFIG.caramel.annonce);
     });
   }
 

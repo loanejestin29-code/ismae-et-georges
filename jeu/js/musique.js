@@ -17,6 +17,7 @@ const Musique = (() => {
     jazz: { bpm: 132, swing: true }, poursuite: { bpm: 172, swing: false, plein: 0.8 },
     foret: { bpm: 108, swing: false, plein: 0.62 }, tournoi: { bpm: 126, swing: false, plein: 0.72 },
     arendelle: { bpm: 132, swing: false, plein: 0.6 }, route: { bpm: 150, swing: false, plein: 0.7 },
+    montaigu: { bpm: 112, swing: false, plein: 0.62 }, resto: { bpm: 168, swing: false, plein: 0.6 },
   };
   let morceau = 'jazz', suivant = null, NOIRE = 60 / MORCEAUX.jazz.bpm;
   let ctx = null, master, bus, sfx, filtre, reverb, wet, debut = 0, prochaine = 0, pas = 0, timer = null;
@@ -351,6 +352,55 @@ const Musique = (() => {
     }
   }
 
+  // ------------------------------------------------------------ Montaigu, un soir de Noël (do majeur, 112 à la noire)
+  const GRILLE_M = ['C', 'A', 'F', 'G', 'C', 'A', 'D', 'C'];
+  const AIR_M = [
+    [0, 0, 2, 76], [0, 2, 2, 79], [0, 4, 2, 84], [0, 6, 2, 83], [1, 0, 4, 81], [1, 4, 2, 76], [1, 6, 2, 79],
+    [2, 0, 2, 77], [2, 2, 2, 81], [2, 4, 3, 84], [2, 7, 1, 81], [3, 0, 6, 79], [3, 6, 2, 74],
+    [4, 0, 2, 76], [4, 2, 2, 79], [4, 4, 2, 84], [4, 6, 2, 88], [5, 0, 3, 86], [5, 3, 1, 84], [5, 4, 4, 81],
+    [6, 0, 2, 77], [6, 2, 2, 81], [6, 4, 2, 83], [6, 6, 2, 86], [7, 0, 6, 84],
+  ];
+  function jouerPasMontaigu(i, t) {
+    const mesure = Math.floor(i / 8) % 16, croche = i % 8, mm = mesure % 8, nom = GRILLE_M[mm], r0 = NOTES[nom], tierce = nom === 'A' || nom === 'D' ? 3 : 4;
+    const accord = [0, tierce, 7].map((iv) => { let m = 60 + ((r0 + iv) % 12); while (m > 71) m -= 12; return m; });
+    if (croche === 0 || croche === 4) contrebasse(noteBasse(r0, 43) + (croche === 4 ? 7 : 0), t, 0.24);
+    if (croche === 2 || croche === 6) piano(accord, t, 0.2, 0.026);
+    if (croche % 2 === 1) grelots(t, 0.012);
+    for (const [b, c, d, n] of AIR_M) {
+      if (b !== mm || c !== croche) continue;
+      clochette(n, t, dureeCroches(i, d), 0.04);
+      if (mesure >= 8) clochette(n - 12, t, dureeCroches(i, d), 0.02);
+    }
+  }
+
+  // ------------------------------------------------------------ le restaurant : une valse musette à l'accordéon (ré mineur)
+  function accordeon(notes, t, dur, vol = 0.026) {
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1900; lp.Q.value = 0.8;
+    g.connect(lp); lp.connect(bus); lp.connect(wet);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+    g.gain.setValueAtTime(vol * 0.8, t + Math.max(0.05, dur - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
+    const trem = ctx.createOscillator(), tg = ctx.createGain(); trem.frequency.value = 6.2; tg.gain.value = vol * 0.25; trem.connect(tg); tg.connect(g.gain); trem.start(t); trem.stop(t + dur + 0.1);
+    for (const m of notes) { osc('square', hz(m) * 0.998, t, dur + 0.08, g); osc('square', hz(m) * 1.003, t, dur + 0.08, g); }
+  }
+  const GRILLE_U = ['D', 'A', 'D', 'A', 'G', 'D', 'A', 'D'];
+  const AIR_U = [
+    [0, 0, 2, 69], [0, 2, 2, 74], [0, 4, 2, 77], [1, 0, 3, 76], [1, 3, 1, 73], [1, 4, 2, 69],
+    [2, 0, 2, 74], [2, 2, 2, 77], [2, 4, 2, 81], [3, 0, 4, 79], [3, 4, 2, 76],
+    [4, 0, 2, 79], [4, 2, 2, 82], [4, 4, 2, 86], [5, 0, 3, 77], [5, 3, 1, 76], [5, 4, 2, 74],
+    [6, 0, 2, 73], [6, 2, 2, 76], [6, 4, 2, 79], [7, 0, 6, 74],
+  ];
+  function jouerPasResto(i, t) {
+    const mesure = Math.floor(i / 6) % 16, croche = i % 6, mm = mesure % 8, nom = GRILLE_U[mm], r0 = NOTES[nom], tierce = nom === 'A' ? 4 : 3;
+    const accord = [0, tierce, 7, nom === 'A' ? 10 : 12].map((iv) => { let m = 60 + ((r0 + iv) % 12); while (m > 70) m -= 12; return m; });
+    // oum-pa-pa : la basse sur le premier temps, l'accordéon sur les deux autres
+    if (croche === 0) contrebasse(noteBasse(r0, 43), t, 0.26);
+    if (croche === 2 || croche === 4) accordeon(accord, t, dureeCroches(i, 1), 0.012);
+    for (const [b, c, d, n] of AIR_U) {
+      if (b !== mm || c !== croche) continue;
+      accordeon([n + (mesure >= 8 ? 12 : 0)], t, dureeCroches(i, d) * 0.92, 0.026);
+    }
+  }
+
   function planifier() {
     if (suivant) {
       // changement de morceau : on repart du début, sans laisser de trou
@@ -359,7 +409,7 @@ const Musique = (() => {
       majMix();
     }
     while (prochaine < ctx.currentTime + 0.15) {
-      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : morceau === 'route' ? jouerPasRoute : jouerPas)(pas, prochaine);
+      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : morceau === 'route' ? jouerPasRoute : morceau === 'montaigu' ? jouerPasMontaigu : morceau === 'resto' ? jouerPasResto : jouerPas)(pas, prochaine);
       prochaine += dureeCroche(pas);
       pas++;
     }
@@ -537,6 +587,25 @@ const Musique = (() => {
     const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(260, t + 0.5); o.frequency.exponentialRampToValueAtTime(120, t + 1.1);
     o.connect(g); o.start(t); o.stop(t + 1.2);
   }
+  // la cuisine de Rémy : son petit couinement, le sucre qui coule, les bulles du caramel, l'alarme incendie
+  function couic() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, g = ctx.createGain(); g.connect(sfx); env(g, t, 0.005, 0.04, 0.12);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(2300, t + 0.08); o.frequency.exponentialRampToValueAtTime(1700, t + 0.13);
+    o.connect(g); o.start(t); o.stop(t + 0.16);
+  }
+  function sucre() { if (!ctx || coupe) return; souffleSfx(ctx.currentTime, 'bandpass', 6000 + Math.random() * 2000, 1.5, 0.03, 0.06); }
+  function bulle() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime, g = ctx.createGain(); g.connect(sfx); env(g, t, 0.003, 0.025, 0.07);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(320 + Math.random() * 200, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.06);
+    o.connect(g); o.start(t); o.stop(t + 0.09);
+  }
+  function alarme() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime;
+    for (let k = 0; k < 3; k++) note('square', 3100, t + k * 0.14, 0.08, 0.02);
+  }
   function choc() {
     if (!ctx || coupe) return;
     const t = ctx.currentTime;
@@ -611,6 +680,6 @@ const Musique = (() => {
       if (!ctx || !timer) { morceau = nom; NOIRE = 60 / MORCEAUX[nom].bpm; return; }
       if (nom !== morceau || suivant) suivant = nom === morceau ? null : nom;
     },
-    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie, klaxon, vroum, choc,
+    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie, klaxon, vroum, choc, couic, sucre, bulle, alarme,
   };
 })();
