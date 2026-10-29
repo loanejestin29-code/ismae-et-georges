@@ -4,7 +4,8 @@
 //  1. À l'arrêt de bus d'Arendelle, le bus arrive ; Ismae et Georges montent.
 //     Le chauffeur annonce : « Prochain arrêt : Montaigu ! »
 //  2. Le trajet (vue du dessus, rétro) : le bus avance tout seul ; on change de file
-//     (flèches ou A / D au clavier, toucher la moitié gauche ou droite de l'écran sur iPhone).
+//     (flèches ou A / D au clavier ; sur iPhone, glisser le doigt vers la gauche ou vers la droite :
+//     sans glisser, le bus reste dans sa file). Des voitures déboîtent en clignotant.
 //     Voitures, camions, tracteurs, travaux, chasse-neige, rennes, vaches… à éviter.
 //     Trois vies ; la vitesse augmente. En panne (plus de vies), on repart aussitôt du début
 //     du paysage en cours. Des cadeaux à ramasser, et un cœur de temps en temps.
@@ -21,7 +22,7 @@ const Bus = (() => {
   const Q = Scenes.quete;
   Q.bus = 'aVenir'; // 'aVenir' → 'depart' → 'route' → 'victoire' → 'gagne'
   const $ = (id) => document.getElementById(id);
-  const LONGUEUR = 14400, KM = 128; // longueur du trajet (pixels) et distance affichée (km)
+  const LONGUEUR = 18000, KM = 128; // longueur du trajet (pixels) et distance affichée (km)
   const PAYSAGES = [
     { id: 'montagne', debut: 0, nom: 'les montagnes' }, { id: 'foret', debut: 0.18, nom: 'la forêt' },
     { id: 'campagne', debut: 0.38, nom: 'la campagne' }, { id: 'ville', debut: 0.65, nom: 'les petites villes' },
@@ -192,6 +193,9 @@ const Bus = (() => {
     $('route').hidden = false;
     majHud();
     message(depuis ? `On repart de ${paysage(depuis).nom} !` : 'En route ! Évite les obstacles.');
+    const doigt = matchMedia('(pointer: coarse)').matches;
+    $('route-aide-g').textContent = doigt ? '◀ glisse le doigt' : '◀ flèche gauche';
+    $('route-aide-d').textContent = doigt ? 'pour changer de file ▶' : 'flèche droite ▶';
   }
   function message(t, k = 'info') {
     const m = $('route-message');
@@ -233,13 +237,16 @@ const Bus = (() => {
     // jamais d'obstacle dessus ; une ou deux autres files bloquées ; de plus en plus serré
     while (E.prochain < E.d + 420) {
       const y = E.prochain, fy = y / LONGUEUR;
-      let ecart = Math.max(118, 200 - 80 * fy) + Math.random() * 60;
+      let ecart = Math.max(108, 175 - 70 * fy) + Math.random() * 45;
       if (fy < 0.94) {
-        if (Math.random() < 0.35) { const n = E.sur + (Math.random() < 0.5 ? -1 : 1); if (n >= 0 && n < NL) { E.sur = n; ecart += 80; } }
+        if (Math.random() < 0.45) { const n = E.sur + (Math.random() < 0.5 ? -1 : 1); if (n >= 0 && n < NL) { E.sur = n; ecart += 80; } }
         const autres = [0, 1, 2].filter((v) => v !== E.sur).sort(() => Math.random() - 0.5);
-        const deux = fy > 0.22 && Math.random() < 0.2 + fy * 0.3;
-        for (const v of autres.slice(0, deux ? 2 : 1)) E.obstacles.push(creerObstacle(obstacleDe(fy), v, y + Math.random() * 14));
-        if (Math.random() < 0.25) E.obstacles.push({ type: E.vies < 3 && Math.random() < 0.3 ? 'coeur' : 'cadeau', voie: E.sur, y: y + 6, vit: 0, img: null });
+        const deux = fy > 0.12 && Math.random() < 0.26 + fy * 0.34;
+        const poses = autres.slice(0, deux ? 2 : 1).map((v) => { const o = creerObstacle(obstacleDe(fy), v, y + Math.random() * 14); E.obstacles.push(o); return o; });
+        // une voiture seule peut déboîter vers l'autre file bloquée (jamais vers la file sûre)
+        const o = poses[0], cible = autres[1];
+        if (!deux && o.type === 'voiture' && fy > 0.15 && Math.abs(cible - o.voie) === 1 && Math.random() < 0.35 + fy * 0.3) o.deboite = { vers: cible, t: 0 };
+        if (Math.random() < 0.18) E.obstacles.push({ type: E.vies < 3 && Math.random() < 0.35 ? 'coeur' : 'cadeau', voie: E.sur, y: y + 6, vit: 0, img: null });
       }
       E.prochain += ecart;
     }
@@ -307,12 +314,17 @@ const Bus = (() => {
     }
     E.x += (E.voie - E.x) * Math.min(1, dt * 14);
     // la vitesse : de plus en plus vite, puis on ralentit pour l'arrivée
-    const cible = E.phase === 'route' ? 118 + 96 * f : 0;
+    const cible = E.phase === 'route' ? 140 + 115 * f : 0;
     E.v += (cible - E.v) * Math.min(1, dt * (E.phase === 'route' ? 1.5 : 1.1));
     E.d += E.v * dt;
     if (E.invul > 0) E.invul -= dt;
     generer();
-    for (const o of E.obstacles) o.y += o.vit * dt;
+    for (const o of E.obstacles) {
+      o.y += o.vit * dt;
+      // la voiture qui déboîte : clignotant, puis elle change de file
+      const db = o.deboite;
+      if (db && db.t < 1) { const dy = o.y - E.d; if (dy < 250) db.cl = true; if (dy < 185) { db.t = Math.min(1, db.t + dt * 2.2); if (db.t >= 0.5 && o.voie !== db.vers) { db.de = o.voie; o.voie = db.vers; } } }
+    }
     if (E.course) { E.course.vit = E.v + 260; E.course.y += E.course.vit * dt; if (E.course.y > E.d + 600) E.course = null; }
     // collisions
     if (E.phase === 'route') {
@@ -411,7 +423,9 @@ const Bus = (() => {
     for (const o of E.obstacles) {
       const y = sy(o.y);
       if (y < -60 || y > h + 40) continue;
-      const x = G.laneX(o.voie);
+      let x = G.laneX(o.voie);
+      const db = o.deboite;
+      if (db && db.t > 0 && db.t < 1) x = db.de === undefined ? x + (G.laneX(db.vers) - x) * db.t : x + (G.laneX(db.de) - x) * (1 - db.t); // en train de déboîter
       if (o.type === 'cadeau' || o.type === 'coeur') {
         if (o.pris) continue;
         const img = o.type === 'cadeau' ? SP.cadeau : SP.coeur, b = Math.round(Math.sin(t * 6 + o.y) * 1.5);
@@ -421,6 +435,10 @@ const Bus = (() => {
       if (o.choc) { o.choc += 1 / 60; g.globalAlpha = Math.max(0, 1 - o.choc * 1.5); }
       g.drawImage(o.img, Math.round(x - o.img.width / 2 + (o.choc ? o.choc * 30 * (o.voie === 0 ? -1 : 1) : 0)), y - o.img.height);
       g.globalAlpha = 1;
+      if (db && db.cl && db.t < 1 && Math.floor(t * 6) % 2) { // le clignotant orange, du côté où elle va
+        const cote = db.vers > (db.de ?? o.voie) ? 1 : -1;
+        g.fillStyle = '#ffa020'; g.fillRect(Math.round(x + cote * 7) - 1, y - o.img.height + 2, 2, 2); g.fillRect(Math.round(x + cote * 7) - 1, y - 4, 2, 2);
+      }
     }
     // la voiture de course rouge qui double sur le bas-côté gauche
     if (E.course) { const y = sy(E.course.y); g.drawImage(SP.mcqueen, rx - 12, y - 28); g.fillStyle = 'rgba(255,255,255,0.5)'; for (let k = 1; k < 4; k++) g.fillRect(rx - 8 + k, y + k * 5, 1, 4); }
@@ -440,10 +458,23 @@ const Bus = (() => {
     g.restore();
   }
 
-  // ------------------------------------------------------------ commandes tactiles : moitié gauche / moitié droite de l'écran
-  function pointeur(type, pos) {
-    if (!E || type !== 'down' || E.phase !== 'route') return;
-    changerVoie(pos.x < E.J.V.w / 2 ? -1 : 1);
+  // ------------------------------------------------------------ commandes tactiles : on glisse le doigt
+  // vers la gauche → une file à gauche ; vers la droite → une file à droite ; sans glisser, on reste.
+  // (un glissement = une file ; il faut glisser franchement plus loin pour en changer une deuxième,
+  //  et revenir un peu en arrière suffit pour revenir dans sa file) — les distances sont en pixels de l'écran
+  function pointeur(type, pos, e) {
+    if (!E) return;
+    const x = e ? e.clientX : pos.x;
+    if (type === 'down') { E.glisse = { x, bout: x, sens: 0 }; return; }
+    if (type === 'up') { E.glisse = null; return; }
+    const g = E.glisse;
+    if (!g || E.phase !== 'route') return;
+    const bouger = (s) => { changerVoie(s); g.x = g.bout = x; g.sens = s; };
+    if (g.sens && (x - g.bout) * g.sens > 0) g.bout = x;
+    const dx = x - g.x;
+    if (!g.sens) { if (Math.abs(dx) >= 16) bouger(Math.sign(dx)); }
+    else if ((x - g.bout) * g.sens <= -16) bouger(-g.sens);
+    else if (dx * g.sens >= 80) bouger(g.sens);
   }
   function fermer() {
     const { J } = E;

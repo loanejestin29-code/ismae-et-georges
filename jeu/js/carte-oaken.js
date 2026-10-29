@@ -32,9 +32,8 @@ Jeu.enregistrerCarte('oaken', () => {
   const cuilleres = { sortY: FOND + 1, pris: false,
     draw(g, J) {
       if (this.pris) return;
-      const t = J.t || 0;
       for (const x of [104, 112]) { g.fillStyle = '#5a5668'; g.fillRect(x, 32, 1, 9); g.fillStyle = '#c8ccd8'; g.fillRect(x - 1, 28, 3, 5); g.fillStyle = '#ffffff'; g.fillRect(x - 1, 28, 1, 2); }
-      if (Math.sin(t * 3) > 0.7) { g.fillStyle = '#ffffff'; g.fillRect(106, 26, 1, 1); g.fillRect(105, 27, 3, 1); g.fillRect(106, 28, 1, 1); }
+      if (Scenes.quete.neige === 'quete') A.paillettes(J, 108, 32, 40, 4, 7, 5);
     } };
   P.rect(96, 40, 26, 3, '#5a3a22'); P.hline(96, 40, 26, '#a8743e');
   C.dynamiques.push(cuilleres);
@@ -44,9 +43,10 @@ Jeu.enregistrerCarte('oaken', () => {
   C.objet(comptoir, 144, 112, { solide: [-56, -12, 112, 12] });
   // la caisse de carottes
   const carottes = { sortY: 118, pris: false,
-    draw(g) {
+    draw(g, J) {
       g.fillStyle = '#6a4428'; g.fillRect(212, 104, 22, 14); g.fillStyle = '#8a5a32'; g.fillRect(212, 104, 22, 2); g.fillRect(212, 110, 22, 1);
       for (let k = 0; k < 6; k++) { g.fillStyle = '#f08a24'; g.fillRect(214 + k * 3, 99 + (k % 2), 2, 6); g.fillStyle = '#4f8a3a'; g.fillRect(214 + k * 3, 97 + (k % 2), 2, 2); }
+      if (EpreuveNeige.veutCarotte()) A.paillettes(J, 223, 102, 50, 5, 10, 5);
     } };
   C.dynamiques.push(carottes); C.solide(212, 108, 22, 10);
   // le poêle et sa lueur
@@ -75,6 +75,7 @@ Jeu.enregistrerCarte('oaken', () => {
   C.porte(126, H - 12, 36, 12, 'arendelle', 'devantOaken', 'down');
   C.arrivees.entree = { x: 144, y: H - 18, dir: 'up' };
   C.onEntree = (J) => EpreuveNeige.entreeOaken(J);
+  C.apresLumiere = (g, J) => A.dessinerPaillettes(g, J); // les paillettes sur les cuillères et les carottes
   C.finaliser(0.2);
   return C;
 });

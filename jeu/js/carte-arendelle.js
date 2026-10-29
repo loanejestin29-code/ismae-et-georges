@@ -24,7 +24,14 @@ Jeu.enregistrerCarte('arendelle', () => {
   // ---------------------------------------------------------------- sol : neige partout
   P.rect(0, 0, W, H, '#e6edf7');
   P.speckle(0, HAUT, W, H - HAUT, ['#f4f8ff', '#d8e2f0', '#eef3fb', '#cfdaea'], 0.12, r);
-  for (let k = 0; k < 220; k++) P.ellipse(r.int(W), HAUT + r.int(H - HAUT), 8 + r.int(26), 3 + r.int(8), r.chance(0.5) ? 'rgba(255,255,255,0.35)' : 'rgba(150,170,210,0.10)');
+  // la neige n'est pas plate : de grandes congères (ombre bleutée en bas, reflet en haut), des vagues de vent,
+  // des brins d'herbe et des brindilles qui dépassent
+  for (let k = 0; k < 420; k++) {
+    const x = r.int(W), y = HAUT + r.int(H - HAUT), rx = 14 + r.int(40), ry = 4 + r.int(10);
+    P.ellipse(x, y + 2, rx, ry, 'rgba(140,165,210,0.13)'); P.ellipse(x - 2, y - 1, rx - 3, Math.max(2, ry - 3), 'rgba(255,255,255,0.32)');
+  }
+  for (let k = 0; k < 900; k++) { const x = r.int(W), y = HAUT + r.int(H - HAUT), l = 3 + r.int(9); P.rect(x, y, l, 1, 'rgba(160,180,215,0.35)'); P.rect(x + 1, y - 1, l - 2, 1, 'rgba(255,255,255,0.6)'); }
+  for (let k = 0; k < 260; k++) { const x = r.int(W), y = HAUT + r.int(H - HAUT); P.px(x, y, r.pick(['#6a7a5a', '#5a4a3a', '#8a7a5a'])); if (r.chance(0.5)) P.px(x + 1, y - 1, '#7a8a5a'); }
   // le fond : ciel, aurore boréale, montagnes, palais de glace
   A.fond(P, W, 186, r);
   A.palais(P, 1210, 96);
@@ -45,6 +52,14 @@ Jeu.enregistrerCarte('arendelle', () => {
   glace(LAC); glace(CANAL);
   // berges enneigées, irrégulières
   for (let y = LAC.y; y < LAC.y + LAC.h; y++) { const b = 3 + Math.round(Math.abs(Math.sin(y * 0.05)) * 6 + Math.sin(y * 0.19) * 2); P.rect(LAC.x + LAC.w - b, y, b + 4, 1, N); P.px(LAC.x + LAC.w - b, y, N3); }
+  // le quai de pierre le long du fjord, devant le village (comme les quais de la rue des chats)
+  const QX = LAC.x + LAC.w - 8;
+  for (let y = 508; y < 1100; y += 6) for (let j = 0; j < 2; j++) {
+    const bx = QX + j * 6 - (((y / 6) | 0) % 2) * 3, col = r.pick(['#9a96aa', '#8a8698', '#a4a0b4']);
+    P.rect(bx, y, 6, 5, col); P.hline(bx, y, 6, PX.shade(col, 0.2)); P.hline(bx, y + 5, 6, '#5a566a');
+  }
+  P.rect(QX - 1, 508, 2, 592, '#4a4658'); P.rect(QX + 12, 508, 3, 592, N); for (let y = 508; y < 1100; y += 3) P.px(QX + 11, y, N3);
+  for (let y = 520; y < 1100; y += 64) { P.ellipse(QX + 1, y, 2, 2, '#3a3646'); P.px(QX + 1, y, '#9a96aa'); } // anneaux d'amarrage
   for (let x = LAC.x; x < LAC.x + LAC.w; x++) { const b = 3 + Math.round(Math.abs(Math.sin(x * 0.07)) * 5); P.rect(x, LAC.y + LAC.h - b, 1, b + 6, N); P.px(x, LAC.y + LAC.h - b, N3); P.rect(x, LAC.y - 2, 1, 3 + (x % 3), N); }
   for (let x = CANAL.x + LAC.w; x < CANAL.w; x++) { P.px(x, CANAL.y, N3); P.rect(x, CANAL.y - 2, 1, 2, N); P.px(x, CANAL.y + CANAL.h, N3); P.rect(x, CANAL.y + CANAL.h + 1, 1, 2, N); }
   C.glaces = [LAC, CANAL];
@@ -69,10 +84,10 @@ Jeu.enregistrerCarte('arendelle', () => {
     const horiz = w >= h, L = horiz ? h : w;
     const img = P.g.getImageData(x, y, w, h), d = img.data;
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
-      // t : 0 au milieu de la rue (déneigé), 1 sur les bords ; sur la place, on part du centre
-      const t = place ? Math.hypot((i / w - 0.5) * 2, (j / h - 0.5) * 2) / 1.2 : Math.abs(((horiz ? j : i) + 0.5) / L - 0.5) * 2;
+      // t : 0 au milieu de la rue (déneigé), 1 sur les bords ; sur la place, on part du centre et la neige recouvre tout au bord
+      const t = place ? (Math.abs((i / w - 0.5) * 2) ** 4 + Math.abs((j / h - 0.5) * 2) ** 4) ** 0.25 : Math.abs(((horiz ? j : i) + 0.5) / L - 0.5) * 2;
       const traces = !place && Math.abs(t - 0.42) < 0.07; // les ornières des traîneaux, plus sombres
-      let a = traces ? 0.12 : Math.min(0.92, Math.max(0.3, (t - 0.15) * 1.25));
+      let a = traces ? 0.12 : Math.min(place ? 1 : 0.92, Math.max(0.3, (t - 0.15) * 1.25));
       a += ((PX.bayer(x + i, y + j) / 16) - 0.5) * 0.12; // un grain très léger
       const k = (j * w + i) * 4;
       d[k] = d[k] * (1 - a) + 0xe6 * a; d[k + 1] = d[k + 1] * (1 - a) + 0xec * a; d[k + 2] = d[k + 2] * (1 - a) + 0xf6 * a;
@@ -163,6 +178,7 @@ Jeu.enregistrerCarte('arendelle', () => {
       m.ampoules.forEach(([bx, by]) => C.scintille.push([cx - m.ax + bx, base - m.ay + by]));
       if (m.fumee) C.fumees.push({ x: cx - m.ax + m.fumee[0], y: base - m.ay + m.fumee[1], t: r() * 2 });
       C.zone(cx - 8, base - 6, 16, 10, 'maisonArendelle');
+      for (let k = 0; k < 4; k++) O.rect(cx - m.mur / 2 - 2, base + k, m.mur + 4, 1, '#000'); // ombre au pied de la façade
       maisons.push({ x: cx, y: base });
       x += m.largeur + 4;
     }
@@ -177,9 +193,17 @@ Jeu.enregistrerCarte('arendelle', () => {
   rangee(452, 830, [{ seed: 21, w: 66, style: 'pignon', couleur: '#3a6aa8', etages: 3, boutique: 'leker' }, { seed: 22, w: 66, style: 'long', couleur: '#d8a838', etages: 3 }]);
   rangee(986, 830, [{ seed: 23, w: 66, style: 'long', couleur: '#4f8a5a', etages: 3, boutique: 'kafe' }, { seed: 24, w: 56, style: 'pignon', couleur: '#a8343a', etages: 3 }]);
   rangee(452, 1000, [{ seed: 25, w: 60, style: 'long', couleur: '#8a4a8a' }]);
-  rangee(1000, 1000, [{ seed: 26, w: 64, style: 'pignon', couleur: '#c86a3a' }]);
   rangee(646, 960, [{ seed: 27, w: 60, style: 'pignon', couleur: '#e8d8b8', boutique: 'bageri' }]);
-  rangee(856, 960, [{ seed: 28, w: 62, style: 'long', couleur: '#2f7a8a' }]);
+  rangee(852, 960, [{ seed: 28, w: 62, style: 'long', couleur: '#2f7a8a' }, { seed: 26, w: 64, style: 'pignon', couleur: '#c86a3a', etages: 3 }, { seed: 29, w: 56, style: 'long', couleur: '#d8a838' }]);
+  // la grand-rue jusqu'à l'entrée de la ville : maisons des deux côtés
+  rangee(650, 1110, [{ seed: 31, w: 58, style: 'long', couleur: '#4f8a5a' }]);
+  rangee(852, 1110, [{ seed: 32, w: 60, style: 'pignon', couleur: '#8a4a8a', boutique: 'sjokolade' }, { seed: 33, w: 54, style: 'long', couleur: '#3a6aa8' }]);
+  // l'arche « GOD JUL » au-dessus de la grand-rue
+  const ar = A.arche(104);
+  C.objet(ar.poteau, 748, 900, { solide: [-3, -3, 6, 4] }); C.objet(ar.poteau, 852, 900, { solide: [-3, -3, 6, 4] });
+  C.dessusImg(ar.haut, 748, 836); ar.ampoules.forEach(([bx, by]) => C.scintille.push([748 + bx, 836 + by]));
+  for (const [x, y, w] of [[760, 1010, 80], [760, 1080, 80]]) { const gl = Objets.guirlande(w, 6); C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by])); }
+  for (const [x, y] of [[742, 1016], [846, 1020], [742, 1150], [858, 1150]]) C.objet(Objets.pot(x, 'sapin'), x, y, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
   // le petit mobilier : bancs, bûches, tonneaux, boîte aux lettres, bannières, statue
   const mobilier = [
     [A.banc(), 560, 640, [-13, -3, 26, 4], 'banc'], [A.banc(), 1040, 640, [-13, -3, 26, 4], 'banc'], [A.banc(), 612, 880, [-13, -3, 26, 4], 'banc'],
@@ -211,15 +235,22 @@ Jeu.enregistrerCarte('arendelle', () => {
   etal('pains', 910, 800, '#d8a838', '#7a2a2a', 'etalPains');
   etal('poisson', 660, 724, '#2f7a8a', '#f4efe6', 'etalPoisson');
   C.objet(A.puits(), 1000, 716, { solide: [-12, -8, 24, 9], texte: 'puitsGele', zw: 24 });
-  for (const [x, y] of [[652, 618], [948, 618], [652, 818], [948, 818], [744, 900], [856, 900], [744, 1060], [856, 1060], [520, 618], [1080, 618], [1180, 880], [1260, 920]])
+  for (const [x, y] of [[652, 618], [948, 618], [652, 818], [948, 818], [744, 1060], [856, 1060], [520, 618], [1080, 618], [1180, 880], [1260, 920]])
     C.objet(A.lampadaire(), x, y, { solide: [-2, -3, 5, 4], rayon: 58 });
-  C.objet(A.tasNeige(34), 1110, 962, { solide: [-14, -6, 28, 6] });
+  C.objet(A.tasNeige(34), 1150, 1030, { solide: [-14, -6, 28, 6] });
   C.objet(A.tasNeige(26), 560, 760, { solide: [-10, -4, 20, 5] });
 
   // ---------------------------------------------------------------- la colline aux luges (sud-ouest)
-  C.objet(A.bonhommeEnfants(), 600, 1030, { solide: [-6, -3, 12, 4], ombre: [7, 2], texte: 'bonhommeEnfants', zw: 18 });
-  C.objet(A.luge(), 640, 1080, { solide: [-9, -3, 18, 4], texte: 'lugeRouge', zw: 20 });
-  for (let k = 0; k < 4; k++) Objets.line(P, 520 + k * 30, 1000 + k * 8, 600 + k * 30, 1120, '#c8d4e6'); // traces de luges
+  C.objet(A.bonhommeEnfants(), 548, 1034, { solide: [-6, -3, 12, 4], ombre: [7, 2], texte: 'bonhommeEnfants', zw: 18 });
+  C.objet(A.luge(), 598, 1084, { solide: [-9, -3, 18, 4], texte: 'lugeRouge', zw: 20 });
+  for (let k = 0; k < 4; k++) Objets.line(P, 470 + k * 30, 1010 + k * 8, 520 + k * 30, 1120, '#c8d4e6'); // traces de luges
+  C.objet(A.palissade(140), 470, 1132, { solide: [0, -3, 140, 3] });
+  // le ponton sur le fjord, sa lanterne et sa barque prise dans la glace
+  for (let x = 330; x < QX; x += 4) { P.rect(x, 768, 3, 22, r.pick(['#8a5a32', '#7a4a2a', '#9a6a3a'])); P.hline(x, 768, 3, '#a8743e'); P.px(x + 1, 768 + r.int(20), '#eef3fb'); }
+  P.hline(330, 790, QX - 330, '#3a2618'); for (const x of [332, 360, 390]) { P.rect(x, 790, 3, 6, '#4a3020'); }
+  C.objet(A.lampadaire(), 336, 772, { solide: [-2, -3, 5, 4], rayon: 50 });
+  C.objet(Objets.barque(), 370, 812, { solide: [-18, -4, 36, 6] });
+  for (const y of [560, 680, 880, 1000]) C.objet(A.bitte(), QX + 18, y, { solide: [-3, -2, 6, 3] });
 
   // ---------------------------------------------------------------- la forêt de sapins, la clairière des trolls (est)
   const SAPINS = [0, 1, 2, 3].map((k) => Foret.sapin(500 + k, 2 + (k % 2)));
@@ -243,7 +274,7 @@ Jeu.enregistrerCarte('arendelle', () => {
   }
   // une rangée de sapins au pied des montagnes et quelques-uns au bord du lac
   for (let x = 450; x < W; x += 34 + r.int(16)) { if (x > 560 && x < 1040) continue; planter(x, 212 + r.int(14), 30); }
-  for (const [x, y] of [[460, 260], [470, 380], [460, 470], [430, 1112], [520, 1150], [690, 1150], [930, 1140], [1060, 1120], [1180, 1160], [430, 1150], [1150, 1060]]) planter(x, y, 24);
+  for (const [x, y] of [[460, 260], [470, 380], [460, 470], [430, 1112], [520, 1150], [1060, 1120], [1180, 1160], [430, 1150]]) planter(x, y, 24);
   for (let k = 0; k < 40; k++) { const a = r() * 6.28, d = 60 + r.int(40); P.px(1400 + Math.cos(a) * d * 1.3, 560 + Math.sin(a) * d * 0.9, '#6a8a6a'); }
   C.solide(W - 8, HAUT, 8, H - HAUT - 70);
 
@@ -333,7 +364,7 @@ Jeu.enregistrerCarte('arendelle', () => {
   Entites.portraits.patineuse = C.pnj[C.pnj.length - 1].spr.down.idle;
   passant('pecheur', { cfg: { peau: '#d8a07a', cheveux: '#6a6a74', coiffure: 'court', barbe: 'pleine', couleurBarbe: '#c8c4cc', yeux: '#2a1d2e', chapeau: 'bonnet', couleurChapeau: '#5a4a3a', ruban: '#c8343a', fleur: '#5a4a3a', veste: '#5a6a4a', echarpe: '#c9483b', pantalon: '#3a3440', chaussures: '#2a2026' },
     x: 246, y: 958, regardeDefaut: 'left' });
-  CONFIG.arendelle.enfants.forEach((e, k) => figurant('enfant' + k, { spr: NA.enfant(e), x: [560, 620, 680][k], y: [1006, 1090, 1040][k], repliques: 'enfant' }));
+  CONFIG.arendelle.enfants.forEach((e, k) => figurant('enfant' + k, { spr: NA.enfant(e), x: [508, 568, 612][k], y: [1010, 1100, 1046][k], repliques: 'enfant' }));
   Entites.portraits.enfant = C.pnj[C.pnj.length - 1].spr.idle;
   // les trolls de la clairière : des rochers… qui se réveillent quand on s'approche
   const trolls = [[1478, 502], [1500, 566], [1452, 632]].map(([x, y], k) => {
@@ -354,13 +385,16 @@ Jeu.enregistrerCarte('arendelle', () => {
     elsaDepart: { x: 800, y: 520 },
     bouleLac: { x: 446, y: 1062 }, bouleClairiere: { x: 1360, y: 600 },
     branches: { x: 1430, y: 1066 },
-    cailloux: [{ x: 1018, y: 724 }, { x: 530, y: 846 }, { x: 1118, y: 972 }],
+    // les trois cailloux (et où Olaf dit qu'ils sont)
+    cailloux: [{ x: 968, y: 712, ou: 'un à côté du puits, sur la grande place' }, { x: 492, y: 858, ou: 'un dans la rue du sud, devant le magasin de jouets bleu' },
+      { x: 1122, y: 1012, ou: 'un sur le chemin de l\'écurie, près du gros tas de neige' }],
     fontaine: { x: 800, y: 404 },
     bus: { x: 1520, y: 1160 },
   };
   C.zone(1500, 1146, 44, 16, null, { dialogue: (J) => EpreuveNeige.arretBus(J) });
 
   C.onEntree = (J) => EpreuveNeige.entree(J);
+  C.apresLumiere = (g, J) => A.dessinerPaillettes(g, J); // les paillettes sur les objets à trouver
   C.finaliser(0.22);
   return C;
 });

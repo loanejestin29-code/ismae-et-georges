@@ -104,9 +104,6 @@ Jeu.enregistrerCarte('foret', () => {
       P.px(x, y + 1, '#3f7a35'); P.px(x, y, col); P.px(x - 1, y, col); P.px(x + 1, y, col); P.px(x, y - 1, col); P.px(x, y, '#fff6c0');
     }
   };
-  // des plaques de neige sur l'herbe
-  const rn = PX.rng(2512);
-  for (let k = 0; k < 110; k++) eclaircir(rn.int(W), 60 + rn.int(H - 60), 14 + rn.int(36), 7 + rn.int(16), '#ffffff', 0.85);
   fleurs(830, 850, 140, 80, 260); fleurs(640, 740, 70, 30, 40); fleurs(200, 470, 80, 40, 50); fleurs(700, 200, 40, 30, 20); fleurs(330, 200, 30, 20, 16);
   // champignons (un cercle de fées dans la prairie)
   const champi = (x, y) => { P.px(x, y, '#f4efe6'); P.rect(x - 1, y - 2, 3, 2, '#d8323a'); P.px(x - 1, y - 2, '#ff8a7a'); P.px(x + 1, y - 1, '#ffffff'); };

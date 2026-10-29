@@ -346,7 +346,9 @@ const Arendelle = (() => {
     P.rect(5, 8, 3, 42, '#2a2632'); P.vline(5, 8, 42, '#4a4658'); P.rect(3, 46, 7, 4, '#2a2632');
     P.rect(2, 4, 9, 2, '#2a2632'); P.rect(3, 6, 7, 9, '#2a2632'); P.rect(4, 7, 5, 7, '#ffd27a'); P.px(4, 7, '#fff4c8');
     P.rect(2, 2, 9, 2, NEIGE); P.hline(3, 1, 7, '#ffffff'); P.hline(2, 15, 9, '#2a2632');
-    P.rect(4, 26, 5, 2, '#2f6a3a'); P.px(6, 28, '#d8323a');
+    // une couronne de sapin à nœud rouge sur le poteau
+    P.ellipse(6, 27, 4, 4, '#1e4a2a'); P.ellipse(6, 27, 3, 3, '#2f6a3a'); P.ellipse(6, 27, 1, 1, '#2a2632'); P.px(4, 25, '#4f8a4a'); P.px(8, 29, '#4f8a4a');
+    P.rect(5, 30, 3, 2, '#d8323a'); P.px(4, 32, '#d8323a'); P.px(8, 32, '#d8323a'); P.px(3, 27, '#f2c230'); P.px(9, 26, '#f2c230');
     return { img: c, ax: 6, ay: base, light: { dx: 0, dy: -39 } };
   }
 
@@ -436,10 +438,20 @@ const Arendelle = (() => {
     P.rect(14, 17, 5, 5, '#6a4428'); P.vline(16, 16, 2, '#3a2618');
     return { img: c, ax: 16, ay: base };
   }
+  // un tas de neige déblayée, en trois bosses bien dessinées ; les gros ont une pelle rouge plantée dedans
   function tasNeige(w) {
-    const h = Math.round(w * 0.45), { c, P } = mk(w, h + 2);
-    P.ellipse(w / 2, h, w / 2 - 1, h - 1, NEIGE3); P.ellipse(w / 2 - 1, h - 1, w / 2 - 2, h - 2, NEIGE); P.ellipse(w / 2 - 3, h - 3, w / 4, h / 3, '#ffffff');
-    return { img: c, ax: w >> 1, ay: h + 1 };
+    const h = Math.round(w * 0.5), H = h + 14, { c, P } = mk(w + 2, H), b = H - 3, cx = w / 2 + 1;
+    P.ellipse(cx, b + 1, w / 2, 2, '#8a96b8');
+    const bosses = [[-w * 0.24, h * 0.34, w * 0.26], [w * 0.22, h * 0.4, w * 0.28], [0, h * 0.62, w * 0.3]];
+    for (const [dx, hy, rx] of bosses) P.ellipse(cx + dx, b - hy + 1, rx + 1, hy + 1, '#7a88aa');
+    for (const [dx, hy, rx] of bosses) P.ellipse(cx + dx, b - hy + 1, rx, hy, NEIGE3);
+    for (const [dx, hy, rx] of bosses) P.ellipse(cx + dx - 1, b - hy, rx - 1, hy - 1, NEIGE);
+    for (const [dx, hy, rx] of bosses) P.ellipse(cx + dx - rx / 3, b - hy * 1.4, rx / 3, hy / 3, '#ffffff');
+    if (w >= 30) {
+      line(P, cx + 5, b - h * 0.55, cx + 11, b - h - 10, '#8a5a32'); P.rect(cx + 10, b - h - 12, 3, 2, '#5a3a22');
+      P.rect(cx + 3, b - h * 0.55 - 1, 5, 4, '#c8343a'); P.hline(cx + 3, b - h * 0.55 - 1, 5, '#e85a5a');
+    }
+    return { img: c, ax: cx | 0, ay: b };
   }
   function bonhommeEnfants() {
     const { c, P } = mk(20, 26), base = 25;
@@ -530,6 +542,34 @@ const Arendelle = (() => {
     return { img: c, ax: 14, ay: base };
   }
 
+  // palissade blanche à chapeaux de neige
+  function palissade(w) {
+    const { c, P } = mk(w, 16), base = 15;
+    P.rect(0, 6, w, 2, '#d8d4cc'); P.rect(0, 11, w, 2, '#d8d4cc');
+    for (let x = 0; x < w; x += 4) { P.rect(x, 2, 3, 13, '#f4f0e8'); P.vline(x + 2, 3, 12, '#c8c0b4'); P.px(x + 1, 1, '#f4f0e8'); P.rect(x, 0, 3, 2, NEIGE); }
+    return { img: c, ax: 0, ay: base };
+  }
+  // l'arche « GOD JUL » (joyeux Noël) au-dessus de la grand-rue : poteaux et linteau (dessinés à part)
+  function arche(w) {
+    const poteau = mk(8, 60), Pp = poteau.P;
+    Pp.rect(2, 0, 4, 60, '#6a4428'); Pp.vline(2, 0, 60, '#8a5a32'); Pp.rect(0, 56, 8, 4, '#4a3020');
+    for (let y = 4; y < 54; y += 6) { Pp.px(1, y, '#2f6a3a'); Pp.px(6, y + 3, '#2f6a3a'); Pp.px(1, y + 1, '#d8323a'); }
+    const haut = mk(w, 26), P = haut.P;
+    P.rect(0, 8, w, 12, '#6a4428'); P.hline(0, 8, w, '#8a5a32'); P.hline(0, 19, w, '#3a2618');
+    P.rect(0, 5, w, 4, NEIGE); P.hline(0, 4, w, '#ffffff'); glacons(P, PX.rng(3), 2, w - 2, 20, 3);
+    const t = 'GOD JUL'; texte(P, t, Math.floor((w - largeurTexte(t)) / 2), 11, '#f2c230');
+    P.trap(w / 2 - 6, 12, w / 2 - 4, 8, -1, 6, '#6a4428'); P.ellipse(w / 2, 1, 2, 2, '#f2c230');
+    const ampoules = [];
+    for (let x = 2; x < w - 2; x += 4) { const y = 21 + Math.round(Math.sin((x / w) * Math.PI) * 3); P.px(x, y, '#2a2632'); ampoules.push([x, y + 1]); }
+    return { poteau: { img: poteau.c, ax: 4, ay: 59 }, haut: haut.c, ampoules };
+  }
+  // ponton de bois sur le fjord gelé (posé au sol) et bitte d'amarrage
+  function bitte() {
+    const { c, P } = mk(8, 10), base = 9;
+    P.rect(1, 2, 6, 8, '#3a3646'); P.rect(2, 2, 4, 8, '#5a5668'); P.ellipse(4, 2, 3, 1, '#7a7690'); P.ellipse(4, 1, 3, 1, NEIGE);
+    return { img: c, ax: 4, ay: base };
+  }
+
   // ------------------------------------------------------------ l'arrêt de bus, à la sortie d'Arendelle
   function arretBus() {
     const { c, P } = mk(56, 56), base = 55;
@@ -582,9 +622,33 @@ const Arendelle = (() => {
     P.ellipse(cx, base - 26, 3, 4, '#ffffff'); P.ellipse(cx, base - 26, 2, 3, C2); // le grand flocon au balcon
   }
 
+  // des paillettes sur les objets à trouver : quelques petits éclats (blanc, doré, bleu glacé) qui s'allument et
+  // s'éteignent un peu partout autour de l'objet, sans halo ; « n » éclats dans une ellipse rx × ry.
+  // Les objets les demandent en se dessinant ; la carte les dessine ensuite par-dessus l'éclairage du soir
+  // (sinon la nuit les éteint), avec C.apresLumiere = (g, J) => Arendelle.dessinerPaillettes(g, J)
+  const COULEURS_PAILLETTES = ['#ffffff', '#ffe27a', '#bfeaff'];
+  function paillettes(J, x, y, graine, n = 4, rx = 5, ry = 4) {
+    const liste = J.carte.paillettes || (J.carte.paillettes = []);
+    if (liste.length < 64) liste.push([x, y, graine, n, rx, ry]);
+  }
+  function dessinerPaillettes(g, J) {
+    const t = J.t || 0, liste = J.carte.paillettes || [];
+    for (const [x, y, graine, n, rx, ry] of liste) for (let k = 0; k < n; k++) {
+      const periode = 0.9 + ((graine * 7 + k * 13) % 5) * 0.16, ph = t / periode + k / n + graine * 0.37;
+      const cycle = Math.floor(ph), p = ph - cycle;
+      if (p > 0.45) continue; // chaque éclat reste éteint un moment
+      const h = Math.abs(Math.sin((cycle + 1) * 12.9898 + k * 78.233 + graine * 3.7) * 43758.5453), u = h % 1, v = (h * 7.13) % 1;
+      const px = Math.round(x + (u * 2 - 1) * rx), py = Math.round(y + (v * 2 - 1) * ry);
+      g.fillStyle = COULEURS_PAILLETTES[(cycle + k) % 3];
+      g.fillRect(px, py, 1, 1);
+      if (p > 0.12 && p < 0.3) { g.globalAlpha = 0.55; g.fillRect(px - 1, py, 3, 1); g.fillRect(px, py - 1, 1, 3); g.globalAlpha = 1; }
+    }
+    liste.length = 0;
+  }
+
   return {
     texte, largeurTexte, maison, chateau, muraille, portail, fontaineGelee, etal, lampadaire, ecurie, traineau, blocsGlace, comptoirOaken,
     bateauGele, puits, tasNeige, bonhommeEnfants, luge, rocher, transat, pancarte, arretBus, fond, palais, MURS, NEIGE, NEIGE2, NEIGE3, GLACE,
-    banc, buches, tonneaux, banniere, boiteLettres, statue, glacons, bourrelet,
+    banc, buches, tonneaux, banniere, boiteLettres, statue, glacons, bourrelet, palissade, arche, bitte, paillettes, dessinerPaillettes,
   };
 })();

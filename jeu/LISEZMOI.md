@@ -98,7 +98,8 @@ image ni aucun son externe.
 - **Arendelle sous la neige**, le soir : village de maisons scandinaves colorées, grande place avec
   son sapin, son marché de Noël (chocolat chaud, lutefisk, tricots, carottes, biscuits) et son puits ;
   le château aux toits de cuivre vert, ses grandes portes qui s'ouvrent et sa fontaine gelée ; le
-  fjord gelé (on y glisse !) avec ses bateaux pris dans la glace et ses patineuses ; la forêt de
+  fjord gelé (on y glisse !) avec ses bateaux pris dans la glace et ses patineuses ; le quai de pierre et
+  son ponton ; l'arche « GOD JUL » au-dessus de la grand-rue ; la forêt de
   sapins et la clairière des trolls (des rochers… qui se réveillent) ; le comptoir d'Oaken (et son
   sauna), où l'on peut entrer ; l'écurie de Kristoff et Sven ; le palais de glace d'Elsa dans la
   montagne, sous une aurore boréale. Flocons, guirlandes, lanternes, traces de pas dans la neige.
@@ -113,8 +114,15 @@ image ni aucun son externe.
   3. la petite boule (la tête) : Anna la donne ;
   4. les cuillères (les yeux) : chez Oaken (« quatre couronnes… bon, c'est cadeau ») ;
   5. les branches (bras, nez et sourire) : Sven les garde, il les échange contre une carotte d'Oaken ;
-  6. les cailloux (boutons) : trois petits cailloux noirs qui brillent dans le village ;
+  6. les cailloux (boutons) : trois petits cailloux noirs dans le village (à côté du puits,
+     devant le magasin de jouets, près du tas de neige à la pelle rouge) ;
   7. l'écharpe noire : en haut de la fontaine gelée, et c'est Georges qui grimpe la chercher.
+
+  Tout ce qu'il faut trouver (les boules à pousser, les cuillères, les carottes, les branches, les
+  cailloux, l'écharpe) est saupoudré de petites paillettes dorées, blanches et bleu glacé qui
+  s'allument et s'éteignent, sans halo : on les remarque en passant à côté.
+- **Les indices d'Olaf** : quand on lui parle, Olaf dit ce qui manque et où le chercher ; pour les
+  cailloux, il dit où sont ceux qui restent, et pendant 40 secondes ils ont deux fois plus de paillettes.
 - **L'assemblage** : on retourne voir Olaf, et on fait glisser chaque élément à sa place (souris ou
   doigt). Les places libres sont en pointillés ; on pose d'abord la grosse boule, puis le ventre,
   puis la tête.
@@ -129,10 +137,12 @@ image ni aucun son externe.
 
 - **Le départ** : à l'arrêt de bus d'Arendelle, le bus arrive en klaxonnant ; Ismae et Georges montent.
   Le chauffeur annonce : « Prochain arrêt : Montaigu ! »
-- **Le trajet** (vue du dessus, rétro) : le bus avance tout seul ; on change de file avec les flèches
-  (ou A / D) au clavier, ou en touchant la moitié gauche ou droite de l'écran sur iPhone. Voitures,
-  camions, tracteurs, chasse-neige, travaux, nids-de-poule, cerfs et vaches à éviter ; il reste
-  toujours une file libre. Trois vies (♥), la vitesse augmente ; en panne, on repart aussitôt du
+- **Le trajet** (vue du dessus, rétro) : le bus avance tout seul ; on change de file en glissant le doigt
+  sur l'iPhone : on glisse à gauche, le bus va d'une file à gauche ; à droite, d'une file à droite ;
+  sans glisser, il reste dans sa file (un long glissement change de deux files). Au clavier : les
+  flèches ou A / D. Voitures, camions, tracteurs, chasse-neige, travaux, nids-de-poule, cerfs et
+  vaches à éviter, de plus en plus serrés ; certaines voitures mettent leur clignotant et déboîtent
+  devant le bus. Il reste toujours une file libre. Trois vies (♥), la vitesse augmente ; en panne, on repart aussitôt du
   début du paysage en cours. Des cadeaux à ramasser, et parfois un cœur qui rend une vie.
 - **Les paysages** : montagnes enneigées (jalons à neige, chalets), forêt, campagne (le bocage, les
   moulins, les vaches, les bottes de foin), petites villes illuminées pour Noël, puis Montaigu.
@@ -162,6 +172,7 @@ Le jeu est en ligne sur **https://ismae-et-georges.vercel.app/jeu/** (ou la page
 | Regarder, parler | bouton **A** |
 | Faire défiler un dialogue | bouton **A**, ou toucher la bulle |
 | Couper la musique | bouton **♪** en haut à droite |
+| Changer de file (bus) | glisser le doigt vers la gauche ou vers la droite |
 
 À la verticale, un écran demande de tourner le téléphone et le jeu se met en pause.
 

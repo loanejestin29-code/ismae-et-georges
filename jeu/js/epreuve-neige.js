@@ -27,10 +27,16 @@ const EpreuveNeige = (() => {
   const F = () => Jeu.carte.neige3;
   const $ = (id) => document.getElementById(id);
   const ORDRE = ['grosse', 'moyenne', 'petite', 'cuilleres', 'branches', 'cailloux', 'echarpe'];
+  // les indices d'Olaf, élément par élément
   const OU = {
-    grosse: 'la grosse boule, à rouler au bord du lac', moyenne: 'la boule moyenne, dans la clairière des sapins', petite: 'la petite boule, demande à Anna',
-    cuilleres: 'les cuillères, chez Oaken', branches: 'les branches de Sven, près de l\'écurie', cailloux: 'des petits cailloux noirs, dans le village', echarpe: 'l\'écharpe noire, vers le château',
+    grosse: 'La grosse boule : au bord du lac gelé, en bas à gauche, près de la colline aux luges. Pousse-la en marchant, elle grossit !',
+    moyenne: 'La boule moyenne : dans la clairière des sapins, à droite du village, au-dessus de l\'écurie.',
+    petite: 'La petite boule : Anna se promène entre la grande place et la rue du sud. Parle-lui !',
+    cuilleres: 'Les cuillères : chez Oaken, tout en haut à droite, à la lisière de la forêt.',
+    branches: 'Les branches : Sven les garde, à l\'écurie, en bas à droite. Il les échange contre une carotte… et Oaken vend des carottes.',
+    echarpe: 'L\'écharpe : tout en haut de la fontaine gelée, dans la cour du château. Georges grimpe très bien, lui.',
   };
+  let revele = 0; // quand Olaf en parle, les cailloux brillent très fort pendant un moment
   const complet = (k) => (k === 'cailloux' ? inv.cailloux >= 3 : inv[k]);
   const toutTrouve = () => ORDRE.every(complet);
 
@@ -133,7 +139,7 @@ const EpreuveNeige = (() => {
       if (this.fini || inv[this.id]) return null;
       return { x: this.x - this.r - 4, y: this.y - this.r * 2 - 2, w: this.r * 2 + 8, h: this.r * 2 + 6, dialogue: () => (Q.neige === 'quete' ? B().bouleDebut : ['Une petite boule de neige.']) };
     }
-    draw(g) {
+    draw(g, J) {
       for (const q of this.trace) { g.globalAlpha = Math.max(0, 0.35 - q.t / 40); g.fillStyle = '#b8c6da'; g.fillRect(Math.round(q.x - q.r * 0.6), Math.round(q.y), Math.max(2, Math.round(q.r * 1.2)), 2); }
       if (this.alpha <= 0) { g.globalAlpha = 1; return; }
       g.globalAlpha = this.alpha;
@@ -141,6 +147,7 @@ const EpreuveNeige = (() => {
       Entites.ombre(g, this.x, this.y, Math.max(3, r));
       const cercle = (rr, col, ox = 0, oy = 0) => { g.fillStyle = col; for (let j = -rr; j <= rr; j++) { const w = Math.round(Math.sqrt(rr * rr - j * j)); g.fillRect(x + ox - w, y + oy + j, w * 2 + 1, 1); } };
       cercle(r + 1, '#8aa0c0'); cercle(r, '#c8d6ea'); cercle(Math.max(1, r - 1), '#f4f8ff', -1, -1); g.fillStyle = '#ffffff'; g.fillRect(x - Math.round(r / 2), y - Math.round(r / 2), 2, 1);
+      if (!this.fini && !inv[this.id] && Q.neige === 'quete') Arendelle.paillettes(J, x, y, this.id === 'grosse' ? 1 : 2, 5, r + 3, r + 2);
       g.globalAlpha = 1;
     }
   }
@@ -194,18 +201,22 @@ const EpreuveNeige = (() => {
   function installerObjets(J) {
     const S = F(), C = J.carte;
     S.cailloux.forEach((c, k) => {
+      // un petit caillou noir et lisse, saupoudré de paillettes (bien plus quand Olaf les « réveille »)
       const obj = { pris: false, sortY: c.y,
+        update(dt) { if (k === 0 && revele > 0) revele -= dt; },
         draw(g, j) {
-          if (this.pris) return;
-          g.fillStyle = '#2a2632'; g.fillRect(c.x - 1, c.y - 2, 3, 2); g.fillStyle = '#5a5668'; g.fillRect(c.x - 1, c.y - 2, 1, 1);
-          g.fillStyle = '#eef3fb'; g.fillRect(c.x - 2, c.y, 5, 1);
-          if (Math.sin((j.t || 0) * 2.4 + k * 2) > 0.85) { g.fillStyle = '#ffffff'; g.fillRect(c.x, c.y - 5, 1, 1); g.fillRect(c.x - 1, c.y - 4, 3, 1); g.fillRect(c.x, c.y - 3, 1, 1); }
+          if (this.pris || Q.neige !== 'quete') return;
+          g.fillStyle = 'rgba(40,40,80,0.3)'; g.fillRect(c.x - 2, c.y, 5, 1);
+          g.fillStyle = '#1d1a24'; g.fillRect(c.x - 2, c.y - 2, 5, 2); g.fillRect(c.x - 1, c.y - 3, 3, 1);
+          g.fillStyle = '#3a3646'; g.fillRect(c.x - 1, c.y - 2, 3, 1); g.fillStyle = '#ffffff'; g.fillRect(c.x - 1, c.y - 2, 1, 1);
+          if (revele > 0) Arendelle.paillettes(j, c.x, c.y - 3, k, 8, 8, 5);
+          else Arendelle.paillettes(j, c.x, c.y - 3, k, 4, 5, 3);
         } };
       C.dynamiques.push(obj);
-      C.zone(c.x - 7, c.y - 6, 14, 10, null, { dialogue: () => {
+      C.zone(c.x - 11, c.y - 10, 22, 16, null, { dialogue: () => {
         if (obj.pris) return null;
         if (Q.neige !== 'quete') return ['Un petit caillou noir, tout lisse.'];
-        obj.pris = true; obtenir('cailloux', J); return B().caillou;
+        obj.pris = true; c.pris = true; obtenir('cailloux', J); return B().caillou;
       } });
     });
     S.echarpeObj = { pris: false, sortY: S.fontaine.y + 1,
@@ -220,16 +231,17 @@ const EpreuveNeige = (() => {
         g.fillStyle = '#121016'; for (const [px, py] of pts) g.fillRect(px, py, 2, 2);
         g.fillStyle = '#4a4660'; for (const [px, py] of pts.slice(0, 16)) g.fillRect(px, py, 1, 1);
         for (let k = 0; k < 3; k++) { const [fx, fy] = pts[15]; g.fillStyle = '#121016'; g.fillRect(fx + 1 + k, fy + 1 + (k % 2), 1, 2); }
-        if (Math.sin(t * 3) > 0.4) { const sx = x + 8 + Math.round(Math.sin(t) * 6), sy = y - 4; g.fillStyle = '#ffffff'; g.fillRect(sx, sy - 1, 1, 3); g.fillRect(sx - 1, sy, 3, 1); }
+        if (Q.neige === 'quete') Arendelle.paillettes(j, x + 6, y + 3, 20, 5, 9, 6);
       } };
     C.dynamiques.push(S.echarpeObj);
     S.branchesObj = { pris: false, sortY: S.branches.y,
-      draw(g) {
+      draw(g, j) {
         if (this.pris) return;
         const { x, y } = S.branches;
         g.fillStyle = '#6a4428';
         for (const [a, b, l] of [[0, 0, 12], [2, -2, 10], [-2, -4, 11]]) for (let k = 0; k < l; k++) g.fillRect(x - 6 + a + k, y + b - Math.round(k * 0.3), 1, 1);
         g.fillRect(x + 1, y - 6, 1, 3); g.fillRect(x - 3, y - 5, 1, 2);
+        if (Q.neige === 'quete') Arendelle.paillettes(j, x, y - 4, 30, 4, 7, 4);
       } };
     C.dynamiques.push(S.branchesObj);
   }
@@ -240,8 +252,16 @@ const EpreuveNeige = (() => {
     o.regarder(J.joueur.x, J.joueur.y);
     if (Q.neige === 'quete') {
       if (toutTrouve()) { assembler(J); return null; }
-      const manque = ORDRE.filter((k) => !complet(k)).map((k) => OU[k]);
-      const lignes = [['olaf', `Il nous manque encore : ${manque.join(' ; ')}.`]];
+      const lignes = [['olaf', 'Voyons ce qu\'il nous manque…']];
+      for (const k of ORDRE) {
+        if (complet(k)) continue;
+        if (k === 'cailloux') {
+          const restent = F().cailloux.filter((c) => !c.pris).map((c) => c.ou);
+          lignes.push(['olaf', `Les cailloux : il en reste ${restent.length}, ${restent.join(' ; ')}.`]);
+          lignes.push(['olaf', 'Attends, je demande aux flocons de les faire briller… Voilà ! Regarde bien par terre.']);
+          revele = 40;
+        } else lignes.push(['olaf', OU[k]]);
+      }
       if (carotte && !inv.branches) return B().olafCarotte.concat(lignes);
       return lignes;
     }
@@ -381,5 +401,8 @@ const EpreuveNeige = (() => {
     if (etape === 'quete') { Q.neige = 'quete'; majInventaire(); }
   }
 
-  return { init, entree, entreeOaken, repliques, parlerOlaf, parlerAnna, parlerSven, prendreCuilleres, prendreCarotte, fontaine, arretBus, dev, inv, Boule };
+  // la caisse de carottes d'Oaken brille tant qu'il en faut une pour Sven
+  const veutCarotte = () => Q.neige === 'quete' && !carotte && !inv.branches;
+
+  return { init, entree, entreeOaken, repliques, parlerOlaf, parlerAnna, parlerSven, prendreCuilleres, prendreCarotte, fontaine, arretBus, dev, inv, Boule, veutCarotte };
 })();
