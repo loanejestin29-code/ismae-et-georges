@@ -183,22 +183,43 @@ image ni aucun son externe.
   bleues, les légumes de la ratatouille, les fromages, les épices, le livre de Gusteau, le
   passe-plat, les sacs de sucre, une guirlande et une couronne. Colette coupe des légumes.
   **Rémy** attend sur son plan de travail, près de sa petite casserole.
-- **La rencontre** : Rémy explique qu'il manque le caramel du dîner de Noël, et lance à Ismae
-  qu'une certaine Loane lui a parlé de son dernier caramel… « un morceau de charbon ».
-- **Le mini-jeu** (façon Cooking Mama, avec Rémy à gauche qui commente tout) :
-  1. *Le sucre* : la jauge se remplit toute seule ; on arrête quand elle est dans la zone verte
-     (toucher l'écran, ou Espace / clic).
-  2. *Mélanger* : on fait des cercles dans la casserole, au doigt ou à la souris (ou avec les
-     flèches) ; le sucre fond et blondit. Cinq tours en moins de 14 secondes.
-  3. *La cuisson* : le caramel passe de clair à doré, ambré, puis brûlé ; on retire la casserole du
-     feu quand le curseur est dans le crochet vert (environ 0,8 seconde pour réagir).
-- **Les échecs**, à regarder : trop peu de sucre (une fourmi vient chercher sa part), trop de
-  sucre (il déborde et ensevelit Rémy), sucre pris en bloc, caramel tout pâle (Rémy goûte, déçu),
-  caramel brûlé (fumée noire, alarme, Rémy panique puis tousse). On recommence l'étape ratée autant
-  de fois qu'on veut. Les réglages de difficulté sont `REGLAGES`, en haut de `js/caramel.js`.
-- **La victoire** : « Incroyable ! Cette fois, tu ne l'as même pas brûlé ! », Linguini emporte le
-  caramel en salle, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE OBTENU ! ». Ismae peut ensuite
-  ressortir et se promener dans Montaigu (les habitants ont de nouvelles répliques).
+- **La rencontre** : Rémy explique qu'il manque le caramel au beurre salé du dîner de Noël
+  (Linguini a essayé avec du beurre doux, une catastrophe), et lance à Ismae qu'une certaine Loane
+  lui a parlé de son dernier caramel… « un morceau de charbon ».
+- **Le mini-jeu du caramel au beurre salé** (façon Cooking Mama, cinq étapes, environ une minute
+  et demie quand tout va bien ; Rémy, à gauche, réagit à tout) :
+  1. *Le sucre* : on maintient (doigt, clic ou Espace) pour pencher le paquet. Il faut 200 g à
+     6 g près, sur la balance. Le sucre continue de tomber quand on relâche, et le paquet lâche
+     parfois un paquet de sucre d'un coup : on finit par petites touches. 13 secondes.
+  2. *Faire fondre* : on règle le feu (curseur à droite, ou ↑↓) et on remue en rond (doigt,
+     souris, ou ←→). Le brûleur chauffe plus fort d'un côté (on voit la lueur orange) et ce côté
+     change de place : sans remuer, des points noirs apparaissent (trois, c'est brûlé) ; à plein
+     feu tout brûle ; trop doux, le sucre cristallise. Réussi quand tout a fondu et doré.
+  3. *Le beurre demi-sel* (papier « DEMI-SEL » et petit Gwenn-ha-du) : on coupe la motte sur les
+     pointillés (glisser vers le bas, ou ←→ puis Espace) — trois coupes ratées et le beurre est
+     en miettes. Puis on glisse les morceaux un par un dans la casserole : chaque morceau fait
+     baisser la température en grésillant, le feu la fait remonter de plus en plus vite. Il faut
+     garder le thermomètre entre le bleu (le caramel fige) et le rouge (il brûle), et ne pas
+     mettre un morceau tant que le précédent n'a pas fondu (ça éclabousse).
+  4. *La crème* : on maintient (un doigt hors de la casserole, ou Espace) pour verser, en remuant
+     avec l'autre main. Versée trop vite ou sans remuer, ça mousse… et ça déborde. Trop lent, le
+     caramel durcit. Il faut ensuite remuer jusqu'à ce qu'il n'y ait plus de traînées de crème.
+  5. *La texture* : tout à la fois. Le feu a de l'inertie et il varie tout seul : il faut garder
+     la température dans le vert, remuer sans arrêt (sinon ça attache au fond), et appuyer sur
+     « RETIRER DU FEU » quand la consistance est dans le vert (la cuillère, à gauche, montre si
+     ça coule, si ça nappe ou si c'est trop épais). La fenêtre dure environ une seconde.
+- **Les échecs**, à regarder (douze en tout) : Rémy enseveli sous le sucre, Rémy qui s'endort
+  (« Zzz… »), fumée noire et alarme (il panique puis tousse), sucre cristallisé, beurre en
+  miettes ou fondu en flaque sur la planche (Rémy pleure), caramel figé avec la cuillère plantée
+  dedans, crème qui déborde jusqu'à noyer Rémy dans la mousse, caramel trop liquide qui
+  éclabousse, caramel trop épais (Rémy tire sur la cuillère… et tombe à la renverse). On
+  recommence l'étape ratée autant de fois qu'on veut. Les réglages de difficulté sont `REGLAGES`,
+  en haut de `js/caramel.js` (ils ont été vérifiés avec des centaines de parties simulées : la
+  dernière étape est la plus exigeante).
+- **La victoire** : « Un caramel au beurre salé parfait ! Les Bretons peuvent être fiers de toi ! »,
+  Linguini emporte le caramel en salle, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE
+  OBTENU ! ». Ismae peut ensuite ressortir et se promener dans Montaigu (les habitants ont de
+  nouvelles répliques).
 - **La suite** : un écran annonce l'épreuve 6, qui n'est pas encore faite (la route est barrée).
 
 ## Sauvegarde
@@ -281,7 +302,7 @@ se met à jour tout seul en moins d'une minute.
 | `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (tables, fourneau, plans de travail…) |
 | `js/persos-resto.js` | Rémy (petit sur la carte, grand dans le mini-jeu) et le portrait de Gusteau |
 | `js/epreuve-caramel.js` | l'épreuve 5 : les habitants, la rencontre avec Rémy, la victoire |
-| `js/caramel.js` | le mini-jeu du caramel (sucre, mélange, cuisson) et ses échecs |
+| `js/caramel.js` | le mini-jeu du caramel au beurre salé (5 étapes) et ses échecs |
 | `js/musique.js` | l'orchestre de jazz, la poursuite, la forêt, la valse d'Arendelle, la route, Montaigu, la valse musette du restaurant, et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |

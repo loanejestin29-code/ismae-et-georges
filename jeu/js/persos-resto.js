@@ -2,8 +2,8 @@
 //  persos-resto.js — Rémy et les dessins du restaurant (épreuve 5).
 //
 //  · Rémy, le petit rat cuisinier : une grille faite main pour la carte (de face
-//    et de profil), et un grand Rémy dessiné à la volée pour le mini-jeu du caramel,
-//    avec ses expressions (content, inquiet, panique, joie, goûte, tousse…).
+//    et de profil), et le même Rémy en plus grand pour le mini-jeu du caramel,
+//    avec toutes ses expressions (content, inquiet, panique, joie, goûte, pleure…).
 //  · Le portrait du grand chef Gusteau, accroché dans la salle.
 //  Linguini, Colette et les clients utilisent le corps des passants (characters.js) :
 //  leurs couleurs sont dans config.js → caramel.persos.
@@ -63,60 +63,79 @@ const Resto = (() => {
     }
   }
 
-  // ------------------------------------------------------------ le grand Rémy du mini-jeu (dessiné à la volée, ~44 px de haut)
+  // ------------------------------------------------------------ le grand Rémy du mini-jeu (28 × 36, affiché en ×2 ou ×3)
+  // Le même dessin que le petit Rémy de la carte, en plus grand : grosse tête ronde, grandes oreilles roses,
+  // grands yeux noirs avec leur reflet, truffe rose, tout gris (comme dans le film), petit corps rond, queue rose.
+  // Il est construit forme par forme sur une grille de lettres, puis on pose les yeux, la bouche et les bras.
   // pose : 'neutre' | 'parle' | 'content' | 'inquiet' | 'panique' | 'joie' | 'goute' | 'tousse' | 'enseveli'
+  //        | 'dort' | 'desespoir' (les pattes sur les yeux) | 'pleure' | 'tire' (il tire de toutes ses forces)
+  const GPAL = Object.assign({}, PAL, { h: '#737d96', b: '#f2a8b8', t: '#7ac8ff', m: '#7a3a4a', K: '#a8743e', k: '#d8dce6' });
+  const GW = 28, GH = 36;
+  const TETE = [[8, 9, 18], [9, 7, 20], [10, 5, 22], [11, 4, 23], [12, 3, 24], [13, 3, 24], [14, 3, 24], [15, 3, 24], [16, 3, 24], [17, 4, 23], [18, 5, 22], [19, 6, 21], [20, 8, 19]];
+  const CORPS = [[21, 10, 17], [22, 8, 19], [23, 7, 20], [24, 7, 20], [25, 7, 20], [26, 7, 20], [27, 7, 20], [28, 8, 19], [29, 9, 18]];
+  const OEIL = { g: [7, 12], d: [18, 12] }, BOUCHE = [12, 18];
+  const YEUX = {
+    ouvert: ['EEe', 'EEE', 'EEE', '.E.'], bas: ['...', 'EEe', 'EEE', '.E.'],
+    heureux: ['...', '.E.', 'E.E', '...'], ferme: ['...', '...', 'EEE', '...'], rond: ['eee', 'eEe', 'eee', '...'],
+    plisseG: ['E..', '.EE', 'E..', '...'], plisseD: ['..E', 'EE.', '..E', '...'], pleure: ['...', '...', 'EEE', '.t.'],
+  };
+  const BOUCHES = { ferme: ['m..m', '.mm.'], parle: ['.mm.', 'mmmm'], sourire: ['m..m', '.mm.'], grand: ['mmmm', '.mm.'], o: ['.mm.', '.mm.'], triste: ['.mm.', 'm..m'], dents: ['meem', '.mm.'], petit: ['....', '.mm.'] };
+  // un bras : une suite de points (plus sombre quand il passe devant le corps), la patte rose au bout
+  const BRAS = {
+    bas: [[[7, 23], [6, 24], [5, 25], [5, 26]], [[19, 23], [20, 24], [21, 25], [21, 26]]],
+    parle: [[[7, 23], [6, 22], [5, 21], [4, 20], [3, 19]], [[19, 23], [20, 24], [21, 25], [21, 26]]],
+    joie: [[[7, 22], [6, 21], [5, 20], [4, 19], [3, 18], [2, 17]], [[19, 22], [20, 21], [21, 20], [22, 19], [23, 18], [24, 17]]],
+    tete: [[[7, 22], [5, 21], [3, 20], [2, 18], [2, 16], [2, 14]], [[19, 22], [21, 21], [23, 20], [24, 18], [24, 16], [24, 14]]],
+    ventre: [[[7, 23], [8, 23], [9, 24], [10, 24], [12, 24]], [[19, 23], [18, 23], [17, 24], [16, 24], [14, 24]]],
+    yeux: [[[7, 22], [6, 20], [6, 18], [6, 16], [7, 13]], [[19, 22], [20, 20], [20, 18], [20, 16], [18, 13]]],
+    bouche: [[[7, 23], [8, 22], [9, 21], [10, 20], [12, 19]], [[19, 23], [20, 24], [21, 25], [21, 26]]],
+    tire: [[[19, 23], [21, 22], [23, 21], [25, 20]], [[18, 24], [20, 23], [22, 22], [24, 21], [25, 21]]],
+  };
+  const POSES = {
+    neutre: ['ouvert', 'ferme', 'bas'], parle: ['ouvert', 'parle', 'parle'], content: ['heureux', 'sourire', 'bas'],
+    inquiet: ['bas', 'triste', 'ventre'], panique: ['rond', 'o', 'tete'], joie: ['heureux', 'grand', 'joie'], goute: ['ferme', 'petit', 'bouche'],
+    tousse: ['ferme', 'o', 'bouche'], enseveli: ['rond', 'o', null], dort: ['ferme', 'petit', 'bas'], desespoir: ['ferme', 'triste', 'yeux'],
+    pleure: ['pleure', 'triste', 'ventre'], tire: ['plisse', 'dents', 'tire'],
+  };
   const cacheGrand = {};
   function grand(pose = 'neutre', anim = 0) {
     const cle = pose + ':' + anim;
     if (cacheGrand[cle]) return cacheGrand[cle];
-    const W = 56, H = 54, c = PX.canvas(W, H), P = PX.painter(c), cx = 28, base = 52;
-    const line = Objets.line;
-    // la queue, derrière
-    for (let k = 0; k < 18; k++) { const a = k / 17; P.rect(Math.round(cx + 10 + a * 14), Math.round(base - 4 - Math.sin(a * 3.4 + anim) * 4 - a * 6), 2, 2, PAL.T); }
-    // les pieds, le corps, le ventre
-    P.ellipse(cx - 6, base - 1, 4, 2, PAL.P); P.ellipse(cx + 6, base - 1, 4, 2, PAL.P);
-    P.ellipse(cx, base - 12, 10, 11, PAL.g); P.ellipse(cx - 1, base - 13, 9, 10, PAL.G); P.ellipse(cx, base - 11, 6, 8, PAL.W);
-    // les bras (selon la pose), puis la tête par-dessus
-    const bras = (x0, y0, x1, y1) => { line(P, x0, y0, x1, y1, PAL.g); line(P, x0 + 1, y0, x1 + 1, y1, PAL.G); P.ellipse(x1, y1, 2, 2, PAL.P); };
-    const hy = pose === 'enseveli' ? base - 26 : base - 30; // le centre de la tête
-    if (pose === 'panique') { /* les pattes sur la tête : dessinées après la tête */ }
-    else if (pose === 'joie') { bras(cx - 8, base - 18, cx - 16, base - 34 - anim); bras(cx + 7, base - 18, cx + 15, base - 34 - anim); }
-    else if (pose === 'parle') { bras(cx - 8, base - 17, cx - 15, base - 18 - anim * 3); bras(cx + 7, base - 17, cx + 10, base - 10); }
-    else if (pose === 'inquiet') { bras(cx - 8, base - 17, cx - 4, base - 11); bras(cx + 7, base - 17, cx + 3, base - 11); }
-    else if (pose === 'goute') { bras(cx - 8, base - 17, cx - 3, hy + 9); bras(cx + 7, base - 17, cx + 9, base - 10); }
-    else if (pose === 'tousse') { bras(cx - 8, base - 17, cx - 2, hy + 8); bras(cx + 7, base - 17, cx + 15, base - 22 - anim * 3); }
-    else if (pose !== 'enseveli') { bras(cx - 8, base - 17, cx - 11, base - 8); bras(cx + 7, base - 17, cx + 11, base - 8); }
-    // les grandes oreilles roses
-    for (const s of [-1, 1]) { P.ellipse(cx + s * 10, hy - 9, 6, 6, PAL.g); P.ellipse(cx + s * 10, hy - 9, 5, 5, PAL.G); P.ellipse(cx + s * 10, hy - 8, 3, 3, PAL.P); P.px(cx + s * 10 - 1, hy - 10, '#f6c8cc'); }
-    P.ellipse(cx, hy - 2, 11, 7, PAL.g); P.ellipse(cx, hy - 3, 10, 6, PAL.G); P.ellipse(cx - 3, hy - 6, 4, 2, PAL.L);
-    // le museau pointu, la grosse truffe rose au bout, les moustaches
-    for (let j = 0; j < 9; j++) { const w = Math.round(9 - j * 0.85); P.hline(cx - w, hy + j, w * 2 + 1, j < 2 ? PAL.G : PAL.L); P.px(cx - w, hy + j, PAL.g); P.px(cx + w, hy + j, PAL.g); }
-    P.ellipse(cx, hy + 5, 3, 2, PAL.W);
-    P.ellipse(cx, hy + 8, 2, 2, PAL.P); P.px(cx - 1, hy + 7, '#ffd0d4');
-    // les yeux
-    const oeil = (x) => {
-      if (pose === 'content' || pose === 'joie') { P.px(x - 1, hy - 2, PAL.E); P.px(x, hy - 3, PAL.E); P.px(x + 1, hy - 2, PAL.E); return; } // yeux plissés de bonheur
-      if (pose === 'tousse' || pose === 'goute') { P.hline(x - 1, hy - 2, 3, PAL.E); return; } // yeux fermés
-      if (pose === 'panique' || pose === 'enseveli') { P.ellipse(x, hy - 2, 2, 2, '#ffffff'); P.px(x, hy - 2, PAL.E); return; } // yeux ronds
-      P.rect(x - 1, hy - 6, 3, 5, PAL.E); P.rect(x, hy - 6, 1, 2, '#ffffff');
-      if (pose === 'inquiet') { P.px(x - 2 * Math.sign(x - cx), hy - 6, PAL.g); P.px(x - Math.sign(x - cx), hy - 6, PAL.g); P.px(x, hy - 7, PAL.g); }
-    };
-    oeil(cx - 5); oeil(cx + 5);
-    // la bouche
-    if (pose === 'parle') { if (anim % 2) P.ellipse(cx, hy + 10, 2, 1, '#7a3a4a'); else P.hline(cx - 1, hy + 10, 3, '#7a3a4a'); }
-    else if (pose === 'panique' || pose === 'enseveli') P.ellipse(cx, hy + 11, 2, 2, '#7a3a4a');
-    else if (pose === 'content' || pose === 'joie') { P.hline(cx - 2, hy + 11, 5, '#7a3a4a'); P.px(cx - 3, hy + 10, '#7a3a4a'); P.px(cx + 3, hy + 10, '#7a3a4a'); }
-    else if (pose === 'tousse') P.ellipse(cx, hy + 11, 1, 1, '#7a3a4a');
-    else P.hline(cx - 1, hy + 10, 3, '#7a3a4a');
-    if (pose === 'panique') { bras(cx - 8, base - 18, cx - 9, hy - 5); bras(cx + 7, base - 18, cx + 9, hy - 5); }
+    const gr = Array.from({ length: GH }, () => Array(GW).fill('.'));
+    const met = (x, y, c) => { if (y >= 0 && y < GH && x >= 0 && x < GW) gr[y][x] = c; };
+    const ligne = (y, a, b, c) => { for (let x = a; x <= b; x++) met(x, y, c); };
+    const disque = (cx, cy, r, c) => { for (let y = Math.floor(cy - r); y <= Math.ceil(cy + r); y++) for (let x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++) if ((x - cx) ** 2 + (y - cy) ** 2 <= r * r) met(x, y, c); };
+    const tampon = (rows, x, y) => rows.forEach((r, j) => [...r].forEach((c, i) => { if (c !== '.') met(x + i, y + j, c); }));
+    // les oreilles (derrière la tête), la tête, le corps
+    for (const cx of [6.5, 20.5]) { disque(cx, 8, 4.2, 'G'); disque(cx, 8, 2.9, 'P'); disque(cx + (cx < 13 ? -0.6 : 0.6), 8.6, 1.4, 'p'); }
+    for (const [y, a, b] of TETE) ligne(y, a, b, 'G');
+    for (const [y, a, b] of CORPS) ligne(y, a, b, 'G');
+    // le reflet sur le haut de la tête, l'ombre sous le menton, la truffe rose
+    ligne(9, 9, 11, 'L'); ligne(10, 7, 9, 'L'); met(6, 11, 'L'); ligne(21, 10, 17, 'h');
+    ligne(16, 13, 14, 'P'); ligne(17, 13, 14, 'p');
+    // les pieds
+    ligne(30, 8, 12, 'P'); ligne(30, 15, 19, 'P'); ligne(31, 8, 12, 'p'); ligne(31, 15, 19, 'p');
+    // les yeux, la bouche, les joues, les sourcils, les larmes
+    const [yeux, bouche0, b] = POSES[pose] || POSES.neutre;
+    const bouche = pose === 'parle' && !anim ? 'ferme' : bouche0;
+    tampon(YEUX[yeux === 'plisse' ? 'plisseG' : yeux], OEIL.g[0], OEIL.g[1]);
+    tampon(YEUX[yeux === 'plisse' ? 'plisseD' : yeux], OEIL.d[0], OEIL.d[1]);
+    tampon(BOUCHES[bouche], BOUCHE[0], BOUCHE[1]);
+    if (pose === 'content' || pose === 'joie') { ligne(16, 5, 6, 'b'); ligne(16, 21, 22, 'b'); }
+    if (pose === 'inquiet' || pose === 'pleure') { met(7, 11, 'g'); met(8, 10, 'g'); met(20, 11, 'g'); met(19, 10, 'g'); }
+    if (pose === 'tire') { ligne(11, 7, 9, 'g'); ligne(11, 18, 20, 'g'); }
+    if (pose === 'pleure') for (const x of [8, 19]) for (let y = 16; y < 19 + anim; y++) met(x, y, 't');
+    // les bras
+    if (b) for (const pts of BRAS[b]) {
+      for (let k = 0; k < pts.length - 1; k++) { const [x, y] = pts[k]; for (const dx of [0, 1]) met(x + dx, y, gr[y] && gr[y][x + dx] === '.' ? 'G' : 'h'); }
+      const [px, py] = pts[pts.length - 1]; for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) met(px + dx, py + dy, 'P');
+    }
     // la cuillère qu'il goûte
-    if (pose === 'goute') { line(P, cx - 3, hy + 9, cx - 12, hy + 20, '#a8743e'); P.ellipse(cx - 2, hy + 8, 2, 1, '#c8ccd8'); }
-    // les joues roses de joie
-    if (pose === 'content' || pose === 'joie') { P.px(cx - 7, hy + 2, '#f0a8b8'); P.px(cx + 7, hy + 2, '#f0a8b8'); }
-    // les moustaches, fines, par-dessus le contour
-    const o = PX.outline(c, '#1d1626'), Q = PX.painter(o);
-    for (const s of [-1, 1]) { line(Q, cx + 1 + s * 4, hy + 7, cx + 1 + s * 14, hy + 4, '#eceef4'); line(Q, cx + 1 + s * 4, hy + 8, cx + 1 + s * 14, hy + 9, '#eceef4'); }
-    return (cacheGrand[cle] = o);
+    if (pose === 'goute') { for (let k = 0; k < 7; k++) met(11 - k, 21 + k, 'K'); ligne(19, 11, 13, 'k'); }
+    // la queue rose qui ondule, derrière
+    const q = anim ? [[18, 29], [19, 30], [20, 30], [21, 30], [22, 29], [23, 28], [24, 27], [24, 26], [25, 25]] : [[18, 29], [19, 30], [20, 31], [21, 31], [22, 31], [23, 30], [24, 29], [25, 28], [25, 27]];
+    for (const [x, y] of q) if (gr[y][x] === '.') gr[y][x] = 'T';
+    return (cacheGrand[cle] = PX.outline(PX.fromRows(gr.map((r) => r.join('')), GPAL), '#1d1626'));
   }
 
   // ------------------------------------------------------------ le portrait de Gusteau (un grand chef tout rond, toque et moustache)
@@ -140,11 +159,11 @@ const Resto = (() => {
     return (portrait = c);
   }
 
-  // le portrait de la boîte de dialogue : la tête du grand Rémy (oreilles, museau, moustaches)
+  // le portrait de la boîte de dialogue : la tête du grand Rémy (oreilles, museau)
   let tete = null;
   function portraitRemy() {
     if (tete) return tete;
-    tete = PX.canvas(34, 30); tete.getContext('2d').drawImage(grand('neutre'), 11, 4, 34, 30, 0, 0, 34, 30);
+    tete = PX.canvas(28, 26); tete.getContext('2d').drawImage(grand('neutre'), 1, 3, 28, 26, 0, 0, 28, 26);
     return tete;
   }
 

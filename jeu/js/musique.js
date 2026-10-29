@@ -601,6 +601,13 @@ const Musique = (() => {
     const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(320 + Math.random() * 200, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.06);
     o.connect(g); o.start(t); o.stop(t + 0.09);
   }
+  // le beurre qui grésille dans le caramel chaud, et Rémy qui ronfle
+  function gresille() { if (!ctx || coupe) return; const t = ctx.currentTime; for (let k = 0; k < 4; k++) souffleSfx(t + k * 0.03 + Math.random() * 0.02, 'highpass', 5000 + Math.random() * 3000, 0.9, 0.025, 0.04); }
+  function ronfle() {
+    if (!ctx || coupe) return;
+    const t = ctx.currentTime; souffleSfx(t, 'lowpass', 300, 2, 0.05, 0.6);
+    const g = ctx.createGain(); g.connect(sfx); env(g, t, 0.2, 0.03, 0.5); osc('sawtooth', 70, t, 0.8, g);
+  }
   function alarme() {
     if (!ctx || coupe) return;
     const t = ctx.currentTime;
@@ -680,6 +687,6 @@ const Musique = (() => {
       if (!ctx || !timer) { morceau = nom; NOIRE = 60 / MORCEAUX[nom].bpm; return; }
       if (nom !== morceau || suivant) suivant = nom === morceau ? null : nom;
     },
-    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie, klaxon, vroum, choc, couic, sucre, bulle, alarme,
+    miaou, bip, porte, couteau, aie, bisou, victoire, partez, fanfare, arc, impact, foule, oh, cage, colere, pleurs, trouve, victoireCourte, magie, klaxon, vroum, choc, couic, sucre, bulle, alarme, gresille, ronfle,
   };
 })();
