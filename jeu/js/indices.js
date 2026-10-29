@@ -1,13 +1,14 @@
 // =====================================================================
 //  indices.js — le carnet d'indices (un indice par épreuve réussie),
 //  l'écran de victoire d'une épreuve et l'annonce de la suite.
+//  Dans le carnet, toucher un indice obtenu fait rejouer son épreuve depuis le début.
 //  Les indices gagnés restent en mémoire sur le téléphone (localStorage) ;
 //  ajouter #reset à la fin de l'adresse pour vider le carnet.
 // =====================================================================
 'use strict';
 
 const Indices = (() => {
-  const CLE = 'jeu.indices';
+  const CLE = 'jeu.indices', CLE_REJOUER = 'jeu.rejouer';
   const ORDINAUX = ['PREMIER', 'DEUXIÈME', 'TROISIÈME', 'QUATRIÈME', 'CINQUIÈME', 'SIXIÈME'];
   const $ = (id) => document.getElementById(id);
   let gagnes = [], ouverte = null;
@@ -66,10 +67,36 @@ const Indices = (() => {
       const txt = document.createElement('p'); txt.className = 'carnet-texte';
       txt.textContent = ok ? ind.texte : 'Indice à découvrir…';
       li.append(nom, txt);
+      // une épreuve réussie se rejoue d'un toucher : on est téléporté à son début
+      if (ok) {
+        li.classList.add('rejouable');
+        li.setAttribute('role', 'button');
+        li.tabIndex = 0;
+        const rej = document.createElement('span'); rej.className = 'carnet-rejouer';
+        rej.textContent = '▶ Rejouer l\'épreuve';
+        li.append(rej);
+        li.addEventListener('click', () => rejouer(i));
+        li.addEventListener('keydown', (e) => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); e.stopPropagation(); rejouer(i); } });
+      }
       liste.append(li);
     });
     $('carnet-titre').textContent = `Carnet d'indices · ${gagnes.length}/${CONFIG.indices.length}`;
     ouvrir('carnet', 'carnet-ok');
+  }
+
+  // rejouer une épreuve : la page est rechargée (tout repart à neuf) en gardant le carnet, et main.js
+  // nous dépose au début de l'épreuve
+  function rejouer(i) {
+    if (!ouverte || performance.now() - ouverte.t0 < 900) return;
+    try { sessionStorage.setItem(CLE_REJOUER, String(i)); } catch (_) { return; }
+    location.reload();
+  }
+  // (pour main.js) l'épreuve à rejouer juste après ce rechargement, s'il y en a une
+  function aRejouer() {
+    let v = null;
+    try { v = sessionStorage.getItem(CLE_REJOUER); sessionStorage.removeItem(CLE_REJOUER); } catch (_) { /* rien */ }
+    const i = Number(v);
+    return v !== null && gagnes.includes(i) ? i : null;
   }
 
   // annonce de l'épreuve suivante : o = { titre, lieu, texte, bouton, haut }
@@ -103,5 +130,5 @@ const Indices = (() => {
     });
   }
 
-  return { init, gagner, carnet, suite, obtenus: () => gagnes.slice(), progression, effacer, simuler };
+  return { init, gagner, carnet, suite, obtenus: () => gagnes.slice(), progression, effacer, simuler, aRejouer };
 })();

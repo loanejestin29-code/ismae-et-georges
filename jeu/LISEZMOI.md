@@ -229,6 +229,12 @@ le bouton devient « Reprendre l'aventure » (on repart au début de l'épreuve 
 « Recommencer depuis le début » (qui vide le carnet). Après l'épreuve 5, on reprend devant le
 restaurant, à Montaigu.
 
+Dans le carnet (bouton ✦ en haut à droite), chaque indice déjà obtenu porte « ▶ Rejouer l'épreuve » :
+le toucher téléporte Ismae et Georges au début de cette épreuve (l'épreuve 1 commence en entrant au
+Carrefour), sans repasser par l'écran titre ni refaire les épreuves d'avant. Le carnet est gardé : rien
+n'est perdu, et en relançant le jeu « Reprendre l'aventure » ramène toujours au plus loin qu'on soit allé.
+(La page se recharge pour que l'épreuve reparte à neuf ; la musique revient au premier toucher.)
+
 ## Tester sur l'iPhone
 
 Le jeu est en ligne sur **https://ismae-et-georges.vercel.app/jeu/** (ou la page d'accueil, bouton

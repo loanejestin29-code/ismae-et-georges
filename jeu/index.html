@@ -256,6 +256,9 @@
   .carnet-nom { display: block; font-size: 12px; font-weight: 700; color: #8a3a4a; margin-bottom: 2px; }
   .carnet-liste li.cache .carnet-nom { color: var(--or); }
   .carnet-texte { margin: 0; font-size: 15px; line-height: 1.3; }
+  .carnet-liste li.rejouable { display: flow-root; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .carnet-liste li.rejouable:active { background: #ffe2a8; }
+  .carnet-rejouer { float: right; margin-top: 6px; padding: 3px 7px 2px; background: #8a3a4a; color: #fff3dc; font-family: var(--pixel); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
   .suite-lieu { margin: 0 0 8px; font-size: 22px; font-weight: 700; color: #9ad0a0; }
   .suite-texte { margin: 0 auto 16px; max-width: 26em; font-size: 16px; line-height: 1.4; color: var(--encre-2); text-wrap: pretty; }
   @media (max-height: 460px) {
