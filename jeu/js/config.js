@@ -258,7 +258,7 @@ const CONFIG = {
       ['robin', 'Enfin… un tout petit peu de mal.'],
       ['ismae', 'Robin des Bois ?!'],
       ['robin', 'En personne. Merci d\'avoir donné une leçon au roi Jean.'],
-      ['robin', 'Une demoiselle en manteau rouge m\'a demandé de te remettre ceci.'],
+      ['robin', 'Une dame au pull bleu m\'a demandé de te remettre ceci.'],
     ],
     apres: [
       ['robin', 'Ta prochaine épreuve t\'attend au-delà des montagnes enneigées.'],
@@ -360,7 +360,7 @@ const CONFIG = {
     magieFinie: ['La magie retombe doucement. Jack Snow redevient un bonhomme de neige immobile…', '… mais on jurerait qu\'il sourit un peu plus qu\'avant.'],
     indice: [
       ['elsa', 'La magie ne dure pas toujours. Les bons souvenirs, si.'],
-      ['elsa', 'Une jeune femme en manteau rouge m\'a confié ceci pour toi.'],
+      ['elsa', 'Une dame au pull bleu m\'a confié ceci pour toi.'],
     ],
     apres: [['olaf', 'Le bus pour la suite de ton voyage passe à la sortie d\'Arendelle, au sud-est. Reviens nous voir avec Jack !']],
     busAvant: ['Un arrêt de bus, au milieu de la neige. « Ligne 4 ».', 'Le prochain passage n\'est pas indiqué. Il attend sûrement que le bonhomme de neige soit fini.'],

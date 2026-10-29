@@ -100,8 +100,9 @@ image ni aucun son externe.
   le château aux toits de cuivre vert, ses grandes portes qui s'ouvrent et sa fontaine gelée ; le
   fjord gelé (on y glisse !) avec ses bateaux pris dans la glace et ses patineuses ; le quai de pierre et
   son ponton ; des rues pavées d'un seul tenant (cour du château, pont, grande place, grand-rue) qui
-  se rejoignent en courbes douces, et des sentiers tassés dans la neige vers Oaken, la clairière, l'écurie
-  (traces de traîneau et sabots de Sven) et la colline aux luges ; la forêt de
+  se rejoignent en courbes douces, et des sentiers tassés dans la neige vers Oaken et vers l'écurie
+  (traces de traîneau et sabots de Sven), qui prolongent les rues en fondu ; aucun chemin ne mène
+  aux boules de neige, il faut les chercher ; la forêt de
   sapins et la clairière des trolls (des rochers… qui se réveillent) ; le comptoir d'Oaken (et son
   sauna), où l'on peut entrer ; l'écurie de Kristoff et Sven ; le palais de glace d'Elsa dans la
   montagne, sous une aurore boréale. Flocons, guirlandes, lanternes, traces de pas dans la neige.

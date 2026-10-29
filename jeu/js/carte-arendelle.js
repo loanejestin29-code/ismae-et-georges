@@ -79,14 +79,17 @@ Jeu.enregistrerCarte('arendelle', () => {
 
   // ---------------------------------------------------------------- sentiers tassés dans la neige
   // une courbe douce ; le creux un peu plus sombre, l'ombre du bord de neige en haut, le rebord éclairé en bas,
-  // et au milieu des traces : des pas, des patins de luge, ou un traîneau et les sabots de Sven.
+  // et au milieu des traces : des pas, ou un traîneau et les sabots de Sven.
   // Tous les sentiers sont dessinés couche par couche, pour qu'ils se rejoignent sans rebord entre eux.
+  // Ceux qui partent d'une rue commencent cachés sous ses pavés, aussi larges qu'elle (debut), puis se resserrent
+  // une fois sortis (après « sortie » pixels) : avec les pavés qui s'effacent, on passe de l'un à l'autre en douceur.
   const SENTIERS = [
-    { pts: [[1176, 622], [1226, 580], [1252, 500], [1268, 420], [1290, 344]], larg: 16, traces: 'pas' },        // vers le comptoir d'Oaken
-    { pts: [[1176, 850], [1236, 878], [1278, 930], [1272, 990], [1302, 1036], [1370, 1048], [1450, 1086], [1530, 1150], [1600, 1164]], larg: 18, traces: 'traineau' }, // vers l'écurie et l'arrêt de bus
-    { pts: [[1176, 622], [1290, 610], [1400, 566]], larg: 14, traces: 'pas' },                                     // vers la clairière
-    { pts: [[454, 850], [466, 940], [500, 1010], [560, 1056]], larg: 16, traces: 'luge' },                          // vers la colline aux luges
-    { pts: [[1470, 1166], [1600, 1176]], larg: 26, traces: null },                                                  // l'arrêt de bus
+    { pts: [[1100, 622], [1180, 622], [1224, 592], [1252, 500], [1268, 420], [1290, 344]], larg: 16, debut: 62, sortie: 80, traces: 'pas' }, // vers le comptoir d'Oaken
+    { pts: [[1100, 850], [1180, 850], [1236, 878], [1278, 930], [1272, 990], [1302, 1036], [1370, 1048], [1450, 1086], [1530, 1150], [1600, 1164]],
+      larg: 18, debut: 57, sortie: 80, traces: 'traineau' },                                                                               // vers l'écurie et l'arrêt de bus
+    // vers la clairière : pas de sentier dessiné (il ne faut pas montrer où est la boule), mais le passage reste sans arbres
+    { pts: [[1100, 622], [1180, 622], [1290, 610], [1400, 566]], larg: 14, invisible: true },
+    { pts: [[1470, 1166], [1600, 1176]], larg: 26, traces: null },                     // l'arrêt de bus
   ];
   const courbe = (pts) => { // Catmull-Rom, un point tous les deux pixels environ
     const out = [];
@@ -102,8 +105,16 @@ Jeu.enregistrerCarte('arendelle', () => {
     out.push(pts[pts.length - 1]);
     return out;
   };
-  const traces = SENTIERS.map((s) => Object.assign({ c: courbe(s.pts) }, s));
-  const couche = (dy, dr, col) => { for (const s of traces) { const R = s.larg / 2 + dr; for (const [x, y] of s.c) P.ellipse(Math.round(x), Math.round(y + dy), R, Math.round(R * 0.7), col); } };
+  const traces = SENTIERS.filter((s) => !s.invisible).map((s) => {
+    const c = courbe(s.pts), R = [];
+    for (let k = 0, d = 0; k < c.length; k++) {
+      if (k) d += Math.hypot(c[k][0] - c[k - 1][0], c[k][1] - c[k - 1][1]);
+      const t = s.debut ? Math.min(1, Math.max(0, (d - s.sortie) / 60)) : 1;
+      R.push((s.larg + (s.debut ? (s.debut - s.larg) * (1 - t * t * (3 - 2 * t)) : 0)) / 2);
+    }
+    return Object.assign({ c, R }, s);
+  });
+  const couche = (dy, dr, col) => { for (const s of traces) s.c.forEach(([x, y], k) => { const R = Math.round(s.R[k] + dr); P.ellipse(Math.round(x), Math.round(y + dy), R, Math.round(R * 0.7), col); }); };
   couche(1, 1, '#fbfdff');   // le rebord de neige, éclairé
   couche(0, 0, '#b2c0d8');   // l'ombre du bord
   couche(1, -1, '#cfd9e8');  // le creux tassé
@@ -114,7 +125,7 @@ Jeu.enregistrerCarte('arendelle', () => {
       const [x0, y0] = s.c[k - 1], [x1, y1] = s.c[k], l = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / l, ny = (x1 - x0) / l;
       dist += l;
       if (s.traces !== 'pas') { for (const e of [-4, 4]) P.px(Math.round(x1 + nx * e), Math.round(y1 + ny * e * 0.7), '#b4c2d8'); } // les patins
-      if (dist < (s.traces === 'luge' ? 1e9 : 7)) continue;
+      if (dist < 7) continue;
       dist = 0; n++;
       const e = s.traces === 'pas' ? (n % 2 ? -2 : 2) : (n % 2 ? -1 : 1), px = Math.round(x1 + nx * e), py = Math.round(y1 + ny * e * 0.7);
       if (s.traces === 'pas') { P.rect(px, py, 2, 1, '#a6b4cc'); P.px(px, py - 1, '#bac6da'); } // les pas
@@ -135,7 +146,9 @@ Jeu.enregistrerCarte('arendelle', () => {
     [450, 830, 730, 40],    // la rue du sud
     [760, 866, 80, 334],    // la grand-rue, jusqu'à l'arrivée
   ];
-  const ENTREES = [[1180, 622], [1180, 850], [450, 850]]; // là où partent les sentiers : pas de congère, les pavés s'effacent peu à peu
+  // là où partent les sentiers : au bout d'une rue, les pavés s'effacent sur ses 44 derniers pixels et les congères
+  // s'amincissent jusqu'aux bords du sentier
+  const BOUTS = [{ x: 1180, y0: 600, y1: 644, sens: 1 }, { x: 1180, y0: 830, y1: 870, sens: 1 }];
   {
     const M = 24, bx = 450 - M, by = 330 - M, w = 1180 - 450 + 2 * M, h = 1200 - 330 + M, n = w * h;
     // distance (en pixels) de chaque case « dedans » à la case « dehors » la plus proche (chanfrein 3-4, deux passes)
@@ -176,15 +189,17 @@ Jeu.enregistrerCarte('arendelle', () => {
     for (let i = 0; i < n; i++) {
       const dd = D[i]; if (!dd) continue;
       const gx = bx + (i % w), gy = by + ((i / w) | 0), k = i * 4;
-      const entree = Math.min(...ENTREES.map(([ex, ey]) => Math.hypot(gx - ex, gy - ey))), ouvert = entree < 30;
-      const conge = 2 + Math.round(Math.abs(Math.sin(gx * 0.13 + gy * 0.09)) * 3); // la congère le long du bord
+      let f = 0; // de 0 (pavés) à 1 (le sentier qui part de là)
+      for (const b of BOUTS) { const u = (b.x - gx) * b.sens; if (gy >= b.y0 - 6 && gy <= b.y1 + 6 && u < 44) f = Math.max(f, 1 - Math.max(0, u) / 44); }
+      f = f * f * (3 - 2 * f);
+      const conge = (2 + Math.round(Math.abs(Math.sin(gx * 0.13 + gy * 0.09)) * 3)) * (1 - f); // la congère le long du bord
       let col = null;
-      if (!ouvert && dd <= conge - 0.5) col = neige;
-      else if (!ouvert && dd <= conge + 0.5) col = ombre;
+      if (conge >= 1 && dd <= conge - 0.5) col = neige;
+      else if (conge >= 1 && dd <= conge + 0.5) col = ombre;
       if (col) { d[k] = col[0]; d[k + 1] = col[1]; d[k + 2] = col[2]; continue; }
       // des plaques de neige irrégulières, plus nombreuses loin du milieu des passages
       const plaque = Math.max(0, Math.sin(gx * 0.045 + Math.sin(gy * 0.031) * 2.2) * Math.sin(gy * 0.058 + Math.sin(gx * 0.017) * 1.7)) * 0.45;
-      let a = Math.min(1, Math.max(0.4 + plaque, 1.05 - dd * 0.042, ouvert ? 1.15 - entree / 30 : 0));
+      let a = Math.min(1, Math.max(0.4 + plaque, 1.05 - dd * 0.042, f));
       a = Math.min(1, Math.max(0, a + ((PX.bayer(gx, gy) / 16) - 0.5) * 0.12)); // un grain très léger
       const fond = gy >= CANAL.y - 2 && gy < CANAL.y + CANAL.h + 2 ? blanc : [d[k], d[k + 1], d[k + 2]]; // sur le pont : de la neige, pas la glace
       d[k] = pv[k] * (1 - a) + fond[0] * a; d[k + 1] = pv[k + 1] * (1 - a) + fond[1] * a; d[k + 2] = pv[k + 2] * (1 - a) + fond[2] * a;

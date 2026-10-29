@@ -144,8 +144,10 @@
   #tir-message.arrive { animation: tirMsg 0.35s steps(4) both; }
   @keyframes tirMsg { 0% { transform: translateX(-50%) scale(0.6); } 100% { transform: translateX(-50%) scale(1); } }
   #tir-aide { position: absolute; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0; white-space: nowrap;
-    font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebond 0.8s steps(2) infinite;
+    font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebondCentre 0.8s steps(2) infinite;
     box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
+  /* le rebond garde le centrage (sinon le texte saute d'une demi-largeur à chaque rebond) */
+  @keyframes rebondCentre { 0%, 100% { transform: translateX(-50%); } 50% { transform: translateX(-50%) translateY(3px); } }
   #tir-aide.etape2 { color: #ff9a8a; }
   /* Arendelle : le petit inventaire du bonhomme de neige, les messages « trouvé ! », l'assemblage */
   #inventaire { position: fixed; z-index: 4; left: calc(12px + env(safe-area-inset-left, 0px)); top: calc(12px + env(safe-area-inset-top, 0px)); display: flex; gap: 4px;
