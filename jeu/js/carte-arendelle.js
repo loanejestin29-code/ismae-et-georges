@@ -77,55 +77,122 @@ Jeu.enregistrerCarte('arendelle', () => {
   C.dynamiques.push({ sortY: 760, draw(g) { g.fillStyle = '#2a2632'; g.fillRect(429, 744, 2, 16); g.fillRect(426, 758, 8, 2); g.fillStyle = '#c89a4a'; g.fillRect(427, 740, 9, 3); g.fillStyle = '#e8c070'; g.fillRect(428, 740, 4, 1); } });
   C.solide(426, 756, 8, 4); C.zone(420, 748, 20, 14, 'longueVue');
 
-  // ---------------------------------------------------------------- rues et place pavées sous la neige
-  // rue pavée déneigée au milieu (vieux pavés, traces de traîneau), poudrée de neige, congères sur les bords
-  const pavesNeige = (x, y, w, h, place = false) => {
-    Sol.paves(P, x, y, w, h, r, { base: ['#7c7c90', '#86869c', '#74748a', '#8c8698'], hi: '#a4a4b8', lo: '#606076', joint: '#525268' });
-    const horiz = w >= h, L = horiz ? h : w;
-    const img = P.g.getImageData(x, y, w, h), d = img.data;
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
-      // t : 0 au milieu de la rue (déneigé), 1 sur les bords ; sur la place, on part du centre et la neige recouvre tout au bord
-      const t = place ? (Math.abs((i / w - 0.5) * 2) ** 4 + Math.abs((j / h - 0.5) * 2) ** 4) ** 0.25 : Math.abs(((horiz ? j : i) + 0.5) / L - 0.5) * 2;
-      const traces = !place && Math.abs(t - 0.42) < 0.07; // les ornières des traîneaux, plus sombres
-      let a = traces ? 0.12 : Math.min(place ? 1 : 0.92, Math.max(0.3, (t - 0.15) * 1.25));
-      a += ((PX.bayer(x + i, y + j) / 16) - 0.5) * 0.12; // un grain très léger
-      const k = (j * w + i) * 4;
-      d[k] = d[k] * (1 - a) + 0xe6 * a; d[k + 1] = d[k + 1] * (1 - a) + 0xec * a; d[k + 2] = d[k + 2] * (1 - a) + 0xf6 * a;
-    }
-    P.g.putImageData(img, x, y);
-    if (place) return;
-    // congères le long des bords
-    for (let k = 0; k < (horiz ? w : h); k += 2) {
-      const a = 2 + Math.round(Math.abs(Math.sin(k * 0.13 + x)) * 3);
-      if (horiz) { P.rect(x + k, y, 2, a, N); P.rect(x + k, y + h - a, 2, a, N); P.px(x + k, y + a, N3); P.px(x + k, y + h - a - 1, N3); }
-      else { P.rect(x, y + k, a, 2, N); P.rect(x + w - a, y + k, a, 2, N); P.px(x + a, y + k, N3); P.px(x + w - a - 1, y + k, N3); }
-    }
-    for (let k = 0; k < (w * h) / 700; k++) { const px = x + r.int(w), py = y + r.int(h); P.rect(px, py, 2, 1, '#9aa4bc'); P.rect(px + 2, py + 4, 2, 1, '#9aa4bc'); }
-  };
-  pavesNeige(590, 330, 420, 112);           // cour du château
-  pavesNeige(776, 440, 48, 70);             // pont
-  pavesNeige(450, 600, 730, 44);            // rue du nord, devant les maisons
-  pavesNeige(640, 640, 320, 170, true);     // la grande place
-  pavesNeige(760, 810, 80, 380);            // la grand-rue jusqu'à l'arrivée
-  pavesNeige(450, 830, 730, 40);            // rue du sud
-  // sentiers tassés dans la neige
-  const sentier = (pts, larg) => {
-    for (let s = 0; s < pts.length - 1; s++) {
-      const [x0, y0] = pts[s], [x1, y1] = pts[s + 1], n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 3);
-      for (let k = 0; k <= n; k++) { const t = k / n; P.ellipse(x0 + (x1 - x0) * t + r.int(3) - 1, y0 + (y1 - y0) * t, larg / 2, larg / 3, '#d0dae8'); }
-    }
-    for (let s = 0; s < pts.length - 1; s++) {
-      const [x0, y0] = pts[s], [x1, y1] = pts[s + 1], n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 6);
-      for (let k = 0; k <= n; k++) { const t = k / n; P.px(x0 + (x1 - x0) * t + r.int(larg) - larg / 2, y0 + (y1 - y0) * t + r.int(5) - 2, '#b8c6da'); }
-    }
-  };
+  // ---------------------------------------------------------------- sentiers tassés dans la neige
+  // une courbe douce ; le creux un peu plus sombre, l'ombre du bord de neige en haut, le rebord éclairé en bas,
+  // et au milieu des traces : des pas, des patins de luge, ou un traîneau et les sabots de Sven.
+  // Tous les sentiers sont dessinés couche par couche, pour qu'ils se rejoignent sans rebord entre eux.
   const SENTIERS = [
-    [[1180, 620], [1230, 560], [1262, 450], [1290, 340]],                 // vers le comptoir d'Oaken
-    [[1180, 850], [1260, 900], [1300, 1030], [1420, 1080], [1540, 1150], [1600, 1160]], // vers l'écurie et l'arrêt de bus
-    [[1180, 620], [1300, 600], [1400, 560]],                              // vers la clairière
-    [[450, 850], [470, 980], [560, 1060]],                                // vers la colline aux luges
+    { pts: [[1176, 622], [1226, 580], [1252, 500], [1268, 420], [1290, 344]], larg: 16, traces: 'pas' },        // vers le comptoir d'Oaken
+    { pts: [[1176, 850], [1236, 878], [1278, 930], [1272, 990], [1302, 1036], [1370, 1048], [1450, 1086], [1530, 1150], [1600, 1164]], larg: 18, traces: 'traineau' }, // vers l'écurie et l'arrêt de bus
+    { pts: [[1176, 622], [1290, 610], [1400, 566]], larg: 14, traces: 'pas' },                                     // vers la clairière
+    { pts: [[454, 850], [466, 940], [500, 1010], [560, 1056]], larg: 16, traces: 'luge' },                          // vers la colline aux luges
+    { pts: [[1470, 1166], [1600, 1176]], larg: 26, traces: null },                                                  // l'arrêt de bus
   ];
-  SENTIERS.forEach((s) => sentier(s, 22));
+  const courbe = (pts) => { // Catmull-Rom, un point tous les deux pixels environ
+    const out = [];
+    for (let s = 0; s < pts.length - 1; s++) {
+      const a = pts[Math.max(0, s - 1)], b = pts[s], c = pts[s + 1], d = pts[Math.min(pts.length - 1, s + 2)];
+      const n = Math.max(2, Math.ceil(Math.hypot(c[0] - b[0], c[1] - b[1]) / 2));
+      for (let k = 0; k < n; k++) {
+        const t = k / n, t2 = t * t, t3 = t2 * t;
+        const f = (p0, p1, p2, p3) => 0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (3 * p1 - p0 - 3 * p2 + p3) * t3);
+        out.push([f(a[0], b[0], c[0], d[0]), f(a[1], b[1], c[1], d[1])]);
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  };
+  const traces = SENTIERS.map((s) => Object.assign({ c: courbe(s.pts) }, s));
+  const couche = (dy, dr, col) => { for (const s of traces) { const R = s.larg / 2 + dr; for (const [x, y] of s.c) P.ellipse(Math.round(x), Math.round(y + dy), R, Math.round(R * 0.7), col); } };
+  couche(1, 1, '#fbfdff');   // le rebord de neige, éclairé
+  couche(0, 0, '#b2c0d8');   // l'ombre du bord
+  couche(1, -1, '#cfd9e8');  // le creux tassé
+  for (const s of traces) {
+    if (!s.traces) continue;
+    let dist = 0, n = 0;
+    for (let k = 1; k < s.c.length; k++) {
+      const [x0, y0] = s.c[k - 1], [x1, y1] = s.c[k], l = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / l, ny = (x1 - x0) / l;
+      dist += l;
+      if (s.traces !== 'pas') { for (const e of [-4, 4]) P.px(Math.round(x1 + nx * e), Math.round(y1 + ny * e * 0.7), '#b4c2d8'); } // les patins
+      if (dist < (s.traces === 'luge' ? 1e9 : 7)) continue;
+      dist = 0; n++;
+      const e = s.traces === 'pas' ? (n % 2 ? -2 : 2) : (n % 2 ? -1 : 1), px = Math.round(x1 + nx * e), py = Math.round(y1 + ny * e * 0.7);
+      if (s.traces === 'pas') { P.rect(px, py, 2, 1, '#a6b4cc'); P.px(px, py - 1, '#bac6da'); } // les pas
+      else { P.px(px - 1, py, '#a8b6ce'); P.px(px + 1, py, '#a8b6ce'); P.px(px, py + 1, '#b4c2d8'); } // les sabots de Sven
+    }
+  }
+
+  // ---------------------------------------------------------------- rues et place pavées sous la neige
+  // La cour du château, le pont, la rue du nord, la grande place, la rue du sud et la grand-rue forment un seul
+  // réseau : on réunit leurs rectangles, on arrondit les coins des croisements, puis la neige dépend de la distance
+  // au bord : congère le long des façades, poudrée sur les côtés, balayée au milieu.
+  const RUES = [
+    [590, 330, 420, 112],   // la cour du château
+    [776, 440, 48, 70],     // le pont
+    [770, 500, 60, 104],    // la montée du pont jusqu'à la rue du nord
+    [450, 600, 730, 44],    // la rue du nord, devant les maisons
+    [640, 640, 320, 194],   // la grande place, jusqu'à la rue du sud
+    [450, 830, 730, 40],    // la rue du sud
+    [760, 866, 80, 334],    // la grand-rue, jusqu'à l'arrivée
+  ];
+  const ENTREES = [[1180, 622], [1180, 850], [450, 850]]; // là où partent les sentiers : pas de congère, les pavés s'effacent peu à peu
+  {
+    const M = 24, bx = 450 - M, by = 330 - M, w = 1180 - 450 + 2 * M, h = 1200 - 330 + M, n = w * h;
+    // distance (en pixels) de chaque case « dedans » à la case « dehors » la plus proche (chanfrein 3-4, deux passes)
+    const distances = (dedans) => {
+      const D = new Float32Array(n);
+      for (let i = 0; i < n; i++) D[i] = dedans(i) ? 1e9 : 0;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x; if (!D[i]) continue;
+        let v = D[i];
+        if (x > 0) v = Math.min(v, D[i - 1] + 3);
+        if (y > 0) { v = Math.min(v, D[i - w] + 3); if (x > 0) v = Math.min(v, D[i - w - 1] + 4); if (x < w - 1) v = Math.min(v, D[i - w + 1] + 4); }
+        D[i] = v;
+      }
+      for (let y = h - 1; y >= 0; y--) for (let x = w - 1; x >= 0; x--) {
+        const i = y * w + x; if (!D[i]) continue;
+        let v = D[i];
+        if (x < w - 1) v = Math.min(v, D[i + 1] + 3);
+        if (y < h - 1) { v = Math.min(v, D[i + w] + 3); if (x < w - 1) v = Math.min(v, D[i + w + 1] + 4); if (x > 0) v = Math.min(v, D[i + w - 1] + 4); }
+        D[i] = v;
+      }
+      for (let i = 0; i < n; i++) D[i] /= 3;
+      return D;
+    };
+    const dans = (i, [x, y, rw, rh]) => { const gx = bx + (i % w), gy = by + ((i / w) | 0); return gx >= x && gx < x + rw && gy >= y && gy < y + rh; };
+    const R0 = new Uint8Array(n);
+    for (let i = 0; i < n; i++) R0[i] = RUES.some((q) => dans(i, q)) ? 1 : 0;
+    // les coins rentrants arrondis (fermeture), puis les coins saillants un peu adoucis (ouverture)
+    const ext = distances((i) => !R0[i]);
+    const R1 = distances((i) => R0[i] || ext[i] <= 14);
+    const R2 = distances((i) => R1[i] > 14);
+    const ext2 = distances((i) => !(R2[i] > 5));
+    const D = distances((i) => R2[i] > 5 || ext2[i] <= 5);
+    // les pavés, sur une toile à part, puis le mélange avec la neige déjà peinte
+    const tp = PX.canvas(w, h), TP = PX.painter(tp);
+    Sol.paves(TP, 0, 0, w, h, r, { base: ['#7c7c90', '#86869c', '#74748a', '#8c8698'], hi: '#a4a4b8', lo: '#606076', joint: '#525268' });
+    const pv = TP.g.getImageData(0, 0, w, h).data, img = P.g.getImageData(bx, by, w, h), d = img.data;
+    const neige = [0xee, 0xf3, 0xfb], ombre = [0xb4, 0xc8, 0xe2], blanc = [0xe6, 0xec, 0xf6];
+    for (let i = 0; i < n; i++) {
+      const dd = D[i]; if (!dd) continue;
+      const gx = bx + (i % w), gy = by + ((i / w) | 0), k = i * 4;
+      const entree = Math.min(...ENTREES.map(([ex, ey]) => Math.hypot(gx - ex, gy - ey))), ouvert = entree < 30;
+      const conge = 2 + Math.round(Math.abs(Math.sin(gx * 0.13 + gy * 0.09)) * 3); // la congère le long du bord
+      let col = null;
+      if (!ouvert && dd <= conge - 0.5) col = neige;
+      else if (!ouvert && dd <= conge + 0.5) col = ombre;
+      if (col) { d[k] = col[0]; d[k + 1] = col[1]; d[k + 2] = col[2]; continue; }
+      // des plaques de neige irrégulières, plus nombreuses loin du milieu des passages
+      const plaque = Math.max(0, Math.sin(gx * 0.045 + Math.sin(gy * 0.031) * 2.2) * Math.sin(gy * 0.058 + Math.sin(gx * 0.017) * 1.7)) * 0.45;
+      let a = Math.min(1, Math.max(0.4 + plaque, 1.05 - dd * 0.042, ouvert ? 1.15 - entree / 30 : 0));
+      a = Math.min(1, Math.max(0, a + ((PX.bayer(gx, gy) / 16) - 0.5) * 0.12)); // un grain très léger
+      const fond = gy >= CANAL.y - 2 && gy < CANAL.y + CANAL.h + 2 ? blanc : [d[k], d[k + 1], d[k + 2]]; // sur le pont : de la neige, pas la glace
+      d[k] = pv[k] * (1 - a) + fond[0] * a; d[k + 1] = pv[k + 1] * (1 - a) + fond[1] * a; d[k + 2] = pv[k + 2] * (1 - a) + fond[2] * a;
+    }
+    P.g.putImageData(img, bx, by);
+    // quelques traces de pas sur les pavés poudrés
+    for (let k = 0; k < 520; k++) { const i = r.int(n); if (D[i] < 7) continue; const px = bx + (i % w), py = by + ((i / w) | 0); P.rect(px, py, 2, 1, '#9aa4bc'); }
+  }
   // la cour, le pont et ses parapets
   C.solide(570, 330, 20, 112); C.solide(1010, 330, 20, 112);
   for (const x of [772, 824]) { C.solide(x, 452, 4, 56); P.rect(x, 452, 4, 56, '#c4b698'); P.vline(x, 452, 56, '#e2d6bc'); for (let y = 454; y < 506; y += 8) P.rect(x - 1, y, 6, 3, N); }
@@ -198,11 +265,6 @@ Jeu.enregistrerCarte('arendelle', () => {
   // la grand-rue jusqu'à l'entrée de la ville : maisons des deux côtés
   rangee(650, 1110, [{ seed: 31, w: 58, style: 'long', couleur: '#4f8a5a' }]);
   rangee(852, 1110, [{ seed: 32, w: 60, style: 'pignon', couleur: '#8a4a8a', boutique: 'sjokolade' }, { seed: 33, w: 54, style: 'long', couleur: '#3a6aa8' }]);
-  // l'arche « GOD JUL » au-dessus de la grand-rue
-  const ar = A.arche(104);
-  C.objet(ar.poteau, 748, 900, { solide: [-3, -3, 6, 4] }); C.objet(ar.poteau, 852, 900, { solide: [-3, -3, 6, 4] });
-  C.dessusImg(ar.haut, 748, 836); ar.ampoules.forEach(([bx, by]) => C.scintille.push([748 + bx, 836 + by]));
-  for (const [x, y, w] of [[760, 1010, 80], [760, 1080, 80]]) { const gl = Objets.guirlande(w, 6); C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by])); }
   for (const [x, y] of [[742, 1016], [846, 1020], [742, 1150], [858, 1150]]) C.objet(Objets.pot(x, 'sapin'), x, y, { solide: [-5, -3, 10, 4], ombre: [5, 2] });
   // le petit mobilier : bancs, bûches, tonneaux, boîte aux lettres, bannières, statue
   const mobilier = [
@@ -210,13 +272,16 @@ Jeu.enregistrerCarte('arendelle', () => {
     [A.buches(), 540, 612, [-12, -3, 24, 4], 'buches'], [A.buches(), 1100, 842, [-12, -3, 24, 4], 'buches'], [A.buches(), 620, 972, [-12, -3, 24, 4], 'buches'],
     [A.tonneaux(), 1150, 612, [-12, -3, 24, 4], null], [A.tonneaux(), 960, 840, [-12, -3, 24, 4], null],
     [A.boiteLettres(), 902, 614, [-3, -2, 6, 3], 'boiteLettres'], [A.boiteLettres(), 728, 974, [-3, -2, 6, 3], 'boiteLettres'],
-    [A.banniere(), 642, 646, [-1, -2, 4, 3], null], [A.banniere(), 958, 646, [-1, -2, 4, 3], null], [A.banniere(), 642, 806, [-1, -2, 4, 3], null], [A.banniere(), 958, 806, [-1, -2, 4, 3], null],
     [A.statue(), 1000, 780, [-12, -10, 24, 11], 'statue'],
   ];
   for (const [obj, x, y, sol, texte] of mobilier) C.objet(obj, x, y, { solide: sol, ombre: [Math.max(4, obj.img.width / 2 - 2), 3], texte, zw: Math.max(16, obj.img.width) });
-  // guirlandes lumineuses au-dessus des rues
-  for (const [x, y, w] of [[640, 606, 120], [840, 606, 120], [640, 812, 110], [850, 812, 110]]) {
-    const gl = Objets.guirlande(w, 6); C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by]));
+  // la grande place : un grand réverbère à chaque coin, symétriques autour du sapin, bannière vers l'extérieur
+  for (const [x, y, cote] of [[648, 652, -1], [952, 652, 1], [648, 822, -1], [952, 822, 1]]) C.objet(A.lampadaireBanniere(cote), x, y, { solide: [-2, -3, 5, 4], rayon: 66 });
+  // guirlandes lumineuses en travers de la grand-rue, tendues entre deux réverbères et accrochées sous la lanterne
+  // ([x du premier réverbère, pied, x du second])
+  for (const [x1, base, x2] of [[744, 990, 856], [744, 1060, 856]]) {
+    const x = x1 + 1, y = base - 34, gl = Objets.guirlande(x2 - x1 - 2, 7);
+    C.dessusImg(gl.img, x, y); gl.bulbs.forEach(([bx, by]) => C.scintille.push([x + bx, y + by]));
   }
 
   // ---------------------------------------------------------------- la grande place : sapin, marché de Noël, puits
@@ -235,7 +300,7 @@ Jeu.enregistrerCarte('arendelle', () => {
   etal('pains', 910, 800, '#d8a838', '#7a2a2a', 'etalPains');
   etal('poisson', 660, 724, '#2f7a8a', '#f4efe6', 'etalPoisson');
   C.objet(A.puits(), 1000, 716, { solide: [-12, -8, 24, 9], texte: 'puitsGele', zw: 24 });
-  for (const [x, y] of [[652, 618], [948, 618], [652, 818], [948, 818], [744, 1060], [856, 1060], [520, 618], [1080, 618], [1180, 880], [1260, 920]])
+  for (const [x, y] of [[520, 618], [1080, 618], [744, 990], [856, 990], [744, 1060], [856, 1060], [1180, 880], [1260, 920]])
     C.objet(A.lampadaire(), x, y, { solide: [-2, -3, 5, 4], rayon: 58 });
   C.objet(A.tasNeige(34), 1150, 1030, { solide: [-14, -6, 28, 6] });
   C.objet(A.tasNeige(26), 560, 760, { solide: [-10, -4, 20, 5] });
@@ -255,8 +320,8 @@ Jeu.enregistrerCarte('arendelle', () => {
   // ---------------------------------------------------------------- la forêt de sapins, la clairière des trolls (est)
   const SAPINS = [0, 1, 2, 3].map((k) => Foret.sapin(500 + k, 2 + (k % 2)));
   const clair = (x, y, rx, ry) => ((x - 1400) / rx) ** 2 + ((y - 560) / ry) ** 2 < 1;
-  const distSentier = (x, y) => Math.min(...SENTIERS.map((s) => Math.min(...s.slice(1).map(([x1, y1], k) => {
-    const [x0, y0] = s[k], dx = x1 - x0, dy = y1 - y0, t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy || 1)));
+  const distSentier = (x, y) => Math.min(...SENTIERS.map((s) => Math.min(...s.pts.slice(1).map(([x1, y1], k) => {
+    const [x0, y0] = s.pts[k], dx = x1 - x0, dy = y1 - y0, t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy || 1)));
     return Math.hypot(x - x0 - dx * t, y - y0 - dy * t);
   }))));
   const places = [];
@@ -300,7 +365,6 @@ Jeu.enregistrerCarte('arendelle', () => {
   const bus = A.arretBus();
   C.objet(bus, 1520, 1150, { solide: [-20, -8, 52, 9] });
   bus.lumieres.forEach(([x, y, rr, k]) => C.lumiere(1520 - bus.ax + x, 1150 - bus.ay + y, rr, k));
-  sentier([[1500, 1160], [1600, 1170]], 30);
 
   // ---------------------------------------------------------------- l'arrivée (sud)
   C.objet(A.pancarte(['ARENDELLE', 'BIENVENUE']), 852, 1140, { solide: [-2, -2, 4, 3], texte: 'bienvenue', zw: 20 });

@@ -518,6 +518,24 @@ const Arendelle = (() => {
     return { img: c, ax: 13, ay: base };
   }
   // mât à bannière violette au crocus doré (les armoiries d'Arendelle)
+  // le grand réverbère des coins de la place : plus haut, couronne sur le poteau, et la bannière d'Arendelle
+  // accrochée à un bras, du côté « cote » (1 : à droite, -1 : à gauche)
+  function lampadaireBanniere(cote = 1) {
+    const { c, P } = mk(26, 62), base = 61;
+    P.rect(11, 12, 3, 50, '#2a2632'); P.vline(11, 12, 50, '#4a4658'); P.rect(8, 57, 9, 5, '#2a2632'); P.hline(8, 57, 9, '#4a4658');
+    P.rect(7, 6, 11, 2, '#2a2632'); P.rect(8, 8, 9, 10, '#2a2632'); P.rect(9, 9, 7, 8, '#ffd27a'); P.px(9, 9, '#fff4c8'); P.vline(12, 9, 8, '#e8a84a');
+    P.rect(7, 4, 11, 2, NEIGE); P.hline(8, 3, 9, '#ffffff'); P.hline(7, 18, 11, '#2a2632'); P.px(12, 1, '#e8b54a'); P.px(12, 2, '#2a2632');
+    // le bras et la bannière (couleurs du château : violet et or, le crocus au milieu)
+    P.hline(14, 21, 10, '#2a2632'); P.px(24, 21, '#e8b54a');
+    P.rect(15, 22, 9, 19, '#6a3a8a'); P.vline(15, 22, 19, '#8a5aaa'); P.hline(15, 22, 9, '#e8b54a');
+    for (let k = 0; k < 4; k++) P.px(16 + k * 2, 41, '#6a3a8a');
+    P.ellipse(19, 30, 2, 4, '#e8b54a'); P.px(19, 25, '#7ac85a'); P.px(17, 35, '#7ac85a'); P.px(21, 35, '#7ac85a'); P.px(18, 28, '#fff0a0');
+    // la couronne de sapin à nœud rouge, plus bas sur le poteau
+    P.ellipse(12, 46, 4, 4, '#1e4a2a'); P.ellipse(12, 46, 3, 3, '#2f6a3a'); P.ellipse(12, 46, 1, 1, '#2a2632'); P.px(10, 44, '#4f8a4a'); P.px(14, 48, '#4f8a4a');
+    P.rect(11, 49, 3, 2, '#d8323a'); P.px(10, 51, '#d8323a'); P.px(14, 51, '#d8323a'); P.px(9, 46, '#f2c230'); P.px(15, 45, '#f2c230');
+    const img = cote > 0 ? c : PX.flipX(c);
+    return { img, ax: cote > 0 ? 12 : 13, ay: base, light: { dx: 0, dy: -48 } };
+  }
   function banniere() {
     const { c, P } = mk(16, 60), base = 59;
     P.rect(2, 2, 2, 58, '#4a4658'); P.vline(2, 2, 58, '#7a7690'); P.ellipse(3, 1, 2, 1, '#e8b54a');
@@ -548,20 +566,6 @@ const Arendelle = (() => {
     P.rect(0, 6, w, 2, '#d8d4cc'); P.rect(0, 11, w, 2, '#d8d4cc');
     for (let x = 0; x < w; x += 4) { P.rect(x, 2, 3, 13, '#f4f0e8'); P.vline(x + 2, 3, 12, '#c8c0b4'); P.px(x + 1, 1, '#f4f0e8'); P.rect(x, 0, 3, 2, NEIGE); }
     return { img: c, ax: 0, ay: base };
-  }
-  // l'arche « GOD JUL » (joyeux Noël) au-dessus de la grand-rue : poteaux et linteau (dessinés à part)
-  function arche(w) {
-    const poteau = mk(8, 60), Pp = poteau.P;
-    Pp.rect(2, 0, 4, 60, '#6a4428'); Pp.vline(2, 0, 60, '#8a5a32'); Pp.rect(0, 56, 8, 4, '#4a3020');
-    for (let y = 4; y < 54; y += 6) { Pp.px(1, y, '#2f6a3a'); Pp.px(6, y + 3, '#2f6a3a'); Pp.px(1, y + 1, '#d8323a'); }
-    const haut = mk(w, 26), P = haut.P;
-    P.rect(0, 8, w, 12, '#6a4428'); P.hline(0, 8, w, '#8a5a32'); P.hline(0, 19, w, '#3a2618');
-    P.rect(0, 5, w, 4, NEIGE); P.hline(0, 4, w, '#ffffff'); glacons(P, PX.rng(3), 2, w - 2, 20, 3);
-    const t = 'GOD JUL'; texte(P, t, Math.floor((w - largeurTexte(t)) / 2), 11, '#f2c230');
-    P.trap(w / 2 - 6, 12, w / 2 - 4, 8, -1, 6, '#6a4428'); P.ellipse(w / 2, 1, 2, 2, '#f2c230');
-    const ampoules = [];
-    for (let x = 2; x < w - 2; x += 4) { const y = 21 + Math.round(Math.sin((x / w) * Math.PI) * 3); P.px(x, y, '#2a2632'); ampoules.push([x, y + 1]); }
-    return { poteau: { img: poteau.c, ax: 4, ay: 59 }, haut: haut.c, ampoules };
   }
   // ponton de bois sur le fjord gelé (posé au sol) et bitte d'amarrage
   function bitte() {
@@ -649,6 +653,6 @@ const Arendelle = (() => {
   return {
     texte, largeurTexte, maison, chateau, muraille, portail, fontaineGelee, etal, lampadaire, ecurie, traineau, blocsGlace, comptoirOaken,
     bateauGele, puits, tasNeige, bonhommeEnfants, luge, rocher, transat, pancarte, arretBus, fond, palais, MURS, NEIGE, NEIGE2, NEIGE3, GLACE,
-    banc, buches, tonneaux, banniere, boiteLettres, statue, glacons, bourrelet, palissade, arche, bitte, paillettes, dessinerPaillettes,
+    banc, buches, tonneaux, banniere, lampadaireBanniere, boiteLettres, statue, glacons, bourrelet, palissade, bitte, paillettes, dessinerPaillettes,
   };
 })();

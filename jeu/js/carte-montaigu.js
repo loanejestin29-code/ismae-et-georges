@@ -59,7 +59,7 @@ Jeu.enregistrerCarte('montaigu', () => {
     C.zone(bx, 280, 32, 24, 'routeBarree');
   }
   C.solide(0, 300, W, 30);
-  C.montaigu = { bus: { x: 300, y: 232 }, descente: { x: 314, y: 236 } };
+  C.montaigu = { bus: { x: 300, y: 252 } }; // le car s'arrête au milieu de la rue, Ismae descend par la porte
   C.arrivees.bus = { x: 300, y: 254, dir: 'down' };
   C.onEntree = (J) => Bus.arriveeMontaigu(J);
   C.finaliser(0.22);

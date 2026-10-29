@@ -486,27 +486,62 @@ const Bus = (() => {
   const vue = { update, draw, pointeur };
 
   // ------------------------------------------------------------ les scènes : le départ à Arendelle
-  // le bus vu de côté, pour les scènes dans les rues
-  let busCote = null;
-  function dessinBusCote() {
-    if (busCote) return busCote;
-    const c = PX.canvas(70, 34), P = PX.painter(c);
-    P.rect(2, 4, 66, 22, '#f2f2f6'); P.rect(2, 2, 62, 3, '#e2e2e8'); P.rect(64, 6, 4, 18, '#d8d8e0');
-    P.rect(2, 18, 66, 3, '#2f8a5a'); P.hline(2, 4, 66, '#ffffff');
-    for (let x = 6; x < 54; x += 10) { P.rect(x, 7, 8, 8, '#3a4a6a'); P.px(x + 1, 8, '#8ab0d8'); }
-    P.rect(56, 7, 10, 10, '#3a4a6a'); P.px(57, 8, '#8ab0d8'); P.rect(58, 2, 8, 3, '#1d1a22'); Arendelle.texte(P, 'MONTAIGU', 26, -1 + 3 - 2, '#f2c230');
-    P.rect(46, 7, 6, 17, '#2a3a5a'); P.vline(49, 7, 17, '#4a5a7a');
-    for (const x of [14, 56]) { P.ellipse(x, 26, 5, 5, '#1d1a22'); P.ellipse(x, 26, 2, 2, '#8a8a9a'); }
-    P.rect(66, 18, 2, 2, '#fff6c0'); P.px(2, 18, '#d8323a');
-    return (busCote = PX.outline(c, '#1d1626'));
+  // le car vu de côté, pour les scènes dans les rues : à la taille d'un vrai car à côté d'Ismae (deux fois plus
+  // haut qu'elle). L'avant est à droite (sens 1) ou à gauche (sens -1) ; la porte est juste derrière le chauffeur.
+  const busCote = {};
+  const PORTE_BUS = 54; // le milieu de la porte, depuis le milieu du car, vers l'avant
+  function dessinBusCote(sens = 1) {
+    if (busCote[sens]) return busCote[sens];
+    const c = PX.canvas(147, 63), P = PX.painter(c), rr = PX.rng(66);
+    // la caisse : blanche, le bas un peu plus gris, le toit arrondi couvert de neige
+    P.rect(6, 4, 134, 3, '#e4e4ec'); P.rect(4, 6, 139, 2, '#ececf2');
+    P.rect(2, 8, 141, 46, '#f2f2f6'); P.rect(143, 10, 2, 44, '#ececf2'); P.rect(145, 13, 1, 41, '#e2e2ea');
+    P.rect(2, 44, 144, 10, '#dcdce6'); P.hline(2, 44, 144, '#c8c8d4');
+    for (let x = 6; x < 140; x++) { const h = 1 + Math.round(Math.abs(Math.sin(x * 0.21)) * 2); P.rect(x, 4 - h, 1, h, '#eef3fb'); P.px(x, 4 - h, '#ffffff'); }
+    // la bande verte et le filet jaune
+    P.rect(2, 35, 144, 5, '#2f8a5a'); P.hline(2, 35, 144, '#4faa7a'); P.hline(2, 40, 144, '#f2c230');
+    // les vitres : un long bandeau teinté, les sièges éclairés de l'intérieur
+    P.rect(6, 12, 113, 21, '#2a2632');
+    for (let k = 0; k < 7; k++) {
+      const x = 7 + k * 16;
+      P.rect(x, 13, 14, 19, '#f2d48a'); P.rect(x, 13, 14, 3, '#d8b468');
+      for (const s of [2, 8]) { P.rect(x + s, 25, 4, 7, '#8a5a3a'); P.hline(x + s, 25, 4, '#a8744a'); }
+      for (let j = 0; j < 7; j++) P.px(x + 12 - j, 14 + j * 2, 'rgba(255,255,255,0.45)');
+    }
+    // la porte (deux battants vitrés) puis la vitre du chauffeur, avec le chauffeur
+    P.rect(119, 12, 16, 42, '#2a2632');
+    for (const x of [120, 127]) { P.rect(x, 13, 6, 30, '#3a4a6a'); P.rect(x, 44, 6, 9, '#c8c8d2'); P.px(x + 1, 14, '#8ab0d8'); P.px(x + 1, 15, '#8ab0d8'); }
+    P.rect(136, 12, 9, 22, '#2a2632'); P.rect(137, 13, 8, 20, '#3a4a6a');
+    P.rect(139, 23, 5, 10, '#1d1a22'); P.ellipse(141, 20, 2, 2, '#1d1a22'); P.rect(139, 17, 5, 2, '#2f5a8a'); // la casquette
+    for (let j = 0; j < 5; j++) P.px(144 - j, 14 + j * 2, '#8ab0d8');
+    // le panneau de destination (le texte est écrit après le retournement)
+    P.rect(110, 4, 36, 8, '#1d1a22');
+    // les passages de roues, les roues, les soutes à bagages
+    for (const x of [30, 104]) { P.ellipse(x, 55, 11, 10, '#2a2a34'); P.ellipse(x, 54, 8, 8, '#1d1a22'); P.ellipse(x, 54, 4, 4, '#8a8a9a'); P.px(x, 54, '#c8c8d0'); P.px(x - 2, 52, '#b8b8c6'); }
+    for (const x of [48, 64, 80]) P.vline(x, 45, 8, '#b8b8c6');
+    for (const x of [56, 72]) P.rect(x, 50, 3, 1, '#8a8a9a');
+    // les feux, les pare-chocs, le rétroviseur, les feux de gabarit orange
+    P.rect(144, 45, 2, 3, '#fff6c0'); P.px(145, 49, '#f2a030');
+    P.rect(2, 37, 2, 8, '#d8323a');
+    P.rect(1, 50, 4, 4, '#3a3a46'); P.rect(141, 50, 5, 4, '#3a3a46');
+    P.rect(145, 14, 2, 1, '#1d1a22'); P.rect(146, 15, 1, 6, '#1d1a22');
+    for (const x of [18, 42, 66, 90]) P.px(x, 46, '#f2a030');
+    // un peu de neige fondue projetée sur le bas de caisse
+    for (let x = 3; x < 144; x++) if (rr() < 0.35 && Math.abs(x - 30) > 11 && Math.abs(x - 104) > 11) P.px(x, 52 + rr.int(2), '#eef3fb');
+    const img = sens > 0 ? c : PX.flipX(c);
+    img.getContext('2d').setTransform(1, 0, 0, 1, 0, 0); // flipX laisse le miroir actif : on écrit le panneau à l'endroit
+    Arendelle.texte(PX.painter(img), 'MONTAIGU', sens > 0 ? 112 : 3, 6, '#f2c230');
+    return (busCote[sens] = PX.outline(img, '#1d1626'));
   }
-  function objetBus(C, x, y) {
-    const b = { x, y, porte: 0, visible: true, get sortY() { return this.y; },
+  function objetBus(C, x, y, sens = 1) {
+    const b = { x, y, sens, porte: 0, visible: true, get sortY() { return this.y; },
+      get xPorte() { return this.x + PORTE_BUS * this.sens; },
       update() {}, draw(g) {
         if (!this.visible) return;
-        Entites.ombre(g, this.x, this.y, 34);
-        const img = dessinBusCote(); g.drawImage(img, Math.round(this.x - 35), Math.round(this.y - 32));
-        if (this.porte > 0) { g.fillStyle = '#ffcf72'; g.fillRect(Math.round(this.x + 12), Math.round(this.y - 24), 5, 17); }
+        Entites.ombre(g, this.x, this.y, 72);
+        const gx = Math.round(this.x - 74), gy = Math.round(this.y - 64);
+        g.drawImage(dessinBusCote(this.sens), gx, gy);
+        if (this.porte > 0) { const dx = this.sens > 0 ? 121 : 14; g.fillStyle = '#ffcf72'; g.fillRect(gx + dx, gy + 14, 14, 40); g.fillStyle = '#b8864a'; g.fillRect(gx + dx, gy + 50, 14, 2); }
       } };
     C.dynamiques.push(b);
     return b;
@@ -516,21 +551,21 @@ const Bus = (() => {
     if (Q.bus !== 'aVenir' && Q.bus !== 'depart') return;
     Q.bus = 'depart';
     const p = J.joueur, G = J.georges, C = J.carte, B = CONFIG.route;
-    const bus = objetBus(C, 1720, 1186);
+    const bus = objetBus(C, 1740, 1186, -1);
     J.cinematique = true;
     J.jouerScript([
       { dire: B.attente },
       { faire: () => { Musique.klaxon(); } },
-      { jusqua: (j) => { bus.x -= 70 * j.dt; return bus.x <= 1548; } },
+      { jusqua: (j) => { bus.x -= 70 * j.dt; return bus.x <= 1500; } },
       { faire: () => { bus.porte = 1; Musique.porte(); } },
       { attendre: 0.4 },
       { dire: B.chauffeur },
-      { faire: () => { p.allerVers([{ x: 1556, y: 1188 }], 50); G.allerVers([{ x: 1556, y: 1190 }], 50); } },
+      { faire: () => { p.allerVers([{ x: bus.xPorte, y: 1190 }], 50); G.allerVers([{ x: bus.xPorte + 3, y: 1192 }], 50); } },
       { jusqua: () => !p.chemin },
       { faire: () => { p.visible = false; G.visible = false; Musique.miaou(1.1, 0.06); } },
       { attendre: 0.5 },
-      { faire: () => { bus.porte = 0; Musique.klaxon(); } },
-      { jusqua: (j) => { bus.x += 90 * j.dt; return bus.x > 1660; } },
+      { faire: () => { bus.porte = 0; bus.sens = 1; Musique.klaxon(); } }, // demi-tour : il repart par la route d'où il vient
+      { jusqua: (j) => { bus.x += 90 * j.dt; return bus.x > 1720; } },
       { attendre: 0.2 },
     ], () => {
       p.visible = true; G.visible = true;
@@ -561,10 +596,10 @@ const Bus = (() => {
     J.cinematique = true;
     J.jouerScript([
       { attendre: 0.6 },
-      { faire: () => { p.visible = true; G.visible = true; p.x = S.descente.x; p.y = S.descente.y; G.x = p.x + 6; G.y = p.y + 4; p.allerVers([{ x: p.x - 10, y: p.y + 18 }], 40); G.allerVers([{ x: p.x + 8, y: p.y + 22 }], 40); } },
+      { faire: () => { p.visible = true; G.visible = true; p.x = bus.xPorte; p.y = bus.y + 4; G.x = p.x + 6; G.y = p.y + 4; p.allerVers([{ x: p.x - 10, y: p.y + 18 }], 40); G.allerVers([{ x: p.x + 8, y: p.y + 22 }], 40); } },
       { jusqua: () => !p.chemin },
       { faire: () => { G.reprendreSuivi(J); bus.porte = 0; Musique.klaxon(); p.dir = 'up'; } },
-      { jusqua: (j) => { bus.x += 80 * j.dt; return bus.x > S.bus.x + 260; } },
+      { jusqua: (j) => { bus.x += 80 * j.dt; return bus.x > S.bus.x + 420; } },
       { faire: () => { bus.visible = false; p.dir = 'down'; } },
       { dire: B.arrivee },
     ], () => {

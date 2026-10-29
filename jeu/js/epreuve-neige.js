@@ -366,7 +366,9 @@ const EpreuveNeige = (() => {
       zone() { return { x: this.x - 12, y: this.y - 20, w: 24, h: 22, dialogue: () => (Q.neige === 'gagne' ? ['Jack Snow. Il a l\'air très fier de son écharpe.', 'Ismae et Loane l\'ont construit ensemble, un soir de neige.'] : null) }; } };
     J.carte.pnj.push(jack);
     S.jackObj = jack;
-    Entites.portraits.jack = jack.img;
+    // le portrait de la boîte de dialogue : sa tête et son écharpe (le cadrage automatique montrerait son ventre)
+    const portrait = PX.canvas(24, 22); portrait.getContext('2d').drawImage(jack.img, 9, 0, 24, 22, 0, 0, 24, 22);
+    Entites.portraits.jack = portrait;
     return jack;
   }
 
