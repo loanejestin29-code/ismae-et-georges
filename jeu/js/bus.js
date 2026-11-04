@@ -7,20 +7,23 @@
 //     (flèches ou A / D au clavier ; sur iPhone, glisser le doigt vers la gauche ou vers la droite :
 //     sans glisser, le bus reste dans sa file). Des voitures déboîtent en clignotant.
 //     Voitures, camions, tracteurs, travaux, chasse-neige, rennes, vaches… à éviter.
-//     Trois vies ; la vitesse augmente. En panne (plus de vies), on repart aussitôt du début
+//     Trois vies ; la vitesse augmente peu à peu. En panne (plus de vies), on repart aussitôt du début
 //     du paysage en cours. Des cadeaux à ramasser, et un cœur de temps en temps.
 //     Les paysages défilent : montagnes enneigées, forêt, campagne (bocage, moulins),
 //     petites villes illuminées pour Noël, puis Montaigu.
 //     Clins d'œil : une voiture de course rouge n° 95 qui double à toute allure (« Ka-chow ! »),
 //     une vieille dépanneuse rouillée sur le bas-côté, la station-service « Radiator Springs ».
-//  3. Arrivée : le bus ralentit et s'arrête à Montaigu, puis l'écran de victoire et le quatrième indice.
-//  4. Ismae et Georges descendent du bus à Montaigu (carte-montaigu.js, zone à venir).
+//     Le trajet est difficile du début à la fin, et de plus en plus rapide ; les paysages, tous sous la
+//     neige, se fondent les uns dans les autres (la forêt s'épaissit, puis les champs et les maisons arrivent).
+//  3. Arrivée : le bus ralentit et s'arrête à Montaigu ; Ismae et Georges descendent (carte-montaigu.js).
+//  4. Flash McQueen, garé un peu plus loin, remet le quatrième indice ; puis Linguini sort en courant du
+//     restaurant du chef Gusteau : Loane a appelé, le chef attend Ismae pour un caramel (épreuve 5).
 // =====================================================================
 'use strict';
 
 const Bus = (() => {
   const Q = Scenes.quete;
-  Q.bus = 'aVenir'; // 'aVenir' → 'depart' → 'route' → 'victoire' → 'gagne'
+  Q.bus = 'aVenir'; // 'aVenir' → 'depart' → 'route' → 'arrive' (à Montaigu, avant l'indice) → 'gagne'
   const $ = (id) => document.getElementById(id);
   const LONGUEUR = 18000, KM = 128; // longueur du trajet (pixels) et distance affichée (km)
   const PAYSAGES = [
@@ -29,6 +32,25 @@ const Bus = (() => {
     { id: 'arrivee', debut: 0.9, nom: 'Montaigu' },
   ];
   const paysage = (f) => { let p = PAYSAGES[0]; for (const q of PAYSAGES) if (f >= q.debut) p = q; return p; };
+  // entre deux paysages, un fondu sur « FONDU » du trajet : la neige fond par plaques, les arbres changent peu à peu…
+  // renvoie le paysage d'avant (a), celui d'après (b) et le mélange m (0 : tout a, 1 : tout b)
+  const FONDU = 0.06;
+  function melange(f) {
+    for (let k = 1; k < PAYSAGES.length; k++) {
+      const d = PAYSAGES[k].debut;
+      if (f < d - FONDU / 2) return { a: PAYSAGES[k - 1], b: PAYSAGES[k - 1], m: 0 };
+      if (f < d + FONDU / 2) return { a: PAYSAGES[k - 1], b: PAYSAGES[k], m: (f - (d - FONDU / 2)) / FONDU };
+    }
+    const fin = PAYSAGES[PAYSAGES.length - 1];
+    return { a: fin, b: fin, m: 0 };
+  }
+  // le paysage qui « gagne » à cet endroit (pour les bords de route), et un tirage au sort pour le décor
+  const dominant = (f) => { const x = melange(f); return x.m < 0.5 ? x.a : x.b; };
+  const tirage = (f) => { const x = melange(f); return Math.random() < x.m ? x.b : x.a; };
+  // la difficulté, du début à la fin du trajet : la vitesse du bus (pixels/s) et le temps qu'on a pour réagir entre deux
+  // rangées d'obstacles (s) ; « deux » : la part des rangées où deux files sur trois sont bouchées ; la file libre change
+  // souvent (« bouge ») et jamais plus de « resteMax » rangées de suite au même endroit : impossible de rester dans sa file
+  const DIFF = { vitesse: [125, 240], reaction: [1.0, 0.66], decale: 0.3, deux: [0.3, 0.62], bouge: 0.55, resteMax: 2 };
   const LANE = 26, NL = 3;
   let E = null;
 
@@ -99,7 +121,13 @@ const Bus = (() => {
     });
     SP.cadeau = mk(10, 10, (P) => { P.rect(0, 2, 10, 8, '#c8343a'); P.hline(0, 2, 10, '#e85a50'); P.vline(4, 2, 8, '#f2c230'); P.hline(0, 5, 10, '#f2c230'); P.px(3, 1, '#f2c230'); P.px(5, 1, '#f2c230'); P.px(2, 0, '#f2c230'); P.px(6, 0, '#f2c230'); });
     SP.coeur = PX.outline(PX.fromRows(['.rr.rr.', 'rRrrrrr', 'rRrrrrr', '.rrrrr.', '..rrr..', '...r...'], { r: '#ff4a6a', R: '#ffc4d0' }), '#3a1426');
-    // le décor des bas-côtés
+    // le décor des bas-côtés (voir plus bas : sapinNeige, arbreNu, rocherNeige…)
+    SP.sapins = [[20, 0.6], [24, 0.7], [28, 0.85], [32, 1], [22, 0.35], [30, 0.5], [26, 0.9]].map(([h, n], k) => sapinNeige(h, n, 300 + k));
+    SP.arbresNus = [22, 26, 30].map((h, k) => arbreNu(h, 400 + k));
+    SP.rochers = [[36, 22], [26, 17], [44, 26]].map(([w, h], k) => rocherNeige(w, h, 500 + k));
+    SP.lac = lacGele(64, 26);
+    SP.haies = [0, 1, 2].map((k) => haie(600 + k));
+    SP.vaches = [0, 1, 2].map((k) => vacheChamp(700 + k));
     SP.sapin = [0, 1, 2].map((k) => mk(16, 22, (P) => {
       P.rect(7, 18, 2, 4, '#4a3020');
       for (let j = 0; j < 18; j++) { const w = 1 + Math.floor(j * 0.42) + (j % 6 > 3 ? 1 : 0); P.rect(8 - w, j + 1, w * 2, 1, j % 6 > 3 ? '#1e4834' : '#27563e'); if (j % 6 === 0 && k > 0) P.rect(8 - w, j + 1, w * 2, 1, '#eef3fb'); }
@@ -161,23 +189,192 @@ const Bus = (() => {
     SP.arret = mk(30, 24, (P) => { P.rect(0, 0, 22, 4, '#2a3a5a'); P.rect(1, 4, 20, 14, 'rgba(180,220,255,0.5)'); P.rect(24, 0, 2, 24, '#5a6a8a'); P.ellipse(25, 2, 4, 4, '#f2c230'); P.rect(4, 14, 14, 3, '#6a7a9a'); });
   }
 
-  // ------------------------------------------------------------ fonds (sol de chaque paysage, une tuile qui défile)
+  // ------------------------------------------------------------ le sol : de la neige partout (c'est l'hiver tout le long du
+  // trajet), avec des congères douces ; ce qui change d'un paysage à l'autre, c'est ce qui pousse au bord de la route
   const SOLS = {};
-  function sol(id, w) {
-    const cle = id + w;
-    if (SOLS[cle]) return SOLS[cle];
-    const T = 256, c = PX.canvas(w, T), P = PX.painter(c), r = PX.rng(id.length * 31);
-    const base = { montagne: '#e8eef8', foret: '#3a5a3a', campagne: '#5a7a44', ville: '#e2e8f2', arrivee: '#e2e8f2' }[id];
-    P.rect(0, 0, w, T, base);
-    if (id === 'montagne') P.speckle(0, 0, w, T, ['#ffffff', '#d4e0f0', '#c8d6ea'], 0.12, r);
-    else if (id === 'foret') { P.speckle(0, 0, w, T, ['#2f4a30', '#4a6a44', '#e8eef8'], 0.2, r); for (let k = 0; k < 40; k++) P.ellipse(r.int(w), r.int(T), 5 + r.int(12), 2 + r.int(3), 'rgba(238,243,251,0.4)'); }
-    else if (id === 'campagne') { P.speckle(0, 0, w, T, ['#6a8a4e', '#4a6a3a', '#7a6a44', '#eef3fb'], 0.15, r); for (let y = 0; y < T; y += 8) P.hline(0, y, w, 'rgba(60,80,40,0.25)'); }
-    else { // jardins enneigés, petites clôtures et haies
-      P.speckle(0, 0, w, T, ['#f4f8ff', '#d0dae8', '#c8d4e4'], 0.12, r);
-      for (let k = 0; k < 26; k++) { const x = r.int(w), y = r.int(T), l = 20 + r.int(40); for (let i = 0; i < l; i += 3) { P.rect(x + i, y, 1, 3, '#8a6a4a'); } P.hline(x, y + 1, l, '#a88a6a'); }
-      for (let k = 0; k < 18; k++) { const x = r.int(w), y = r.int(T); P.ellipse(x, y, 5 + r.int(4), 3, '#3a5a3a'); P.ellipse(x - 1, y - 1, 4, 2, '#eef3fb'); }
+  function sol(w) {
+    if (SOLS[w]) return SOLS[w];
+    const T = 256, c = PX.canvas(w, T), P = PX.painter(c), r = PX.rng(31);
+    P.rect(0, 0, w, T, '#e6edf7');
+    P.speckle(0, 0, w, T, ['#f4f8ff', '#d8e2f0', '#eef3fb'], 0.1, r);
+    for (let k = 0; k < Math.round(w / 6); k++) {
+      const x = r.int(w), y = r.int(T), rx = 10 + r.int(26), ry = 3 + r.int(5);
+      for (const dy of [-T, 0, T]) { P.ellipse(x, y + dy + 2, rx, ry, 'rgba(150,170,210,0.16)'); P.ellipse(x - 2, y + dy, rx - 3, ry - 1, 'rgba(255,255,255,0.35)'); }
     }
-    return (SOLS[cle] = c);
+    return (SOLS[w] = c);
+  }
+
+  // ------------------------------------------------------------ le décor des bords de route : sapins enneigés, arbres nus,
+  // rochers, lacs gelés, champs bordés de haies (le bocage), maisons. Il est tiré au sort par tranches de route (toujours le
+  // même pour une tranche donnée), dessiné une fois dans une image, puis simplement recopié à l'écran. Au passage d'un
+  // paysage à l'autre, chaque élément tire au sort son paysage, de plus en plus souvent le suivant : la forêt s'épaissit
+  // peu à peu, puis s'éclaircit, les champs puis les maisons arrivent petit à petit.
+  function sapinNeige(h, neige, seed) {
+    const w = (Math.round(h * 0.36) * 2) + 1, n = h >= 26 ? 4 : 3, base = h - 3, th = base / n, cx = (w - 1) / 2, r = PX.rng(seed);
+    return mk(w, h, (P) => {
+      P.rect(cx - 1, base, 3, 3, '#5a3a26'); P.px(cx - 1, base, '#7a5236');
+      for (let t = 0; t < n; t++) {
+        const y0 = Math.round(t * th), y1 = Math.round((t + 1) * th) + 1, hw0 = (t + 0.5) / n * cx * 0.55, hw1 = (t + 1) / n * cx;
+        for (let y = y0; y < Math.min(y1 + 1, base); y++) {
+          const hw = Math.round(hw0 + (hw1 - hw0) * (y - y0) / (y1 - y0));
+          P.hline(cx - hw, y, hw * 2 + 1, '#1f4a36'); P.hline(cx - hw, y, Math.max(1, hw - 1), '#2a5c42');
+          P.px(cx + hw, y, '#14301f'); P.px(cx + hw - 1, y, '#173826');
+          if (y >= y1 - 1) P.hline(cx - hw, y, hw * 2 + 1, '#173826'); // le dessous de l'étage, dans l'ombre
+        }
+        // la neige posée sur l'étage, bleutée sur sa droite
+        const yn = y0 + Math.round((y1 - y0) * 0.3), hwn = Math.round(hw0 + (hw1 - hw0) * 0.3);
+        for (let x = -hwn; x <= hwn; x++) {
+          if (r() > neige + 0.25) continue;
+          const col = x > hwn * 0.4 ? '#c8d6ea' : '#f4f8ff';
+          P.px(cx + x, yn - (Math.abs(x) < hwn * 0.6 ? 1 : 0), col); P.px(cx + x, yn, col);
+          if (r() < neige * 0.5) P.px(cx + x, yn + 1, '#dfe8f4');
+        }
+      }
+      P.px(cx, 0, '#f4f8ff');
+    });
+  }
+  function arbreNu(h, seed) { // un arbre sans feuilles (sans contour : les branches restent fines), la neige sur les branches
+    const w = Math.round(h * 0.9) | 1, r = PX.rng(seed), c = PX.canvas(w, h), P = PX.painter(c), cx = (w - 1) / 2, segs = [];
+    const branche = (x, y, a, l, ep, prof) => {
+      const x2 = x + Math.cos(a) * l, y2 = y - Math.sin(a) * l;
+      segs.push([x, y, x2, y2, ep]);
+      if (prof <= 0) return;
+      branche(x2, y2, a + 0.35 + r() * 0.3, l * (0.62 + r() * 0.12), Math.max(1, ep - 1), prof - 1);
+      branche(x2, y2, a - 0.35 - r() * 0.3, l * (0.62 + r() * 0.12), Math.max(1, ep - 1), prof - 1);
+    };
+    branche(cx, h - 1, Math.PI / 2, h * 0.38, 3, 4);
+    for (const [x1, y1, x2, y2, ep] of segs) Objets.line(P, x1, y1, x2, y2, ep > 2 ? '#3e2a1e' : ep > 1 ? '#4e3626' : '#6a4c38', ep);
+    for (const [x1, y1, x2, y2] of segs) if (r() < 0.5) { const t = 0.3 + r() * 0.5; P.px(Math.round(x1 + (x2 - x1) * t), Math.round(y1 + (y2 - y1) * t) - 1, '#f4f8ff'); }
+    return c;
+  }
+  function rocherNeige(w, h, seed) {
+    const r = PX.rng(seed);
+    return mk(w, h, (P) => {
+      const cx = w / 2;
+      P.ellipse(cx, h * 0.62, w / 2 - 1, h * 0.38, '#5e6272'); P.ellipse(cx - w * 0.12, h * 0.55, w * 0.34, h * 0.32, '#7a7e8e'); P.ellipse(cx - w * 0.2, h * 0.5, w * 0.2, h * 0.22, '#959aa8');
+      for (let k = 0; k < 4; k++) { const x = Math.round(cx + (r() - 0.3) * w * 0.6), y = Math.round(h * (0.5 + r() * 0.3)); Objets.line(P, x, y, x + 2 + r() * 3, y + 2, '#4a4e5c'); }
+      for (let x = 2; x < w - 2; x++) {
+        const top = Math.round(h * 0.62 - Math.sqrt(Math.max(0, 1 - ((x - cx) / (w / 2 - 1)) ** 2)) * h * 0.38), e = 2 + Math.round(Math.abs(Math.sin(x * 0.7 + seed)) * 2);
+        P.rect(x, top, 1, e, x > cx + w * 0.15 ? '#c8d6ea' : '#f4f8ff'); P.px(x, top, '#ffffff');
+      }
+    });
+  }
+  function lacGele(w, h) {
+    return mk(w, h, (P) => {
+      P.ellipse(w / 2, h / 2, w / 2 - 1, h / 2 - 1, '#a8c8e0'); P.ellipse(w / 2 - 2, h / 2 - 1, w / 2 - 4, h / 2 - 3, '#c4dcee');
+      for (let k = 0; k < 5; k++) P.hline(Math.round(w * (0.2 + k * 0.12)), Math.round(h * (0.3 + (k % 3) * 0.15)), Math.round(w * 0.12), '#e8f4fc');
+      Objets.line(P, w * 0.3, h * 0.6, w * 0.55, h * 0.45, '#8ab0cc'); Objets.line(P, w * 0.55, h * 0.45, w * 0.7, h * 0.58, '#8ab0cc');
+    });
+  }
+  function haie(seed) { const r = PX.rng(seed); return mk(7, 6, (P) => { P.ellipse(3, 3, 3, 2, '#2a4a2a'); P.ellipse(2, 2, 2, 1, '#3a5e34'); for (let x = 1; x < 6; x++) if (r() < 0.6) P.px(x, 1, '#eef3fb'); }); }
+  function vacheChamp(seed) { // une vache normande vue de côté, dans son champ
+    const r = PX.rng(seed);
+    return mk(18, 12, (P) => {
+      for (const x of [4, 6, 12, 14]) P.rect(x, 8, 1, 4, '#3a3236');
+      P.ellipse(9, 6, 6, 3, '#f4f2ec'); P.rect(4, 4, 11, 4, '#f4f2ec');
+      for (let k = 0; k < 3; k++) P.ellipse(6 + r.int(7), 5 + r.int(2), 1 + r.int(2), 1, '#6a4a3a');
+      P.rect(0, 3, 4, 4, '#f4f2ec'); P.rect(0, 5, 2, 2, '#e8a0a8'); P.px(1, 3, '#6a4a3a'); P.px(2, 2, '#d8d0b8'); P.px(3, 2, '#d8d0b8');
+      P.vline(16, 4, 4, '#6a4a3a'); P.hline(4, 3, 11, '#ffffff');
+    });
+  }
+
+  const TR = 128, OBJETS = new Map(), TRANCHES = new Map();
+  let largeurTr = 0;
+  function objetsTranche(k, G) {
+    if (OBJETS.has(k)) return OBJETS.get(k);
+    const r = PX.rng(9001 + k * 7919), out = [], y0 = k * TR, dyn = [];
+    const ici = (y) => { const m = melange(Math.max(0, y) / LONGUEUR); return r() < m.m ? m.b.id : m.a.id; };
+    const pose = (img, x, y, o) => out.push(Object.assign({ img, x: Math.round(x), y: Math.round(y) }, o));
+    const pick = (l) => l[Math.floor(r() * l.length)];
+    for (const c of [-1, 1]) {
+      const bord = c < 0 ? G.rx - 12 : G.rx + G.rw + 12, large = c < 0 ? bord : G.w - bord, X = (d) => bord + c * d;
+      // les réverbères des villes, au bord du trottoir
+      for (let y = y0 + 6; y < y0 + TR; y += 42) if (['ville', 'arrivee'].includes(ici(y))) out.push({ lampe: true, x: c < 0 ? G.rx - 14 : G.rx + G.rw + 14, y });
+      // des parcelles côte à côte, du bord de la route vers l'extérieur ; chacune prend son paysage
+      for (let d0 = 16; d0 < large; ) {
+        const lw = 70 + Math.floor(r() * 44), d1 = Math.min(large + 20, d0 + lw), deux = r() < 0.5;
+        for (const [py0, py1] of deux ? [[y0, y0 + TR / 2], [y0 + TR / 2, y0 + TR]] : [[y0, y0 + TR]]) {
+          const p = ici((py0 + py1) / 2), xa = Math.min(X(d0), X(d1)), xb = Math.max(X(d0), X(d1));
+          if (p === 'campagne') {
+            // un champ sous la neige, entouré de haies ; dedans, des vaches, des bottes de foin, parfois une ferme ou un moulin
+            const champ = { champ: true, x: xa + 3, y: py0 + 3, w: xb - xa - 6, h: py1 - py0 - 6, col: pick(['#eef2f8', '#e6ebf3', '#f0eee8', '#e9eef6']), sillons: r() < 0.55 };
+            out.push(champ);
+            const q = r(), cx = (xa + xb) / 2, cy = py0 + 10 + r() * (py1 - py0 - 30);
+            if (q < 0.14 && d0 > 20) pose(SP.ferme, cx, cy);
+            else if (q < 0.22 && d0 > 20) dyn.push({ img: SP.moulin[0], anime: true, x: Math.round(cx), y: Math.round(cy) });
+            else if (q < 0.5) for (let n = 1 + Math.floor(r() * 3); n > 0; n--) pose(pick(SP.vaches), xa + 12 + r() * (xb - xa - 24), py0 + 10 + r() * (py1 - py0 - 26));
+            else if (q < 0.75) for (let n = 2 + Math.floor(r() * 3); n > 0; n--) pose(SP.botte, xa + 10 + r() * (xb - xa - 20), py0 + 8 + r() * (py1 - py0 - 20));
+          } else if (p === 'ville' || p === 'arrivee') {
+            // deux rangées de maisons bien alignées le long de la route, des sapins décorés et des jardins entre elles
+            for (let y = py0 + 4; y < py1 - 8; y += 38) for (const d of [30, 92]) {
+              if (d < d0 || d >= d1 || r() < 0.12) continue;
+              pose(r() < 0.84 ? pick(SP.maison) : r() < 0.86 ? SP.sapinNoel : SP.eglise, X(d), y + r() * 3);
+            }
+            if (d0 > 120) for (let n = 0; n < 3; n++) pose(pick(SP.sapins), xa + r() * (xb - xa), py0 + r() * (py1 - py0));
+          } else if (p === 'foret') {
+            // une forêt bien serrée : des sapins enneigés et des arbres nus, un cerf de temps en temps
+            for (let y = py0; y < py1; y += 11) for (let x = xa; x < xb; x += 13) {
+              if (r() < 0.12) continue;
+              const px = x + r() * 10, py = y + r() * 9;
+              if (r() < 0.01) pose(SP.cerf, px, py); else pose(r() < 0.62 ? pick(SP.sapins) : pick(SP.arbresNus), px, py);
+            }
+          } else {
+            // la montagne : des bosquets de sapins, des rochers, parfois un chalet, un lac gelé, un bonhomme de neige
+            const dens = 0.5 + 0.5 * Math.sin(k * 1.7 + d0 * 0.05 + c);
+            if (r() < 0.12 && d0 > 30) pose(SP.lac, (xa + xb) / 2, py0 + 6 + r() * 20);
+            for (let y = py0; y < py1; y += 14) for (let x = xa; x < xb; x += 15) {
+              const px = x + r() * 12, py = y + r() * 10, q = r();
+              if (q < 0.12 + 0.42 * dens) pose(pick(SP.sapins), px, py);
+              else if (q < 0.15 + 0.42 * dens) pose(SP.rochers[r() < 0.6 ? 1 : Math.floor(r() * 3)], px, py);
+              else if (q < 0.16 + 0.42 * dens && d0 > 30) pose(r() < 0.75 ? SP.chalet : SP.bonhomme, px, py);
+            }
+          }
+        }
+        d0 = d1;
+      }
+    }
+    out.dyn = dyn;
+    OBJETS.set(k, out);
+    return out;
+  }
+  function dessinChamp(g, o, haut) {
+    const bas = haut - o.y, top = bas - o.h, x = Math.round(o.x);
+    if (bas < -10 || top > TR + 10) return;
+    g.fillStyle = o.col; g.fillRect(x, top, o.w, o.h);
+    if (o.sillons) { g.fillStyle = 'rgba(130,110,90,0.22)'; for (let y = top + 3; y < bas - 2; y += 4) g.fillRect(x + 3, y, o.w - 6, 1); }
+    // les haies du bocage, avec des trous et, de loin en loin, un vieil arbre
+    const r = PX.rng(o.x * 31 + o.y);
+    for (let k = 0, xx = x; xx < x + o.w; xx += 7, k++) {
+      if (r() > 0.22) g.drawImage(SP.haies[k % 3], xx - 3, top - 4);
+      if (r() > 0.22) g.drawImage(SP.haies[(k + 1) % 3], xx - 3, bas - 4);
+    }
+    for (let k = 0, yy = top + 3; yy < bas - 3; yy += 7, k++) {
+      if (r() > 0.22) g.drawImage(SP.haies[(k + 2) % 3], x - 3, yy - 3);
+      if (r() > 0.22) g.drawImage(SP.haies[k % 3], x + o.w - 4, yy - 3);
+    }
+    for (let xx = x + 10 + r() * 20; xx < x + o.w - 8; xx += 34 + r() * 26) { const a = SP.arbresNus[Math.floor(r() * 3)]; g.drawImage(a, Math.round(xx - a.width / 2), top - a.height + 2); }
+  }
+  function tranche(k, G) {
+    if (largeurTr !== G.w) { OBJETS.clear(); TRANCHES.clear(); largeurTr = G.w; }
+    if (TRANCHES.has(k)) return TRANCHES.get(k);
+    const c = PX.canvas(G.w, TR), g = c.getContext('2d'), haut = (k + 1) * TR;
+    const objs = [k - 1, k].flatMap((n) => objetsTranche(n, G));
+    for (const o of objs) if (o.champ) dessinChamp(g, o, haut);
+    for (const o of objs.filter((q) => !q.champ).sort((a, b) => b.y - a.y)) {
+      const y = haut - o.y;
+      if (o.lampe) {
+        g.fillStyle = '#2a2632'; g.fillRect(o.x, y - 14, 2, 14); g.fillStyle = '#ffd27a'; g.fillRect(o.x - 1, y - 17, 4, 3);
+        g.globalAlpha = 0.25; g.fillRect(o.x - 5, y - 21, 12, 10); g.globalAlpha = 1;
+        continue;
+      }
+      const w = o.img.width;
+      g.fillStyle = 'rgba(70,90,140,0.18)'; g.fillRect(o.x - (w >> 1) + 2, y - 2, w - 2, 3); // l'ombre
+      g.drawImage(o.img, o.x - (w >> 1), y - o.img.height);
+    }
+    TRANCHES.set(k, c);
+    for (const n of [...TRANCHES.keys()]) if (n < k - 5 || n > k + 6) TRANCHES.delete(n);
+    for (const n of [...OBJETS.keys()]) if (n < k - 7 || n > k + 8) OBJETS.delete(n);
+    return c;
   }
 
   // ------------------------------------------------------------ déroulement
@@ -185,7 +382,7 @@ const Bus = (() => {
     init();
     E = {
       J, d: depuis * LONGUEUR, v: 0, vies: 3, cadeaux: E ? E.cadeaux : 0, voie: 1, x: 1, invul: 1.2, t: 0, phase: 'route', obstacles: [], decor: [], messages: [],
-      prochain: depuis * LONGUEUR + 260, prochainDecor: depuis * LONGUEUR - 40, champs: [], sur: 1, gauche: 0, droite: 0, repete: 0, secousse: 0, finT: 0,
+      prochain: depuis * LONGUEUR + 260, tranchesVues: new Set(), sur: 1, reste: 0, gauche: 0, droite: 0, repete: 0, secousse: 0, finT: 0,
       evts: { mcqueen: [0.27, 0.72], martin: 0.48, station: 0.56, panneaux: [0.08, 0.3, 0.5, 0.7, 0.86] }, faits: new Set(), flash: 0,
     };
     J.vue = vue;
@@ -219,7 +416,7 @@ const Bus = (() => {
     return { w, h, rx, rw: LANE * NL, busY: h - 54, laneX: (k) => rx + LANE * k + LANE / 2 };
   }
   function obstacleDe(f) {
-    const p = paysage(f).id, r = Math.random();
+    const p = tirage(f).id, r = Math.random();
     if (p === 'montagne') return r < 0.55 ? 'voiture' : r < 0.75 ? 'chasseNeige' : r < 0.9 ? 'travaux' : 'nid';
     if (p === 'foret') return r < 0.5 ? 'voiture' : r < 0.68 ? 'cerf' : r < 0.84 ? 'camion' : 'travaux';
     if (p === 'campagne') return r < 0.38 ? 'voiture' : r < 0.6 ? 'tracteur' : r < 0.76 ? 'vache' : r < 0.9 ? 'camion' : 'nid';
@@ -234,62 +431,40 @@ const Bus = (() => {
   function generer() {
     const f = E.d / LONGUEUR;
     // les obstacles : une « file sûre » qui ne bouge que d'une file à la fois (et avec assez de place pour changer),
-    // jamais d'obstacle dessus ; une ou deux autres files bloquées ; de plus en plus serré
+    // jamais d'obstacle dessus ; quand elle bouge, l'ancienne file sûre est bouchée en premier (il faut suivre) ;
+    // une ou deux files bloquées ; l'écart entre deux rangées suit la vitesse, pour un temps de réaction qui baisse doucement
     while (E.prochain < E.d + 420) {
-      const y = E.prochain, fy = y / LONGUEUR;
-      let ecart = Math.max(108, 175 - 70 * fy) + Math.random() * 45;
+      const y = E.prochain, fy = y / LONGUEUR, v = DIFF.vitesse[0] + (DIFF.vitesse[1] - DIFF.vitesse[0]) * fy;
+      let ecart = v * (DIFF.reaction[0] + (DIFF.reaction[1] - DIFF.reaction[0]) * fy) * (0.92 + Math.random() * 0.22);
       if (fy < 0.94) {
-        if (Math.random() < 0.45) { const n = E.sur + (Math.random() < 0.5 ? -1 : 1); if (n >= 0 && n < NL) { E.sur = n; ecart += 80; } }
-        const autres = [0, 1, 2].filter((v) => v !== E.sur).sort(() => Math.random() - 0.5);
-        const deux = fy > 0.12 && Math.random() < 0.26 + fy * 0.34;
+        const avant = E.sur;
+        E.reste++;
+        if (E.reste > DIFF.resteMax || Math.random() < DIFF.bouge) {
+          E.sur = E.sur === 1 ? (Math.random() < 0.5 ? 0 : 2) : 1;
+          E.reste = 0; ecart += v * DIFF.decale;
+        }
+        const autres = [0, 1, 2].filter((k) => k !== E.sur).sort(() => Math.random() - 0.5).sort((p, q) => (q === avant) - (p === avant));
+        const deux = Math.random() < DIFF.deux[0] + (DIFF.deux[1] - DIFF.deux[0]) * fy;
         const poses = autres.slice(0, deux ? 2 : 1).map((v) => { const o = creerObstacle(obstacleDe(fy), v, y + Math.random() * 14); E.obstacles.push(o); return o; });
         // une voiture seule peut déboîter vers l'autre file bloquée (jamais vers la file sûre)
         const o = poses[0], cible = autres[1];
-        if (!deux && o.type === 'voiture' && fy > 0.15 && Math.abs(cible - o.voie) === 1 && Math.random() < 0.35 + fy * 0.3) o.deboite = { vers: cible, t: 0 };
+        if (!deux && o.type === 'voiture' && Math.abs(cible - o.voie) === 1 && Math.random() < 0.3 + fy * 0.35) o.deboite = { vers: cible, t: 0 };
         if (Math.random() < 0.18) E.obstacles.push({ type: E.vies < 3 && Math.random() < 0.35 ? 'coeur' : 'cadeau', voie: E.sur, y: y + 6, vit: 0, img: null });
       }
       E.prochain += ecart;
     }
-    // le décor des bas-côtés
+    // le décor des bas-côtés est dessiné par tranches (voir tranche) ; seuls les moulins, qui tournent, sont à part
     const G = geometrie(E.J.V);
-    while (E.prochainDecor < E.d + 420) {
-      const y = E.prochainDecor, p = paysage(y / LONGUEUR).id;
-      // la campagne vendéenne : des champs bordés de haies (le bocage), sous le reste du décor
-      if (p === 'campagne' && Math.random() < 0.5) for (const cote of [-1, 1]) {
-        const cw = 50 + Math.random() * 70, ch = 40 + Math.random() * 50, cx0 = cote < 0 ? G.rx - 30 - cw - Math.random() * 60 : G.rx + G.rw + 30 + Math.random() * 60;
-        E.champs.push({ x: cx0, y, w: cw, h: ch, col: ['#7a8a4a', '#9a8a5a', '#5a7a3e', '#8a9a5a', '#b8a868'][Math.floor(Math.random() * 5)], sillons: Math.random() < 0.5 });
-      }
-      // dans les petites villes : deux rangées de maisons bien alignées le long de la route, des sapins décorés entre elles
-      if (p === 'ville' || p === 'arrivee') {
-        for (const cote of [-1, 1]) for (const loin of [42, 104 + Math.random() * 16]) {
-          if (Math.random() < 0.15) continue;
-          const img = Math.random() < 0.82 ? SP.maison[Math.floor(Math.random() * 3)] : Math.random() < 0.6 ? SP.sapinNoel : SP.eglise;
-          E.decor.push({ img, x: cote < 0 ? G.rx - loin : G.rx + G.rw + loin, y: y + Math.random() * 4 });
-        }
-        for (const cote of [-1, 1]) E.decor.push({ img: null, lampe: true, x: cote < 0 ? G.rx - 14 : G.rx + G.rw + 14, y: y + 18 });
-        E.prochainDecor += 38;
-        continue;
-      }
-      for (const cote of [-1, 1]) for (let n = 0; n < (p === 'foret' ? 2 : 1); n++) {
-        const loin = (p === 'foret' ? 8 : 24) + Math.random() * (G.rx - 34);
-        const x = cote < 0 ? G.rx - loin : G.rx + G.rw + loin;
-        const choix = {
-          montagne: () => { const q = Math.random(); return q < 0.7 ? SP.sapin[1 + (Math.random() < 0.5 ? 1 : 0)] : q < 0.82 ? SP.rocher : q < 0.94 ? SP.chalet : SP.bonhomme; },
-          foret: () => (Math.random() < 0.55 ? SP.arbre[Math.random() < 0.5 ? 0 : 1] : SP.sapin[Math.random() < 0.5 ? 0 : 1]),
-          campagne: () => { const q = Math.random(); return q < 0.3 ? SP.botte : q < 0.5 ? SP.vache : q < 0.62 ? SP.moulin : q < 0.78 ? SP.ferme : SP.arbre[0]; },
-          ville: () => (Math.random() < 0.7 ? SP.maison[Math.floor(Math.random() * 3)] : Math.random() < 0.6 ? SP.sapinNoel : SP.eglise),
-          arrivee: () => (Math.random() < 0.8 ? SP.maison[Math.floor(Math.random() * 3)] : SP.sapinNoel),
-        }[p]();
-        E.decor.push({ img: choix, x, y: y + Math.random() * 30, anime: choix === SP.moulin });
-        if (p === 'ville' || p === 'arrivee') E.decor.push({ img: null, lampe: true, x: cote < 0 ? G.rx - 14 : G.rx + G.rw + 14, y: y + 40 });
-      }
-      E.prochainDecor += { montagne: 38, foret: 30, campagne: 44, ville: 46, arrivee: 46 }[p] + Math.random() * 20;
+    for (let k = Math.max(0, Math.floor((E.d - 200) / TR)); k <= Math.floor((E.d + 420) / TR); k++) {
+      if (E.tranchesVues.has(k)) continue;
+      E.tranchesVues.add(k);
+      for (const o of objetsTranche(k, G).dyn) E.decor.push(Object.assign({}, o));
     }
     // les clins d'œil : panneaux kilométriques, la voiture de course, la dépanneuse, la station-service
     const evt = (cle, fx, faire) => { if (!E.faits.has(cle) && f >= fx) { E.faits.add(cle); faire(); } };
     E.evts.panneaux.forEach((fx, k) => evt('p' + k, fx - 0.03, () => E.decor.push({ img: SP.panneauRoute(`MONTAIGU ${Math.round(KM * (1 - fx))}`), x: G.rx + G.rw + 22, y: fx * LONGUEUR })));
-    evt('sortie', -1, () => E.decor.push({ img: SP.entreeVille('ARENDELLE'), x: G.rx + G.rw + 24, y: E.d + 120, barre: true }));
-    E.evts.mcqueen.forEach((fx, k) => evt('m' + k, fx, () => { E.course = { y: E.d - 80, vit: 0 }; message('Ka-chow !', 'course'); Musique.vroum(); }));
+    if (E.d < 300) evt('sortie', -1, () => E.decor.push({ img: SP.entreeVille('ARENDELLE'), x: G.rx + G.rw + 24, y: E.d + 120, barre: true }));
+    E.evts.mcqueen.forEach((fx, k) => f < fx + 0.02 && evt('m' + k, fx, () => { E.course = { y: E.d - 80, vit: 0 }; message('Ka-chow !', 'course'); Musique.vroum(); }));
     evt('martin', E.evts.martin - 0.03, () => E.decor.push({ img: SP.martin, x: G.rx + G.rw + 16, y: E.evts.martin * LONGUEUR, martin: true }));
     evt('station', E.evts.station - 0.03, () => E.decor.push({ img: SP.station, x: G.rx - 46, y: E.evts.station * LONGUEUR }));
     evt('montaigu', 0.9, () => { E.decor.push({ img: SP.entreeVille('MONTAIGU'), x: G.rx + G.rw + 24, y: 0.93 * LONGUEUR }); E.decor.push({ img: SP.arret, x: G.rx + G.rw + 20, y: LONGUEUR + 200, arret: true }); });
@@ -314,7 +489,7 @@ const Bus = (() => {
     }
     E.x += (E.voie - E.x) * Math.min(1, dt * 14);
     // la vitesse : de plus en plus vite, puis on ralentit pour l'arrivée
-    const cible = E.phase === 'route' ? 140 + 115 * f : 0;
+    const cible = E.phase === 'route' ? DIFF.vitesse[0] + (DIFF.vitesse[1] - DIFF.vitesse[0]) * f : 0;
     E.v += (cible - E.v) * Math.min(1, dt * (E.phase === 'route' ? 1.5 : 1.1));
     E.d += E.v * dt;
     if (E.invul > 0) E.invul -= dt;
@@ -352,7 +527,6 @@ const Bus = (() => {
     }
     E.obstacles = E.obstacles.filter((o) => o.y > E.d - 120 && !(o.pris && (o.type === 'cadeau' || o.type === 'coeur')));
     E.decor = E.decor.filter((o) => o.y > E.d - 160);
-    E.champs = E.champs.filter((o) => o.y > E.d - 200);
     majHudLeger(f);
   }
   let dernierKm = -1;
@@ -365,50 +539,46 @@ const Bus = (() => {
     const sy = (yMonde) => Math.round(busY - (yMonde - E.d)); // position à l'écran d'un point de la route
     const dx = E.secousse > 0 ? Math.round((Math.random() - 0.5) * 4) : 0;
     g.save(); g.translate(dx, 0);
-    // le sol, par bandes : chaque bande prend le paysage de son endroit du trajet
+    // le sol enneigé (le décor des bas-côtés vient après la route et ses trottoirs)
+    const ici = (y) => dominant(Math.max(0, E.d + (busY - y)) / LONGUEUR).id; // le paysage à cette hauteur de l'écran
     for (let y = -8; y < h + 8; y += 8) {
-      const ym = E.d + (busY - y), p = paysage(Math.max(0, ym) / LONGUEUR).id, tuile = sol(p, w);
-      const ty = ((Math.floor(ym) % 256) + 256) % 256;
-      g.drawImage(tuile, 0, Math.max(0, 255 - ty - 7), w, 8, 0, y, w, 8);
+      const ym = E.d + (busY - y);
+      g.drawImage(sol(w), 0, Math.max(0, 255 - (((Math.floor(ym) % 256) + 256) % 256) - 7), w, 8, 0, y, w, 8);
     }
-    // les champs du bocage
-    for (const c of E.champs) {
-      const y = sy(c.y);
-      if (y < -10 || y - c.h > h + 10) continue;
-      g.fillStyle = '#3a5a2e'; g.fillRect(Math.round(c.x) - 2, y - c.h - 2, Math.round(c.w) + 4, c.h + 4);
-      g.fillStyle = c.col; g.fillRect(Math.round(c.x), y - c.h, Math.round(c.w), c.h);
-      g.fillStyle = 'rgba(40,30,20,0.18)'; if (c.sillons) for (let yy = y - c.h + 2; yy < y; yy += 4) g.fillRect(Math.round(c.x), yy, Math.round(c.w), 1);
-      g.fillStyle = 'rgba(238,243,251,0.45)'; for (let k = 0; k < 6; k++) g.fillRect(Math.round(c.x + (k * 37) % c.w), y - c.h + ((k * 23) % c.h), 6, 2);
-      g.fillStyle = '#2f4a26'; for (let x = c.x; x < c.x + c.w; x += 5) { g.fillRect(Math.round(x), y - c.h - 3, 3, 3); g.fillRect(Math.round(x), y, 3, 2); }
+    // la route : bas-côtés (leur couleur suit le paysage, en fondu), bitume, lignes
+    const BAS_COTE = { montagne: '#dfe6f2', foret: '#dfe6f2', campagne: '#d2d8e4', ville: '#9a9eac', arrivee: '#9a9eac' };
+    for (let y = -8; y < h + 8; y += 8) {
+      const x = melange(Math.max(0, E.d + (busY - y)) / LONGUEUR);
+      g.fillStyle = PX.mix(BAS_COTE[x.a.id], BAS_COTE[x.b.id], x.m); g.fillRect(rx - 10, y, 10, 8); g.fillRect(rx + rw, y, 10, 8);
     }
-    // la route : bas-côtés, bitume, lignes
-    const pAct = paysage(f).id, neigeuse = pAct === 'montagne' || pAct === 'foret';
-    g.fillStyle = pAct === 'ville' || pAct === 'arrivee' ? '#9a9eac' : neigeuse ? '#dfe6f2' : '#8a8a74'; g.fillRect(rx - 10, 0, 10, h); g.fillRect(rx + rw, 0, 10, h);
     g.fillStyle = '#4a4a58'; g.fillRect(rx, 0, rw, h);
     g.fillStyle = '#545464'; for (let k = 0; k < 40; k++) g.fillRect(rx + ((k * 37) % rw), ((k * 53 + Math.floor(E.d)) % h), 2, 1);
     g.fillStyle = '#f4f4f8'; g.fillRect(rx + 1, 0, 1, h); g.fillRect(rx + rw - 2, 0, 1, h);
     for (let k = 1; k < NL; k++) for (let y = -24 + (Math.floor(E.d) % 24); y < h; y += 24) g.fillRect(rx + k * LANE, y, 1, 12);
-    if (neigeuse) { g.fillStyle = '#eef3fb'; for (let y = -16 + (Math.floor(E.d) % 16); y < h; y += 16) { g.fillRect(rx, y, 3, 6); g.fillRect(rx + rw - 3, y + 8, 3, 5); } }
+    // ce qui borde la route dépend de l'endroit du trajet (et pas de l'endroit où est le bus) : ça arrive et ça s'en va avec le paysage
     const defile = (pas) => -pas + (Math.floor(E.d) % pas);
-    if (pAct === 'montagne') { // jalons à neige rouges et blancs
-      for (let y = defile(48); y < h + 48; y += 48) for (const x of [rx - 8, rx + rw + 6]) { g.fillStyle = '#1d1626'; g.fillRect(x - 1, y - 13, 4, 14); for (let k = 0; k < 4; k++) { g.fillStyle = k % 2 ? '#f4f4f8' : '#d8323a'; g.fillRect(x, y - 12 + k * 3, 2, 3); } }
+    const enNeige = (p) => p === 'montagne' || p === 'foret', enVille = (p) => p === 'ville' || p === 'arrivee';
+    g.fillStyle = '#eef3fb';
+    for (let y = defile(16); y < h; y += 16) if (enNeige(ici(y))) { g.fillRect(rx, y, 3, 6); g.fillRect(rx + rw - 3, y + 8, 3, 5); } // la neige sur les bords
+    for (let y = defile(48); y < h + 48; y += 48) if (ici(y) === 'montagne') { // jalons à neige rouges et blancs
+      for (const x of [rx - 8, rx + rw + 6]) { g.fillStyle = '#1d1626'; g.fillRect(x - 1, y - 13, 4, 14); for (let k = 0; k < 4; k++) { g.fillStyle = k % 2 ? '#f4f4f8' : '#d8323a'; g.fillRect(x, y - 12 + k * 3, 2, 3); } }
     }
-    if (pAct === 'montagne' || pAct === 'foret') { // la glissière de sécurité
-      g.fillStyle = '#8a92a4'; g.fillRect(rx + rw + 11, 0, 2, h); g.fillStyle = '#c8d0dc'; g.fillRect(rx + rw + 11, 0, 1, h);
-      g.fillStyle = '#5a6278'; for (let y = defile(20); y < h + 20; y += 20) g.fillRect(rx + rw + 12, y, 2, 4);
+    for (let y = -8; y < h + 8; y += 8) if (enNeige(ici(y))) { // la glissière de sécurité
+      g.fillStyle = '#8a92a4'; g.fillRect(rx + rw + 11, y, 2, 8); g.fillStyle = '#c8d0dc'; g.fillRect(rx + rw + 11, y, 1, 8);
     }
-    if (pAct === 'campagne') { // poteaux télégraphiques et leurs fils
-      const xs = rx - 22;
-      g.fillStyle = 'rgba(30,30,40,0.6)'; g.fillRect(xs + 1, 0, 1, h); g.fillRect(xs + 5, 0, 1, h);
-      for (let y = defile(90); y < h + 90; y += 90) { g.fillStyle = '#5a3a22'; g.fillRect(xs, y - 20, 3, 20); g.fillRect(xs - 2, y - 18, 9, 2); g.fillStyle = 'rgba(20,10,40,0.25)'; g.fillRect(xs + 3, y - 2, 8, 2); }
+    g.fillStyle = '#5a6278'; for (let y = defile(20); y < h + 20; y += 20) if (enNeige(ici(y))) g.fillRect(rx + rw + 12, y, 2, 4);
+    const xs = rx - 22; // les poteaux télégraphiques de la campagne et leurs fils
+    g.fillStyle = 'rgba(30,30,40,0.6)'; for (let y = -8; y < h + 8; y += 8) if (ici(y) === 'campagne') { g.fillRect(xs + 1, y, 1, 8); g.fillRect(xs + 5, y, 1, 8); }
+    for (let y = defile(90); y < h + 90; y += 90) if (ici(y - 10) === 'campagne') { g.fillStyle = '#5a3a22'; g.fillRect(xs, y - 20, 3, 20); g.fillRect(xs - 2, y - 18, 9, 2); g.fillStyle = 'rgba(20,10,40,0.25)'; g.fillRect(xs + 3, y - 2, 8, 2); }
+    for (let y = -8; y < h + 8; y += 8) if (enVille(ici(y))) { // trottoirs et bordures des villes
+      g.fillStyle = '#b8bcc8'; g.fillRect(rx - 22, y, 12, 8); g.fillRect(rx + rw + 10, y, 12, 8);
+      g.fillStyle = '#e8ecf4'; g.fillRect(rx - 11, y, 1, 8); g.fillRect(rx + rw + 10, y, 1, 8);
     }
-    if (pAct === 'ville' || pAct === 'arrivee') { // trottoirs, bordures, passages piétons
-      g.fillStyle = '#b8bcc8'; g.fillRect(rx - 22, 0, 12, h); g.fillRect(rx + rw + 10, 0, 12, h);
-      g.fillStyle = '#e8ecf4'; g.fillRect(rx - 11, 0, 1, h); g.fillRect(rx + rw + 10, 0, 1, h);
-      g.fillStyle = '#a4a8b4'; for (let y = defile(12); y < h + 12; y += 12) { g.fillRect(rx - 22, y, 12, 1); g.fillRect(rx + rw + 10, y, 12, 1); }
-      g.fillStyle = '#f4f4f8'; for (let y = defile(420); y < h + 420; y += 420) for (let x = rx + 3; x < rx + rw - 3; x += 7) g.fillRect(x, y, 4, 14);
-    }
-    // le décor des bas-côtés (du plus loin au plus proche)
+    g.fillStyle = '#a4a8b4'; for (let y = defile(12); y < h + 12; y += 12) if (enVille(ici(y))) { g.fillRect(rx - 22, y, 12, 1); g.fillRect(rx + rw + 10, y, 12, 1); }
+    g.fillStyle = '#f4f4f8'; for (let y = defile(420); y < h + 420; y += 420) if (enVille(ici(y))) for (let x = rx + 3; x < rx + rw - 3; x += 7) g.fillRect(x, y, 4, 14); // passages piétons
+    // le décor des bas-côtés, tranche par tranche (rien ne déborde sur la route), puis les panneaux, la station…
+    for (let k = Math.floor((E.d - (h - busY) - 40) / TR); k <= Math.floor((E.d + busY + 40) / TR); k++) if (k >= 0) g.drawImage(tranche(k, G), 0, Math.round(busY - ((k + 1) * TR - E.d)));
+    // les éléments à part (du plus loin au plus proche)
     const decor = E.decor.slice().sort((a, b) => b.y - a.y);
     for (const o of decor) {
       const y = sy(o.y);
@@ -447,11 +617,12 @@ const Bus = (() => {
     if (!(E.invul > 0 && E.phase === 'route' && Math.floor(E.t * 12) % 2)) g.drawImage(SP.bus, bx, busY);
     if (E.v > 150) { g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(bx + 3, busY + 47, 1, 4); g.fillRect(bx + 16, busY + 47, 1, 4); }
     // guirlandes lumineuses au-dessus des rues des petites villes
-    if (pAct === 'ville' || pAct === 'arrivee') for (let y = -40 + (Math.floor(E.d) % 120); y < h; y += 120) {
+    for (let y = -40 + (Math.floor(E.d) % 120); y < h; y += 120) if (enVille(ici(y))) {
       for (let x = rx - 12; x < rx + rw + 12; x += 2) { const yy = y + Math.round(Math.sin((x - rx + 12) / (rw + 24) * Math.PI) * 6); g.fillStyle = '#2a2632'; g.fillRect(x, yy, 2, 1); if ((x >> 1) % 3 === 0) { g.fillStyle = ['#ff6a5a', '#ffd24a', '#7ad0ff', '#7aff9a'][(x >> 1) % 4]; g.fillRect(x, yy + 1, 2, 2); } }
     }
-    // la neige qui tombe (plus fort dans les montagnes)
-    const n = pAct === 'montagne' ? 70 : pAct === 'campagne' ? 25 : 45;
+    // la neige qui tombe (plus fort dans les montagnes ; ça change doucement d'un paysage à l'autre)
+    const FLOCONS = { montagne: 70, foret: 45, campagne: 25, ville: 45, arrivee: 45 }, ml = melange(f);
+    const n = Math.round(FLOCONS[ml.a.id] * (1 - ml.m) + FLOCONS[ml.b.id] * ml.m);
     g.fillStyle = '#f4f6ff';
     for (let k = 0; k < n; k++) { const x = Math.round((k * 97.3 + Math.sin(t + k) * 6) % w), y = Math.round((k * 53.7 + t * (30 + (k % 4) * 10) + E.d * 0.6) % h); g.fillRect(x, y, k % 4 ? 1 : 2, k % 4 ? 1 : 2); }
     if (E.flash > 0) { g.fillStyle = `rgba(255,80,80,${(E.flash * 1.2).toFixed(2)})`; g.fillRect(0, 0, w, h); }
@@ -575,35 +746,81 @@ const Bus = (() => {
     });
   }
 
-  // ------------------------------------------------------------ la victoire, puis Montaigu
+  // ------------------------------------------------------------ l'arrivée à Montaigu
+  // au bout du trajet, on descend du car ; Flash McQueen (la voiture de course rouge de la route) est garé
+  // un peu plus loin : c'est lui qui remet le quatrième indice. Puis Linguini sort en courant du restaurant :
+  // Loane a appelé, il faut un caramel au beurre salé, le chef attend Ismae en cuisine.
   function victoire(J) {
-    Q.bus = 'victoire';
-    Musique.victoire();
-    Indices.gagner(3, () => {
-      Q.bus = 'gagne';
-      J.cinematique = false;
-      J.allerA('montaigu', 'bus');
-    });
+    Q.bus = 'arrive';
+    Musique.victoireCourte();
+    J.allerA('montaigu', 'bus');
+  }
+  function voitureFlash(C, x, y) {
+    const imgs = { [-1]: Montaigu.flash(-1), 1: Montaigu.flash(1) };
+    const f = { x, y, sens: -1, phares: 0, visible: true, get sortY() { return this.y; },
+      update() {}, draw(g, J) {
+        if (!this.visible) return;
+        const s = imgs[this.sens], dy = this.roule ? Math.round(Math.sin((J.t || 0) * 30) * 0.6) : 0;
+        Entites.ombre(g, this.x, this.y, 24);
+        g.drawImage(s.img, Math.round(this.x - s.ax), Math.round(this.y - s.ay + dy));
+        if (this.phares > 0 && Math.floor(this.phares * 6) % 2) { // l'appel de phares
+          const px = Math.round(this.x + (this.sens < 0 ? -s.ax - 4 : s.ax + 1));
+          g.fillStyle = 'rgba(255,246,192,0.75)'; g.fillRect(px, Math.round(this.y - 12), 4, 3);
+        }
+      } };
+    C.dynamiques.push(f);
+    return f;
   }
   function arriveeMontaigu(J) {
-    const C = J.carte, p = J.joueur, G = J.georges, B = CONFIG.route;
+    const C = J.carte, p = J.joueur, G = J.georges, B = CONFIG.route, S = C.montaigu, lin = C.linguini;
     Musique.morceau('montaigu');
-    if (C.busFait || Q.caramel === 'gagne') { C.busFait = true; return; }
-    C.busFait = true;
-    const S = C.montaigu, bus = objetBus(C, S.bus.x, S.bus.y);
+    // Linguini attend devant le restaurant (avec une flèche quand il sort de l'écran), jusqu'à ce qu'Ismae entre
+    const attend = () => { lin.visible = Q.caramel === 'aVenir' && Q.linguini === 'attend'; lin.x = S.porteResto.x; lin.y = S.porteResto.y; lin.dir = 'down'; J.reperes = lin.visible ? [lin] : []; };
+    attend();
+    const parBus = Math.hypot(p.x - C.arrivees.bus.x, p.y - C.arrivees.bus.y) < 2;
+    if (!parBus || Q.caramel !== 'aVenir' || (Q.bus === 'gagne' && Q.linguini === 'attend')) return;
+    const bus = objetBus(C, S.bus.x, S.bus.y), flash = Q.bus !== 'gagne' ? voitureFlash(C, S.flash.x, S.flash.y) : null;
+    Entites.portraits.mcqueen = Montaigu.portraitFlash();
     bus.porte = 1;
     p.visible = false; G.visible = false; G.mode = 'script';
     J.cinematique = true;
-    J.jouerScript([
+    let indice = false;
+    const etapes = [
       { attendre: 0.6 },
       { faire: () => { p.visible = true; G.visible = true; p.x = bus.xPorte; p.y = bus.y + 4; G.x = p.x + 6; G.y = p.y + 4; p.allerVers([{ x: p.x - 10, y: p.y + 18 }], 40); G.allerVers([{ x: p.x + 8, y: p.y + 22 }], 40); } },
       { jusqua: () => !p.chemin },
       { faire: () => { G.reprendreSuivi(J); bus.porte = 0; Musique.klaxon(); p.dir = 'up'; } },
-      { jusqua: (j) => { bus.x += 80 * j.dt; return bus.x > S.bus.x + 420; } },
+      { jusqua: (j) => { bus.x += 80 * j.dt; return bus.x > S.bus.x + 440; } },
       { faire: () => { bus.visible = false; p.dir = 'down'; } },
       { dire: B.arrivee },
-    ], () => {
+    ];
+    if (flash) etapes.push(
+      { faire: () => { Musique.klaxon(); flash.phares = 1.4; p.dir = 'right'; } },
+      { jusqua: (j) => (flash.phares -= j.dt) <= 0 },
+      { dire: B.flash },
+      { faire: () => { Musique.victoire(); Indices.gagner(3, () => { indice = true; }); } },
+      { jusqua: () => indice },
+      { faire: () => { Q.bus = 'gagne'; } },
+      { dire: B.flashFin },
+      { faire: () => { flash.sens = 1; flash.roule = true; Musique.vroum(); } },
+      { jusqua: (j) => { flash.x += 220 * j.dt; return flash.x > S.flash.x + 640; } },
+      { faire: () => { flash.visible = false; } },
+    );
+    // Linguini sort du restaurant et vient en courant
+    etapes.push(
+      { faire: () => { lin.visible = true; lin.x = S.porteResto.x; lin.y = S.porteResto.y; lin.allerVers([{ x: S.porteResto.x, y: 262 }, { x: p.x + 28, y: 262 }, { x: p.x + 26, y: p.y - 2 }], 110); lin.dire('!', 1.5); } },
+      { attendre: 0.4 },
+      { faire: () => { p.dir = 'right'; } },
+      { jusqua: () => !lin.chemin },
+      { faire: () => { lin.dir = 'left'; } },
+      { dire: B.linguini },
+      { faire: () => { lin.allerVers([{ x: p.x + 28, y: 262 }, { x: S.porteResto.x, y: 262 }, { x: S.porteResto.x, y: S.porteResto.y }], 110); } },
+      { attendre: 0.6 },
+    );
+    J.jouerScript(etapes, () => {
       J.cinematique = false;
+      Q.linguini = 'attend';
+      J.reperes = [lin];
       Indices.suite(CONFIG.caramel.annonce);
     });
   }

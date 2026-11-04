@@ -22,6 +22,9 @@ const Batiments = (() => {
   const FRAME = { a: '#ece3d2', b: '#c4b9a6' };
   const ZINC = { hi: '#b3bed0', a: '#8e9ab2', b: '#76829c', c: '#5f6b86', d: '#48516b', e: '#323952' };
   const TUILE = { hi: '#d98a62', a: '#b9654a', b: '#9a4d3b', c: '#7a3a31', d: '#55272a' };
+  // les ardoises (toits de Vendée) et le granit des chaînes d'angle et des encadrements de fenêtres
+  const ARDOISE = { hi: '#8a93a8', a: '#4e566c', b: '#3c4358', c: '#444b60', d: '#2a3042' };
+  const GRANIT = { hi: '#d4cdbd', a: '#b0a896', b: '#8e8676', joint: '#7a7262' };
 
   // ------------------------------------------------------------ éléments
   function stoneWall(P, x, y, w, h, pal, r, plaster) {
@@ -513,14 +516,19 @@ const Batiments = (() => {
       bays.forEach((bx, i) => { if (nb <= 4 || i % 2 === 0 || i === nb - 1) dormer(P, bx, y + 1, MANS - 1, nightLit(0.35), pal); });
       y += MANS;
     } else {
-      // vieux toit en tuiles plates
+      // vieux toit en tuiles plates (ou en ardoises : o.ardoise ; avec de la neige dessus : o.neige)
+      const T = o.ardoise ? ARDOISE : TUILE;
       for (let j = 0; j < TILE; j++) {
-        const col = j < 2 ? TUILE.hi : j % 3 === 0 ? TUILE.c : TUILE.a;
+        const col = j < 2 ? T.hi : j % 3 === 0 ? T.c : T.a;
         P.hline(0, y + j, W, col);
-        if (j % 3 === 1) for (let x = (j % 6 === 1 ? 0 : 2); x < W; x += 4) P.px(x, y + j, TUILE.b);
+        if (j % 3 === 1) for (let x = (j % 6 === 1 ? 0 : 2); x < W; x += 4) P.px(x, y + j, T.b);
       }
-      P.hline(0, y, W, TUILE.d);
-      P.dither(0, y + TILE - 6, W, 6, TUILE.c, 6);
+      P.hline(0, y, W, T.d);
+      P.dither(0, y + TILE - 6, W, 6, T.c, 6);
+      if (o.neige) for (let x = 0; x < W; x++) {
+        const e = 3 + Math.round(Math.abs(Math.sin(x * 0.19 + (o.seed || 0))) * 3 + Math.sin(x * 0.07 + (o.seed || 0)) * 1.5);
+        P.rect(x, y, 1, e, '#eef3fb'); P.px(x, y, '#ffffff'); P.px(x, y + e, '#c8d4e6');
+      }
       bays.forEach((bx, i) => { if (i % 2 === 1) dormer(P, bx, y + 3, TILE - 4, nightLit(0.4), pal); });
       y += TILE;
     }
@@ -545,6 +553,11 @@ const Batiments = (() => {
     stoneWall(P, 0, top, W, floorsH, pal, r, old);
     P.dither(0, top, W, 3, '#2a1e3a', 6);
     P.dither(Math.floor(W * 0.72), top, W - Math.floor(W * 0.72), floorsH, pal.joint, 4);
+    // o.granit : les chaînes d'angle en granit, une pierre longue, une pierre courte (et les encadrements, plus bas)
+    if (o.granit) for (let yy = top, k = 0; yy < top + floorsH; yy += 6, k++) {
+      const l = k % 2 ? 4 : 7;
+      for (const gx of [0, W - l]) { P.rect(gx, yy, l, 5, GRANIT.a); P.hline(gx, yy, l, GRANIT.hi); P.hline(gx, yy + 5, l, GRANIT.joint); }
+    }
     const voletCol = o.volets || null;
     for (let f = 0; f < fh.length; f++) {
       const level = floors - f;
@@ -554,11 +567,16 @@ const Batiments = (() => {
       const balconFilant = !old && (level === 2 || level === floors);
       bays.forEach((bx) => {
         const wx = bx - 4, wy = fy + 4;
-        // linteau + clé
-        P.rect(wx - 1, wy - 2, 11, 2, pal.hi);
-        P.hline(wx - 1, wy - 1, 11, pal.joint);
-        P.rect(bx, wy - 3, 1, 3, pal.hi);
-        P.px(bx + 1, wy - 2, pal.mid);
+        if (o.granit) { // l'encadrement de granit, plus clair en haut et à gauche
+          P.rect(wx - 2, wy - 3, 13, wh + 4, GRANIT.a); P.hline(wx - 2, wy - 3, 13, GRANIT.hi); P.vline(wx - 2, wy - 3, wh + 4, GRANIT.hi);
+          P.vline(wx + 10, wy - 2, wh + 3, GRANIT.b); P.rect(bx - 1, wy - 3, 3, 2, GRANIT.hi);
+        } else {
+          // linteau + clé
+          P.rect(wx - 1, wy - 2, 11, 2, pal.hi);
+          P.hline(wx - 1, wy - 1, 11, pal.joint);
+          P.rect(bx, wy - 3, 1, 3, pal.hi);
+          P.px(bx + 1, wy - 2, pal.mid);
+        }
         if (level === 2 && !old) { P.rect(wx - 2, wy - 4, 13, 1, pal.hi); P.hline(wx - 2, wy - 3, 13, pal.mid); }
         const lit = nightLit(0.3);
         windowFr(P, wx, wy, 9, wh, lit);
@@ -605,5 +623,5 @@ const Batiments = (() => {
     return { img: c, w: W, h: H, roofY: CH, lights: out.lights, smoke: out.smoke, door: out.door, fenetres: out.fenetres, ampoules: out.ampoules };
   }
 
-  return { building, carrefourLogo, affiche, texte, windowFr, railing, stoneWall, STONE, ZINC, GLASS, LIT, IRON, FRAME, TUILE, chimney, dormer, flowerBox, shutters, awning };
+  return { building, carrefourLogo, affiche, texte, windowFr, railing, stoneWall, STONE, ZINC, GLASS, LIT, IRON, FRAME, TUILE, ARDOISE, GRANIT, chimney, dormer, flowerBox, shutters, awning };
 })();

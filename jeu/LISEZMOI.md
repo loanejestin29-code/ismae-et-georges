@@ -145,35 +145,50 @@ image ni aucun son externe.
   sur l'iPhone : on glisse à gauche, le bus va d'une file à gauche ; à droite, d'une file à droite ;
   sans glisser, il reste dans sa file (un long glissement change de deux files). Au clavier : les
   flèches ou A / D. Voitures, camions, tracteurs, chasse-neige, travaux, nids-de-poule, cerfs et
-  vaches à éviter, de plus en plus serrés ; certaines voitures mettent leur clignotant et déboîtent
-  devant le bus. Il reste toujours une file libre. Trois vies (♥), la vitesse augmente ; en panne, on repart aussitôt du
-  début du paysage en cours. Des cadeaux à ramasser, et parfois un cœur qui rend une vie.
+  vaches à éviter ; certaines voitures mettent leur clignotant et déboîtent devant le bus. C'est
+  difficile du début à la fin : la file libre change très souvent (jamais plus de deux rangées
+  d'obstacles au même endroit), on ne peut donc pas rester dans sa file ; puis la vitesse augmente
+  peu à peu, mais il reste toujours assez de temps pour réagir (réglages : `DIFF`, en haut de
+  `js/bus.js`). Trois vies (♥) ; en panne, on repart aussitôt du début du paysage en cours. Des
+  cadeaux à ramasser, et parfois un cœur qui rend une vie.
 - **Les paysages** : montagnes enneigées (jalons à neige, chalets), forêt, campagne (le bocage, les
-  moulins, les vaches, les bottes de foin), petites villes illuminées pour Noël, puis Montaigu.
+  moulins, les vaches, les bottes de foin), petites villes illuminées pour Noël, puis Montaigu. Tout est
+  sous la neige ; on passe d'un paysage à l'autre en douceur : la montagne (sapins enneigés, rochers,
+  chalets, lacs gelés) devient une forêt de plus en plus serrée, qui laisse peu à peu la place aux
+  champs bordés de haies, puis aux maisons.
   Des panneaux « MONTAIGU … km » et une barre de progression montrent la distance qui reste.
 - **Les clins d'œil** : une voiture de course rouge n° 95 qui double à toute allure (« Ka-chow ! »),
   une vieille dépanneuse rouillée sur le bas-côté, la station-service « Radiator Springs » (route 66).
-- **L'arrivée** : le bus ralentit et s'arrête à Montaigu, puis « ÉPREUVE 4/6 TERMINÉE ! — QUATRIÈME
-  INDICE OBTENU ! ». Ismae et Georges descendent du car sur la Grande Rue de Montaigu ;
-  un écran annonce l'épreuve 5.
+- **L'arrivée** : le bus ralentit et s'arrête à Montaigu ; Ismae et Georges descendent du car rue
+  Georges-Clemenceau. Deux appels de phares : la voiture de course rouge de la route, **Flash McQueen**,
+  est garée un peu plus loin. « Ka-chow ! » Une certaine Loane lui a confié quelque chose pour le
+  meilleur conducteur de car de la soirée : « ÉPREUVE 4/6 TERMINÉE ! — QUATRIÈME INDICE OBTENU ! ».
+  Puis il repart vers Radiator Springs.
+- **Linguini vient chercher Ismae** : il sort en courant du restaurant du chef Gusteau. Loane a appelé
+  le restaurant (« Si vous avez un problème de caramel, c'est lui qu'il vous faut ») ; le chef attend
+  Ismae en cuisine, le dîner de Noël commence dans une heure. L'écran annonce l'épreuve 5 ; Linguini
+  attend devant le restaurant (une flèche le montre quand il sort de l'écran).
 
 ## Épreuve 5 : « Le caramel raté » (à Montaigu)
 
-- **Montaigu un soir de Noël** : en descendant du car, Ismae et Georges arrivent sur la Grande Rue.
-  Au fond, les remparts du vieux château et un croissant de lune. Deux rangées de maisons
-  vendéennes et de vieux immeubles de pierre (boulangerie, pharmacie, fleuriste, librairie,
-  fromagerie, café, pâtisserie, antiquaire, atelier de peinture, maison de la presse, mairie et
-  son drapeau), tous décorés de guirlandes et de couronnes. Au milieu, l'église illuminée et son
-  clocher. La place de l'église a son grand sapin, un manège de chevaux de bois qui tourne, des
-  bancs et des réverbères. À l'ouest, le jardin enneigé (fontaine gelée, bonhomme de neige,
-  abribus) ; à l'est, le marché de Noël et ses chalets (chocolat chaud, marrons, crêpes, santons).
-  Deux ruelles mènent à la petite rue du bas. À l'est, la route est barrée : la sixième épreuve
-  viendra plus tard. Une musique de Noël originale (clochettes, piano, grelots).
+- **Montaigu un soir de Noël** : une seule rue, la rue Georges-Clemenceau, avec des commerces des deux
+  côtés, comme le vrai centre de Montaigu : maisons de deux ou trois niveaux à l'enduit crème ou blanc,
+  chaînes d'angle et encadrements de fenêtres en granit, toits d'ardoise sous la neige, lucarnes,
+  volets blancs, lanternes de fer forgé, gros pavés de granit et bornes de pierre. Au bout de la rue, la
+  tour ronde et trapue des remparts du château (sans toit, de l'herbe dessus). Au nord : la boulangerie
+  (brioches vendéennes), la pharmacie, **l'église Saint-Jean-Baptiste** (pas de flèche : une grosse
+  tour carrée, sa galerie à balustrade, son horloge, ses portes rouges), le restaurant du chef Gusteau,
+  la librairie Les Trois Mondes, le bar-tabac et sa carotte rouge, l'office de tourisme, la fromagerie.
+  Au sud (on voit leurs façades plus bas) : la pâtisserie, la maison de la presse, le fleuriste, la
+  mairie et son drapeau, l'antiquaire, l'atelier de peinture, un café. Pour « Noël à Montaigu », le
+  haut de la rue est fermé aux voitures : chalets (chocolat chaud, marrons, crêpes) et manège de
+  chevaux de bois ; tout au bout, la rue est barrée : la sixième épreuve viendra plus tard. L'abribus
+  et le panneau MONTAIGU à l'ouest, des réverbères et leurs guirlandes. Une musique de Noël originale.
 - **Les habitants** : Mamie Jeannette, la marchande de chocolat, un petit garçon qui jure avoir vu
   un rat cuisiner, le facteur, un monsieur au béret, une dame et son chien. Ils parlent d'une odeur
   de caramel et d'un chef « tout petit », puis du caramel réussi une fois l'épreuve gagnée.
-  Plus de 25 choses à regarder (vitrines, ardoise du menu, boîte aux lettres jaune, manège…).
-- **Le restaurant du chef Gusteau** (sur la place, à côté de l'église ; on y entre librement) :
+  Plus de 25 choses à regarder (vitrines, ardoise du menu, boîte aux lettres jaune, remparts, manège…).
+- **Le restaurant du chef Gusteau** (dans la rue, à côté de l'église ; Linguini attend devant) :
   devanture bleu nuit et lettres dorées, vitrines aux chandelles. Dedans : parquet en chevrons,
   papier peint bordeaux et doré, cheminée et ses chaussettes, sapin, le portrait de Gusteau
   (« Tout le monde peut cuisiner »), six tables dressées aux chandelles, la vitrine des desserts
@@ -189,15 +204,15 @@ image ni aucun son externe.
 - **Le mini-jeu du caramel au beurre salé** (façon Cooking Mama, cinq étapes, environ une minute
   et demie quand tout va bien ; Rémy, à gauche, réagit à tout) :
   1. *Le sucre* : on maintient (doigt, clic ou Espace) pour pencher le paquet. Il faut 200 g à
-     6 g près, sur la balance. Le sucre continue de tomber quand on relâche, et le paquet lâche
-     parfois un paquet de sucre d'un coup : on finit par petites touches. 13 secondes.
+     8 g près, sur la balance. Le sucre continue de tomber quand on relâche, et le paquet lâche
+     parfois un paquet de sucre d'un coup : on finit par petites touches. 15 secondes.
   2. *Faire fondre* : on règle le feu (curseur à droite, ou ↑↓) et on remue en rond (doigt,
      souris, ou ←→). Le brûleur chauffe plus fort d'un côté (on voit la lueur orange) et ce côté
      change de place : sans remuer, des points noirs apparaissent (trois, c'est brûlé) ; à plein
      feu tout brûle ; trop doux, le sucre cristallise. Réussi quand tout a fondu et doré.
   3. *Le beurre demi-sel* (papier « DEMI-SEL » et petit Gwenn-ha-du) : on coupe la motte sur les
-     pointillés (glisser vers le bas, ou ←→ puis Espace) — trois coupes ratées et le beurre est
-     en miettes. Puis on glisse les morceaux un par un dans la casserole : chaque morceau fait
+     pointillés (un toucher ou un glissé vers le bas, ou ←→ puis Espace) ; un peu de travers, ça
+     passe, mais cinq coupes à côté et le beurre est en miettes. Puis on glisse les morceaux un par un dans la casserole : chaque morceau fait
      baisser la température en grésillant, le feu la fait remonter de plus en plus vite. Il faut
      garder le thermomètre entre le bleu (le caramel fige) et le rouge (il brûle), et ne pas
      mettre un morceau tant que le précédent n'a pas fondu (ça éclabousse).
@@ -302,7 +317,7 @@ se met à jour tout seul en moins d'une minute.
 | `js/assemblage.js` | le mini-jeu d'assemblage de Jack Snow (glisser-déposer) |
 | `js/persos-neige.js` | Olaf, Sven, Anna, Elsa, Kristoff, Oaken, les trolls, les enfants, et Jack Snow |
 | `js/decor-arendelle.js` | maisons scandinaves, château, fontaine gelée, marché, écurie, palais de glace… |
-| `js/bus.js` | l'épreuve 4 : le départ en bus, le mini-jeu de conduite, l'arrivée à Montaigu |
+| `js/bus.js` | l'épreuve 4 : le départ en bus, le mini-jeu de conduite, l'arrivée à Montaigu (Flash McQueen, Linguini) |
 | `js/carte-montaigu.js` | Montaigu : les rues, l'église, la place et son manège, le marché de Noël |
 | `js/decor-montaigu.js` | le restaurant Gusteau, l'église, les chalets, le manège, les remparts… |
 | `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (tables, fourneau, plans de travail…) |

@@ -1,7 +1,8 @@
 // =====================================================================
 //  decor-montaigu.js — les dessins de Montaigu (épreuve 5) :
-//  le restaurant du chef Gusteau, l'église et son clocher, les chalets du marché
-//  de Noël, le manège de chevaux de bois, les remparts du vieux château, la boîte
+//  le restaurant du chef Gusteau, l'église Saint-Jean-Baptiste et sa tour carrée, la tour
+//  ronde des remparts du château, les chalets du marché de Noël, le manège de chevaux de bois,
+//  les lanternes, les bornes de granit, la « carotte » du tabac, Flash McQueen, la boîte
 //  aux lettres jaune, les guirlandes de façade et celles tendues entre deux poteaux.
 //  Tout est dessiné au pixel près, dans le même style que les autres quartiers.
 // =====================================================================
@@ -60,7 +61,7 @@ const Montaigu = (() => {
   // un vieil immeuble de pierre (Batiments) dont on redessine le rez-de-chaussée : devanture bleu nuit,
   // grandes lettres dorées, deux vitrines où l'on voit les tables aux chandelles, une porte vitrée au milieu
   function restaurant() {
-    const b = Batiments.building({ w: 168, facade: 'creme', style: 'ancien', etages: 2, boutique: 'porte', volets: '#2f4a5a', seed: 505, cheminees: 2 });
+    const b = Batiments.building({ w: 168, facade: 'blanc', style: 'ancien', etages: 2, boutique: 'porte', volets: '#e8eaee', seed: 505, cheminees: 2, ardoise: true, neige: true, granit: true });
     const P = PX.painter(b.img), W = b.w, H = b.h, y0 = H - 46;
     const BLEU = '#1c3048', BLEU2 = '#2a4464', BLEUS = '#101c2c';
     P.rect(0, y0, W, 46, BLEU);
@@ -112,48 +113,186 @@ const Montaigu = (() => {
     return b;
   }
 
-  // ------------------------------------------------------------ l'église et son clocher pointu
+  // ------------------------------------------------------------ l'église Saint-Jean-Baptiste de Montaigu
+  // néogothique, en granit gris-beige : pas de flèche, une grosse tour carrée sur la façade, en deux étages
+  // (une galerie à balustrade et ses gargouilles à mi-hauteur, puis l'étage des cloches avec l'horloge),
+  // de petits pinacles aux angles et un toit très bas ; de chaque côté, les bas-côtés et leurs contreforts
   function eglise() {
-    const W = 120, H = 236, base = H - 1, { c, P } = mk(W, H), r = PX.rng(91);
-    const PIERRE = '#ded2b6', PIERRE2 = '#c4b696', PIERRE3 = '#a8987a', ARDOISE = '#4a5068', ARDOISE2 = '#5e6682';
+    const W = 132, H = 182, base = H - 1, { c, P } = mk(W, H);
+    const G = '#b8ae98', G2 = '#a0967f', G3 = '#857b66', CLAIR = '#d8cfba', ARD = '#4a5068', ARD2 = '#5e6682';
     const lumieres = [], ampoules = [];
-    // la nef : un grand pignon de pierre
-    const ny = base - 92;
-    P.rect(8, ny, W - 16, 92, PIERRE); for (let y = ny + 4; y < base; y += 6) P.hline(8, y, W - 16, PIERRE2);
-    for (let y = ny + 4, k = 0; y < base; y += 6, k++) for (let x = 8 + (k % 2) * 6; x < W - 8; x += 12) P.vline(x, y - 5, 5, PIERRE2);
-    for (let j = 0; j < 30; j++) { const w = Math.round((W - 16) / 2 * (j / 30)); P.hline(W / 2 - w, ny - 30 + j, w * 2, ARDOISE); }
-    for (let j = 0; j < 30; j += 3) { const w = Math.round((W - 16) / 2 * (j / 30)); P.hline(W / 2 - w, ny - 30 + j, w * 2, ARDOISE2); }
-    for (let j = 0; j < 30; j++) { const w = Math.round((W - 16) / 2 * (j / 30)); P.px(W / 2 - w, ny - 31 + j, NEIGE); P.px(W / 2 + w - 1, ny - 31 + j, NEIGE); }
-    // la rosace (vitrail éclairé) et les deux hautes fenêtres
-    const rx = W / 2, ry = ny + 16;
-    P.ellipse(rx, ry, 9, 9, PIERRE3); P.ellipse(rx, ry, 8, 8, '#3a2a5a');
-    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; P.ellipse(Math.round(rx + Math.cos(a) * 5), Math.round(ry + Math.sin(a) * 5), 2, 2, ['#e85a5a', '#5a8ae8', '#f2c230', '#5ac87a'][k % 4]); }
-    P.ellipse(rx, ry, 2, 2, '#fff1bb'); lumieres.push([rx, ry, 30, 'win']);
-    for (const fx of [24, W - 30]) {
-      P.rect(fx, ny + 30, 7, 22, PIERRE3); P.rect(fx + 1, ny + 31, 5, 21, '#3a2a5a'); P.ellipse(fx + 3, ny + 31, 3, 2, '#3a2a5a');
-      for (let y = ny + 32; y < ny + 52; y += 3) P.hline(fx + 1, y, 5, ['#e85a5a', '#5a8ae8', '#f2c230'][((y - ny) / 3 | 0) % 3]);
-      lumieres.push([fx + 3, ny + 42, 22, 'win']);
+    const appareil = (x, y, w, h) => { // un mur de granit en assises régulières
+      P.rect(x, y, w, h, G);
+      for (let yy = y + 5, k = 0; yy < y + h; yy += 6, k++) { P.hline(x, yy, w, G2); for (let xx = x + (k % 2) * 5; xx < x + w; xx += 10) P.vline(xx, yy - 5, 5, G2); }
+    };
+    const ogive = (x, y, w, h, col) => { P.rect(x, y + Math.ceil(w / 2), w, h - Math.ceil(w / 2), col); for (let j = 0; j < Math.ceil(w / 2) + 1; j++) { const d = Math.round(Math.sqrt(Math.max(0, (w / 2) ** 2 - (w / 2 - j) ** 2)) * 0.9); P.hline(Math.round(x + w / 2 - d), y + j, d * 2, col); } };
+    const vitrail = (x, y, w, h) => {
+      ogive(x - 1, y - 1, w + 2, h + 1, CLAIR); ogive(x, y, w, h, '#3a2a5a');
+      for (let yy = y + 3; yy < y + h; yy += 3) P.hline(x + 1, yy, w - 2, ['#e85a5a', '#5a8ae8', '#f2c230', '#5ac87a'][((yy - y) / 3 | 0) % 4]);
+      P.vline(x + (w >> 1), y + 2, h - 2, '#2a1e44'); lumieres.push([x + w / 2, y + h / 2, 22, 'win']);
+    };
+    // les bas-côtés, de part et d'autre de la tour : murs, toits d'ardoise en appentis, contreforts et pinacles
+    for (const [x0, sens] of [[4, 1], [W - 46, -1]]) {
+      const w = 42, hmur = 58, y0 = base - hmur;
+      appareil(x0, y0, w, hmur);
+      for (let j = 0; j < 22; j++) { const yy = y0 - 22 + j, l = Math.round(w * (j + 1) / 22); P.hline(sens > 0 ? x0 + w - l : x0, yy, l, j % 3 ? ARD : ARD2); }
+      for (let j = 0; j < 22; j++) { const l = Math.round(w * (j + 1) / 22); P.px(sens > 0 ? x0 + w - l : x0 + l - 1, y0 - 22 + j, NEIGE); }
+      vitrail(x0 + 15, y0 + 12, 12, 26);
+      for (const bx of [x0, x0 + w - 5]) { // les contreforts et leur pinacle
+        P.rect(bx, y0 - 6, 5, hmur + 6, G2); P.vline(bx, y0 - 6, hmur + 6, CLAIR); P.vline(bx + 4, y0 - 6, hmur + 6, G3);
+        for (let j = 0; j < 8; j++) P.hline(bx + Math.floor(j / 3), y0 - 14 + j, 5 - 2 * Math.floor(j / 3), G2);
+        P.px(bx + 2, y0 - 15, NEIGE);
+      }
     }
-    // le grand portail en bois, sa voussure et sa couronne
-    const dx = W / 2 - 12, dy = base - 34;
-    for (let k = 0; k < 3; k++) { P.rect(dx - 3 + k, dy - 3 + k, 30 - k * 2, 37 - k, [PIERRE3, PIERRE2, PIERRE3][k]); P.ellipse(W / 2, dy + k, 15 - k, 9 - k, [PIERRE3, PIERRE2, PIERRE3][k]); }
-    P.rect(dx, dy, 24, 34, '#5a3a24'); P.ellipse(W / 2, dy, 12, 7, '#5a3a24');
-    for (let x = dx + 3; x < dx + 24; x += 4) P.vline(x, dy - 4, 38, '#4a2e1c');
-    P.vline(W / 2, dy - 6, 40, '#3a2418'); P.rect(W / 2 - 4, dy + 16, 2, 2, OR); P.rect(W / 2 + 2, dy + 16, 2, 2, OR);
-    P.ellipse(W / 2, dy - 2, 5, 5, '#1e4a2a'); P.ellipse(W / 2, dy - 2, 3, 3, '#5a3a24'); P.rect(W / 2 - 1, dy + 3, 3, 2, '#d8323a');
-    P.rect(dx - 6, base - 2, 36, 3, '#a8a090'); P.hline(dx - 6, base - 2, 36, NEIGE);
-    // le clocher : une tour carrée, l'horloge, les abat-sons, puis la flèche d'ardoise
-    const tx = W / 2 - 14, ty = 70, tw = 28;
-    P.rect(tx, ty, tw, ny - 30 - ty + 6, PIERRE); for (let y = ty + 3; y < ny - 24; y += 6) P.hline(tx, y, tw, PIERRE2);
-    P.vline(tx, ty, ny - 24 - ty, '#f0e6cc'); P.vline(tx + tw - 1, ty, ny - 24 - ty, PIERRE3);
-    P.ellipse(W / 2, ty + 34, 7, 7, PIERRE3); P.ellipse(W / 2, ty + 34, 6, 6, '#f4f0e0'); P.vline(W / 2, ty + 30, 4, '#1d1626'); P.hline(W / 2, ty + 34, 3, '#1d1626');
-    for (const bx of [tx + 5, tx + tw - 11]) { P.rect(bx, ty + 8, 6, 14, '#2a2632'); P.ellipse(bx + 3, ty + 8, 3, 2, '#2a2632'); for (let y = ty + 10; y < ty + 22; y += 3) P.hline(bx, y, 6, '#5a5668'); }
-    for (let j = 0; j < 70; j++) { const w = Math.max(1, Math.round((tw / 2 + 3) * (j / 70))); P.hline(W / 2 - w, j, w * 2, j % 4 === 0 ? ARDOISE2 : ARDOISE); P.px(W / 2 - w, j, '#7a84a0'); }
-    P.rect(tx - 3, ty - 2, tw + 6, 4, PIERRE2); P.hline(tx - 3, ty - 2, tw + 6, NEIGE);
-    P.vline(W / 2, 0, 6, OR); P.hline(W / 2 - 2, 2, 5, OR); // la croix dorée
-    // une guirlande d'ampoules blanches le long du toit de la nef
-    for (let j = 0; j < 30; j += 3) { const w = Math.round((W - 16) / 2 * (j / 30)); for (const x of [W / 2 - w, W / 2 + w - 1]) { P.px(x, ny - 29 + j, '#fff4c8'); ampoules.push([x, ny - 29 + j]); } }
+    // la tour : l'étage du bas (le portail), la galerie, puis l'étage des cloches, plus étroit
+    const tx = 44, tw = 44, galY = 74, hautY = 22;
+    appareil(tx, galY, tw, base - galY);
+    P.vline(tx, galY, base - galY, CLAIR); P.vline(tx + tw - 1, galY, base - galY, G3);
+    for (const bx of [tx - 3, tx + tw - 2]) { P.rect(bx, galY + 4, 5, base - galY - 4, G2); P.vline(bx, galY + 4, base - galY - 4, CLAIR); }
+    // le portail : voussures en ogive, portes rouges, un petit tympan
+    const px0 = W / 2 - 11, py0 = base - 40;
+    for (let k = 0; k < 3; k++) ogive(px0 - 4 + k * 2, py0 - 6 + k * 2, 30 - k * 4, 46 - k * 2, [G3, CLAIR, G2][k]);
+    ogive(px0, py0, 22, 40, '#8a2a2e');
+    P.vline(W / 2, py0 + 12, 28, '#5a1a1e'); for (let y = py0 + 16; y < base; y += 6) { P.hline(px0 + 2, y, 8, '#a8343a'); P.hline(W / 2 + 2, y, 8, '#a8343a'); }
+    P.rect(W / 2 - 4, py0 + 24, 2, 2, OR); P.rect(W / 2 + 2, py0 + 24, 2, 2, OR);
+    P.ellipse(W / 2, py0 + 6, 5, 4, '#3a2a5a'); P.ellipse(W / 2, py0 + 6, 2, 2, '#f2c230'); lumieres.push([W / 2, py0 + 6, 14, 'win']);
+    P.rect(px0 - 8, base - 2, 38, 3, '#a8a090'); P.hline(px0 - 8, base - 2, 38, NEIGE);
+    vitrail(W / 2 - 6, galY + 14, 12, 34); // la grande verrière au-dessus du portail
+    // la galerie à balustrade, qui déborde un peu, et ses gargouilles aux angles
+    P.rect(tx - 5, galY - 4, tw + 10, 5, CLAIR); P.hline(tx - 5, galY, tw + 10, G3);
+    P.rect(tx - 5, galY - 12, tw + 10, 8, G2); for (let x = tx - 3; x < tx + tw + 4; x += 3) P.rect(x, galY - 11, 2, 6, CLAIR);
+    P.hline(tx - 5, galY - 13, tw + 10, CLAIR); P.hline(tx - 5, galY - 14, tw + 10, NEIGE);
+    for (const gx of [tx - 9, tx + tw + 5]) { P.rect(gx, galY - 3, 4, 2, G3); P.px(gx + (gx < tx ? 0 : 3), galY - 1, G3); }
+    // l'étage des cloches : deux longues baies à abat-sons, l'horloge au-dessus
+    const ux = tx + 6, uw = tw - 12;
+    appareil(ux, hautY, uw, galY - 12 - hautY);
+    P.vline(ux, hautY, galY - 12 - hautY, CLAIR); P.vline(ux + uw - 1, hautY, galY - 12 - hautY, G3);
+    for (const bx of [ux + 6, ux + uw - 12]) { ogive(bx, hautY + 22, 6, 26, '#2a2632'); for (let y = hautY + 28; y < hautY + 47; y += 3) P.hline(bx, y, 6, '#5a5668'); }
+    P.ellipse(W / 2, hautY + 12, 7, 7, G3); P.ellipse(W / 2, hautY + 12, 6, 6, '#f4f0e0');
+    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; P.px(Math.round(W / 2 + Math.cos(a) * 5), Math.round(hautY + 12 + Math.sin(a) * 5), '#8a8270'); }
+    P.vline(W / 2, hautY + 8, 4, '#1d1626'); P.hline(W / 2, hautY + 12, 4, '#1d1626'); lumieres.push([W / 2, hautY + 12, 18, 'win']);
+    // la corniche, le toit très bas et les quatre petits pinacles des angles
+    P.rect(ux - 3, hautY - 4, uw + 6, 4, CLAIR); P.hline(ux - 3, hautY - 1, uw + 6, G3);
+    for (let j = 0; j < 7; j++) P.hline(ux + j * 2, hautY - 5 - j, uw - j * 4, j % 2 ? ARD2 : ARD);
+    for (let j = 0; j < 7; j++) { P.px(ux + j * 2, hautY - 5 - j, NEIGE); P.px(ux + uw - 1 - j * 2, hautY - 5 - j, NEIGE); }
+    for (const px of [ux - 3, ux + uw]) { P.rect(px, hautY - 12, 3, 8, G2); P.vline(px, hautY - 12, 8, CLAIR); P.px(px + 1, hautY - 14, G2); P.px(px + 1, hautY - 15, NEIGE); }
+    P.vline(W / 2, hautY - 20, 8, OR); P.hline(W / 2 - 2, hautY - 18, 5, OR); // la croix
+    // une guirlande d'ampoules blanches sur la galerie
+    for (let x = tx - 4; x < tx + tw + 5; x += 3) { P.px(x, galY - 3, '#fff4c8'); ampoules.push([x, galY - 3]); }
     return { img: c, ax: W / 2, ay: base, lumieres, ampoules, porteY: base };
+  }
+
+  // ------------------------------------------------------------ les restes des remparts du château : une tour ronde et trapue,
+  // sans toit (de l'herbe et de la neige dessus), en moellons de granit gris, et un bout de courtine
+  function tourRemparts() {
+    const W = 120, H = 112, base = H - 1, { c, P } = mk(W, H), r = PX.rng(1215);
+    const M1 = '#8a8478', M2 = '#9c9688', M3 = '#6c675d', M4 = '#b2ac9e';
+    const moellons = (x, y, w, h) => { P.rect(x, y, w, h, M1); for (let k = 0; k < w * h / 14; k++) { const mx = x + r.int(w - 3), my = y + r.int(h - 2); P.rect(mx, my, 3 + r.int(3), 2, r.pick([M2, M3, M4, M1])); } };
+    // la courtine, à droite de la tour
+    moellons(56, base - 62, 64, 62); P.hline(56, base - 62, 64, M4);
+    for (let x = 56; x < W; x++) { const e = 2 + Math.round(Math.abs(Math.sin(x * 0.3)) * 2); P.rect(x, base - 63 - e, 1, e, '#4a6a3a'); P.px(x, base - 64 - e, NEIGE); }
+    // la tour ronde : on l'ombre comme un cylindre
+    const cx = 34, rw = 30, ty = base - 84;
+    moellons(cx - rw, ty, rw * 2, 84);
+    for (let x = -rw; x < rw; x++) { const t = (x + rw) / (rw * 2), ombre = t > 0.62 ? (t - 0.62) * 0.9 : t < 0.12 ? (0.12 - t) * 1.5 : 0; if (ombre) { P.g.globalAlpha = ombre; P.vline(cx + x, ty, 84, '#2a2632'); P.g.globalAlpha = 1; } }
+    for (let x = -rw; x < rw; x++) P.px(cx + x, base - Math.round(Math.sqrt(rw * rw - x * x) / rw * 3), M3); // le pied arrondi
+    P.ellipse(cx, ty, rw, 6, '#3f6a3a'); P.ellipse(cx, ty - 1, rw - 2, 4, '#4f7a44'); P.ellipse(cx - 2, ty - 2, rw - 6, 3, NEIGE);
+    for (let k = 0; k < 10; k++) P.px(cx - rw + 2 + r.int(rw * 2 - 4), ty + 1 + r.int(2), '#2f5a3a');
+    // deux meurtrières, dont une éclairée
+    P.rect(cx - 2, ty + 26, 3, 12, '#1d1626'); P.rect(cx + 12, ty + 44, 3, 10, '#1d1626'); P.rect(cx + 13, ty + 46, 1, 6, '#ffcf72');
+    // du lierre sur la courtine
+    for (let k = 0; k < 60; k++) P.ellipse(60 + r.int(26), base - 10 - r.int(46), 1 + r.int(2), 1, r.pick(['#2f5d3a', '#3f7a45', '#2a4a33']));
+    return { img: c, ax: 0, ay: base, lumieres: [[cx + 13, ty + 49, 16, 'win']] };
+  }
+
+  // ------------------------------------------------------------ les petits détails de la rue
+  function lanterne() { // une lanterne de fer forgé noire, accrochée au mur
+    const { c, P } = mk(9, 14), base = 13;
+    P.hline(0, 1, 5, '#1f1d2b'); P.vline(4, 0, 3, '#1f1d2b');
+    P.rect(3, 3, 5, 1, '#1f1d2b'); P.rect(3, 4, 5, 7, '#1f1d2b'); P.rect(4, 5, 3, 5, '#ffd47c'); P.px(5, 6, '#fff1bb');
+    P.hline(4, 11, 3, '#1f1d2b'); P.px(5, 12, '#1f1d2b'); P.hline(3, 2, 5, NEIGE);
+    return { img: c, ax: 1, ay: base };
+  }
+  function borne() { // une borne de granit au bord du trottoir, son chapeau de neige
+    const { c, P } = mk(6, 10), base = 9;
+    P.rect(0, 3, 6, 7, '#a8a294'); P.vline(0, 3, 7, '#c4beb0'); P.vline(5, 3, 7, '#7e786c'); P.ellipse(3, 3, 3, 2, '#a8a294'); P.ellipse(3, 2, 3, 1, NEIGE);
+    return { img: c, ax: 3, ay: base };
+  }
+  // la « carotte » rouge du bar-tabac, en drapeau sur la façade
+  function carotte() {
+    const { c, P } = mk(9, 26), base = 25;
+    P.hline(0, 2, 5, '#1f1d2b'); P.vline(4, 2, 3, '#1f1d2b');
+    for (let j = 0; j < 20; j++) { const l = Math.max(1, Math.round(4 - Math.abs(j - 9.5) * 0.35)); P.hline(5 - l, 4 + j, l * 2, j < 1 || j > 18 ? '#a8242a' : '#d8323a'); }
+    for (const y of [8, 12, 16]) P.hline(4, y, 3, '#f4f4f8'); // « TABAC », en tout petit
+    P.px(3, 4, NEIGE); P.px(4, 4, NEIGE);
+    return { img: c, ax: 0, ay: base };
+  }
+  function panneauInfo() { // le panneau bleu de l'office de tourisme, un grand « i »
+    const { c, P } = mk(12, 14), base = 13;
+    P.rect(0, 0, 12, 12, '#2a5aa8'); P.rect(1, 1, 10, 10, '#3a6ac8'); P.rect(5, 2, 2, 2, '#f4f4f8'); P.rect(5, 5, 2, 5, '#f4f4f8'); P.hline(4, 9, 4, '#f4f4f8');
+    P.hline(0, 0, 12, NEIGE);
+    return { img: c, ax: 6, ay: base };
+  }
+
+  // ------------------------------------------------------------ Flash McQueen, garé au bord de la rue (vu de côté, l'avant à gauche)
+  // une voiture de course rouge, basse et allongée : long capot, pare-brise incliné où l'on voit son œil,
+  // aileron à l'arrière, le n° 95 sur la portière et l'éclair jaune-orange, jantes rouges, son sourire sur le pare-chocs
+  function poly(P, pts, col) { // remplit un polygone, ligne par ligne (sans anticrénelage)
+    const ys = pts.map((p) => p[1]), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    for (let y = y0; y <= y1; y++) {
+      const xs = [];
+      for (let k = 0; k < pts.length; k++) {
+        const [ax, ay] = pts[k], [bx, by] = pts[(k + 1) % pts.length];
+        if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax + (y + 0.5 - ay) * (bx - ax) / (by - ay));
+      }
+      xs.sort((a, b) => a - b);
+      for (let k = 0; k + 1 < xs.length; k += 2) P.hline(Math.round(xs[k]), y, Math.round(xs[k + 1]) - Math.round(xs[k]), col);
+    }
+  }
+  function flash(sens = -1) {
+    const W = 60, H = 23, { c, P } = mk(W, H);
+    const R = '#d8262c', R2 = '#a3141c', R3 = '#ff5f4f', VITRE = '#2a3348';
+    // la caisse, le bas de caisse plus sombre, les reflets
+    poly(P, [[2, 17], [1, 14], [2, 12], [6, 10], [18, 9], [20, 9], [26, 3], [35, 2], [43, 7], [50, 8], [55, 9], [57, 11], [57, 17], [54, 18], [6, 18]], R);
+    poly(P, [[2, 15], [57, 15], [57, 17], [54, 18], [6, 18], [2, 17]], R2);
+    P.hline(7, 10, 11, R3); P.hline(3, 11, 4, R3); P.hline(44, 8, 10, R3); P.hline(27, 3, 8, R3);
+    // les vitres, et son œil sur le pare-brise (il regarde devant, l'air sûr de lui)
+    poly(P, [[21, 9], [27, 4], [35, 4], [41, 8]], VITRE); P.vline(31, 4, 5, R);
+    P.ellipse(26, 6, 2, 1, '#f4f6fa'); P.rect(24, 5, 2, 2, '#3a7ad8'); P.px(24, 6, '#1d1626'); P.px(25, 5, '#ffffff'); P.hline(24, 4, 4, R2);
+    // l'aileron
+    P.rect(49, 4, 2, 4, '#1d1626'); P.rect(46, 3, 12, 2, R); P.hline(46, 3, 12, R3); P.rect(56, 1, 2, 4, R);
+    // l'éclair jaune-orange sur le côté
+    poly(P, [[15, 13], [26, 11], [25, 12], [38, 10], [36, 12], [47, 11], [35, 15], [36, 13], [25, 15], [26, 14]], '#f6c02a');
+    for (let x = 34; x < 48; x++) for (let y = 10; y < 16; y++) if ((x + y) % 3 === 0 && P.g.getImageData(x, y, 1, 1).data[1] > 150) P.px(x, y, '#f08a24');
+    // le phare autocollant et le sourire sur le pare-chocs
+    P.rect(4, 11, 2, 2, '#f6d23a');
+    for (const [x, y] of [[2, 14], [3, 15], [4, 15], [5, 15], [6, 14]]) P.px(x, y, '#1d1626');
+    P.hline(3, 14, 3, '#ffffff');
+    // les roues : pneus noirs, jantes rouges
+    for (const wx of [12, 47]) { P.ellipse(wx, 18, 5, 4, '#1d1626'); P.ellipse(wx, 18, 4, 3, '#2a2632'); P.ellipse(wx, 18, 2, 2, '#c8202a'); P.px(wx, 18, '#c8ccd8'); }
+    const img = sens < 0 ? c : PX.flipX(c);
+    if (sens > 0) img.getContext('2d').setTransform(1, 0, 0, 1, 0, 0); // flipX laisse le miroir actif : le 95 s'écrit à l'endroit
+    const P2 = PX.painter(img), tx = sens < 0 ? 28 : W - 28 - A.largeurTexte('95');
+    A.texte(P2, '95', tx + 1, 11, '#1d1626'); A.texte(P2, '95', tx, 10, '#fff4d0');
+    return { img: PX.outline(img, '#1d1626'), ax: W / 2, ay: H - 1 };
+  }
+  // son portrait pour les dialogues, vu de face : les deux grands yeux sur le pare-brise, le capot, le grand sourire
+  function portraitFlash() {
+    const { c, P } = mk(28, 26);
+    const R = '#d8262c', R2 = '#a3141c', R3 = '#ff5f4f';
+    poly(P, [[6, 2], [22, 2], [26, 10], [27, 20], [25, 24], [3, 24], [1, 20], [2, 10]], R);
+    P.hline(7, 2, 14, R3);
+    poly(P, [[7, 4], [21, 4], [24, 11], [4, 11]], '#2a3348');                       // le pare-brise
+    for (const ex of [5, 15]) {                                                       // les yeux
+      P.rect(ex + 1, 5, 7, 5, '#f4f6fa'); P.rect(ex + 3, 6, 3, 4, '#3a7ad8'); P.rect(ex + 4, 7, 1, 2, '#1d1626'); P.px(ex + 3, 6, '#ffffff');
+      P.hline(ex + 1, 5, 7, R2);                                                      // les paupières, un peu baissées
+    }
+    P.hline(4, 12, 20, R3); P.ellipse(14, 14, 3, 1, '#c87a2a');                       // le capot et son autocollant
+    P.rect(2, 13, 4, 2, '#f6d23a'); P.rect(22, 13, 4, 2, '#f6d23a');                  // les phares autocollants
+    poly(P, [[4, 17], [24, 17], [21, 22], [7, 22]], '#1d1626');                      // le grand sourire
+    P.hline(6, 18, 16, '#ffffff'); P.hline(5, 17, 18, R2);
+    P.rect(1, 21, 4, 4, '#1d1a22'); P.rect(23, 21, 4, 4, '#1d1a22'); P.hline(3, 24, 22, R2);
+    return PX.outline(c, '#1d1626');
   }
 
   // ------------------------------------------------------------ un chalet du marché de Noël
@@ -271,5 +410,5 @@ const Montaigu = (() => {
     return { img: c, ax: 11, ay: base };
   }
 
-  return { texte2x, largeur2x, guirlandeEntre, facadeNoel, restaurant, eglise, chalet, dessinManege, remparts, boitePoste, panneauVille, chevalet, AMPOULES };
+  return { texte2x, largeur2x, guirlandeEntre, facadeNoel, restaurant, eglise, tourRemparts, lanterne, borne, carotte, panneauInfo, flash, portraitFlash, chalet, dessinManege, remparts, boitePoste, panneauVille, chevalet, AMPOULES };
 })();

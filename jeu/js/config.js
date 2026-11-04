@@ -381,6 +381,28 @@ const CONFIG = {
       ['ismae', 'Combien de fois j\'ai fait ce trajet, juste pour la voir…'],
       'Georges s\'étire longuement. Le voyage l\'a épuisé. Il a dormi tout du long.',
     ],
+    // à la descente du car : la voiture de course rouge du trajet est garée un peu plus loin…
+    flash: [
+      'Deux coups de phares. Un vrombissement. La voiture de course rouge du trajet est garée juste là.',
+      ['mcqueen', 'Ka-chow ! Pas mal du tout, pour un car ! Tu ne m\'as pas lâché d\'un pare-chocs.'],
+      ['ismae', 'Attends… c\'était TOI, la voiture rouge qui nous a doublés sur la route ?!'],
+      ['mcqueen', 'Flash McQueen, en personne. Et je ne m\'arrête jamais pour rien : une certaine Loane m\'a confié ça pour toi.'],
+      ['mcqueen', '« À remettre au meilleur conducteur de car de la soirée. » C\'est toi, non ?'],
+    ],
+    flashFin: [
+      ['ismae', 'Loane… Elle a des amis partout, ma parole.'],
+      ['mcqueen', 'Allez, je file, on m\'attend à Radiator Springs. Ka-chow !'],
+    ],
+    // puis Linguini sort en courant du restaurant
+    linguini: [
+      ['linguini', 'Attendez ! ATTENDEZ ! … Un garçon avec un chat noir… Tu es Ismae ? C\'est forcément toi.'],
+      ['ismae', 'Euh… oui ? On se connaît ?'],
+      ['linguini', 'Linguini, je travaille chez Gusteau, le restaurant, là-bas, à côté de l\'église. Une certaine Loane a appelé tout à l\'heure.'],
+      ['linguini', 'Elle a dit : « Ismae arrive par le car de ce soir. Si vous avez un problème de caramel, c\'est elle qu\'il vous faut. »'],
+      ['ismae', 'Encore Loane ?! Mais qu\'est-ce qu\'elle a manigancé…'],
+      ['linguini', 'Et justement, on a un ÉNORME problème de caramel. Le chef t\'attend en cuisine. Vite, le dîner de Noël commence dans une heure !'],
+      'Linguini repart en courant vers le restaurant… et manque de glisser sur une plaque de verglas.',
+    ],
   },
 
   // ------------------------------------------------------------------
@@ -605,12 +627,12 @@ const CONFIG = {
       dameChien: { peau: '#f0c8a8', cheveux: '#a83a2a', coiffure: 'meche', barbe: 'aucune', yeux: '#3a5a3a', veste: '#2a5a7a', echarpe: '#f2c230', coupe: 'robe', pantalon: '#2a3a5a', chaussures: '#2a2026' },
     },
     // l'annonce de l'épreuve, à la descente du car
-    annonce: { haut: 'Épreuve suivante', titre: 'ÉPREUVE 5/6 · Le caramel raté', lieu: 'Montaigu', texte: 'Une délicieuse odeur de caramel au beurre salé flotte dans les rues illuminées… D\'où peut-elle bien venir ?', bouton: 'Explorer Montaigu' },
+    annonce: { haut: 'Épreuve suivante', titre: 'ÉPREUVE 5/6 · Le caramel raté', lieu: 'Montaigu', texte: 'Au restaurant du chef Gusteau, le caramel au beurre salé du dîner de Noël est raté… et Loane a donné ton nom. Linguini t\'attend devant le restaurant, à côté de l\'église.', bouton: 'C\'est parti !' },
     // en entrant pour la première fois dans le restaurant
     salle: [
       'Une odeur de beurre, de thym… et, quelque part, de caramel au beurre salé.',
       ['ismae', 'Waouh. C\'est chic, ici.'],
-      ['linguini', 'Bonsoir, bienvenue chez Gusteau ! Attention, je ne sais pas freiner !'],
+      ['linguini', 'Bienvenue chez Gusteau ! La cuisine, c\'est tout au fond, les portes battantes. Attention, je ne sais pas freiner !'],
     ],
     // la rencontre avec Rémy, en entrant dans la cuisine
     rencontre: {
@@ -643,7 +665,7 @@ const CONFIG = {
       consignes: {
         sucre: ['Maintiens le doigt pour verser 200 g', 'Maintiens Espace (ou le clic) pour verser 200 g'],
         fonte: ['Feu : curseur à droite · Remue en rond dans la casserole', 'Feu : ↑ ↓ · Remuer : ← → ou en rond à la souris'],
-        coupe: ['Glisse vers le bas sur les pointillés pour couper', 'Couteau : ← → puis Espace (ou glisser vers le bas)'],
+        coupe: ['Touche les pointillés pour couper', 'Couteau : ← → puis Espace (ou touche les pointillés)'],
         ajout: ['Glisse les morceaux un par un dans la casserole', 'Espace : un morceau (ou glisser à la souris)'],
         creme: ['Maintiens hors de la casserole pour verser, et remue', 'Verser : Espace · Remuer : ← → ou en rond à la souris'],
         texture: ['Feu à droite, remue sans arrêt, puis RETIRER DU FEU', 'Feu : ↑ ↓ · Remuer : ← → · Retirer : Espace'],
@@ -731,7 +753,8 @@ const CONFIG = {
       facteur: { avant: [['facteur', 'Encore des lettres pour le Père Noël. Elles arrivent toutes par la boîte jaune.']], apres: [['facteur', 'Joyeux Noël ! Et bon appétit, il paraît que ça sent bon au restaurant.']] },
       monsieur: { avant: [['monsieur', 'La route est barrée, là-bas. Il faudra attendre encore un peu.']], apres: [['monsieur', 'La route est toujours barrée. Patience… les plus belles choses se méritent.']] },
       dameChien: { avant: [['dameChien', 'Mon chien adore le manège. Il aboie à chaque tour.'], 'Georges regarde le chien de haut. Très haut.'], apres: [['dameChien', 'Ce soir, tout Montaigu sent le caramel. C\'est merveilleux.']] },
-      linguini: { avant: [['linguini', 'Bienvenue chez Gusteau ! La cuisine ? Tout au fond, les portes battantes. Attention, ça glisse !']], apres: [['linguini', 'Tout le monde parle de ton caramel dans la salle ! Bon, j\'ai failli renverser la bûche. Deux fois.']] },
+      linguiniRue: { avant: [['linguini', 'Vite, vite ! Le chef t\'attend en cuisine. Entre, c\'est là !']], apres: [['linguini', 'Merci encore !']] },
+      linguini: { avant: [['linguini', 'La cuisine ? Tout au fond, les portes battantes. Le chef t\'attend ! Attention, ça glisse !']], apres: [['linguini', 'Tout le monde parle de ton caramel dans la salle ! Bon, j\'ai failli renverser la bûche. Deux fois.']] },
       ego: { avant: [['ego', 'Hm. Je suis venu pour le dessert de Noël.'], ['ego', 'On me dit qu\'il manque le caramel au beurre salé. Je suis… patient.']], apres: [['ego', 'Ce caramel au beurre salé. Ambré, onctueux, juste ce qu\'il faut de sel. Il me rappelle un souvenir d\'enfance.'], ['ego', 'Mes compliments au chef. Aux chefs.']] },
       clienteResto: { avant: [['clienteResto', 'Il paraît qu\'il y a un rat en cuisine. … Non, je plaisante. Enfin, je crois.']], apres: [['clienteResto', 'Ce caramel au beurre salé ! On dirait de l\'or fondu.']] },
       clientResto: { avant: [['clientResto', 'On attend le dessert depuis une heure. Il paraît qu\'il manque le caramel.']], apres: [['clientResto', 'Enfin, le dessert ! Ça valait le coup d\'attendre.']] },
@@ -860,25 +883,23 @@ const CONFIG = {
     sortieArendelle: ['Le chemin redescend vers la forêt.', ['ismae', 'Non, on a promis à Olaf. On reste.']],
     // Montaigu
     panneauMontaigu: ['« MONTAIGU »', 'Ismae connaît ce panneau par cœur.'],
-    egliseMontaigu: ['L\'église, toute illuminée pour Noël. Les cloches sonnent huit coups.'],
+    egliseMontaigu: ['L\'église Saint-Jean-Baptiste. Pas de clocher pointu : une grosse tour carrée, sa galerie et son horloge.', 'Les cloches sonnent huit coups.'],
+    rempartsMontaigu: ['Ce qui reste des remparts du château : une vieille tour ronde, sans toit. Il pousse de l\'herbe dessus… sous la neige.'],
+    tabacMontaigu: ['Le bar-tabac, sa carotte rouge et sa terrasse. Ça sent le café et le vin chaud.'],
+    tourismeMontaigu: ['L\'office de tourisme. Une affiche : « Noël à Montaigu : marché, manège et illuminations, rue Clemenceau ».'],
     routeBarree: ['La rue est barrée par des barrières de travaux.', '« La suite de l\'aventure… bientôt ! »'],
-    abribusMontaigu: ['L\'arrêt de bus de Montaigu. Ismae l\'a attendu des dizaines de fois, ce bus.'],
-    sapinMontaigu: ['Le grand sapin de la place, couvert de boules et de guirlandes.', 'Tout en haut, l\'étoile clignote un peu de travers. C\'est ce qui fait son charme.'],
+    abribusMontaigu: ['L\'arrêt de car de Montaigu. Ismae l\'a attendu des dizaines de fois, ce car.'],
     manegeMontaigu: ['Un vieux manège de chevaux de bois. La musique tourne en boucle depuis 1952.', 'Georges suit les chevaux des yeux. Un tour, deux tours, trois tours…'],
-    bancMontaigu: ['Un banc couvert de neige, juste devant le sapin. La meilleure place de Montaigu.'],
-    fontaineMontaigu: ['La fontaine du jardin. L\'eau a gelé en une jolie petite cascade de glace.'],
-    bonhommeMontaigu: ['Un bonhomme de neige au chapeau noir. Il ressemble un peu à Jack Snow… en moins penché.'],
     boitePoste: ['Une boîte aux lettres jaune. Une lettre dépasse : « Cher Père Noël, cette année j\'ai été TRÈS sage. Presque. »'],
     chaletChocolat: ['Le chalet du chocolat chaud. Ça sent la cannelle et la guimauve.'],
     chaletMarrons: ['Des marrons chauds dans des cornets en papier. Ils craquent sous la dent.'],
     chaletCrepes: ['Des crêpes au sucre, au chocolat, à la confiture…', 'Pas au caramel au beurre salé ce soir. Il paraît que le restaurant a tout réquisitionné.'],
-    chaletSantons: ['Des santons tout petits : un berger, un âne, un boulanger… et un tout petit chat noir.', 'Georges trouve qu\'il ne lui ressemble pas du tout. Il a raison : il est moins beau.'],
-    boulangerieMontaigu: ['La boulangerie. Des bûches de Noël en vitrine : chocolat, praliné, marrons.'],
+    boulangerieMontaigu: ['La boulangerie. Des bûches de Noël en vitrine, et des brioches vendéennes tressées, toutes dorées.'],
     pharmacieMontaigu: ['La pharmacie, sa croix verte qui clignote. Fermée, mais la vitrine est décorée de flocons en papier.'],
     fleuristeMontaigu: ['Le fleuriste : des houx, des roses de Noël et des couronnes de sapin.'],
-    librairieMontaigu: ['La librairie. Un livre est mis en avant : « Tout le monde peut cuisiner », par le chef Gusteau.'],
+    librairieMontaigu: ['La librairie Les Trois Mondes. Un livre est mis en avant : « Tout le monde peut cuisiner », par le chef Gusteau.'],
     fromagerieMontaigu: ['La fromagerie. Même à travers la vitre, ça sent très fort. Georges adore.'],
-    cafeMontaigu: ['Le café de la place. Des gens rient au chaud derrière la vitre embuée.'],
+    cafeMontaigu: ['Le café d\'en face. Des gens rient au chaud derrière la vitre embuée.'],
     patisserieMontaigu: ['La pâtisserie : des macarons, des choux, des éclairs… et une affiche « Plus de caramel au beurre salé ! Désolés ! ».'],
     antiquaireMontaigu: ['Un antiquaire. Dans la vitrine, une vieille horloge, un gramophone et un chapeau melon.'],
     atelierMontaigu: ['Un atelier de peinture. Des tableaux de Montaigu sous la neige sèchent sur des chevalets.'],
@@ -909,6 +930,7 @@ const CONFIG = {
 CONFIG.personnages.cliente = { nom: 'Une cliente', couleur: '#e7a0c8' };
 Object.assign(CONFIG.personnages, {
   // Montaigu et le restaurant du chef Gusteau (épreuve 5)
+  mcqueen: { nom: 'Flash McQueen', couleur: '#ff6a5a', bip: 560 },
   remy: { nom: 'Rémy', couleur: '#b4c0d8', bip: 1040 }, linguini: { nom: 'Linguini', couleur: '#f0a060', bip: 430 }, coletteChef: { nom: 'Colette', couleur: '#f08090', bip: 660 },
   ego: { nom: 'Anton Ego', couleur: '#b8a0c8', bip: 190 }, clienteResto: { nom: 'Une cliente', couleur: '#e7a0c8' }, clientResto: { nom: 'Un client', couleur: '#a8c0e0', bip: 300 },
   mamie: { nom: 'Mamie Jeannette', couleur: '#d8b0e0', bip: 700 }, vendeuse: { nom: 'La marchande', couleur: '#9ad0a0' }, petitGarcon: { nom: 'Un petit garçon', couleur: '#f2c230', bip: 900 },

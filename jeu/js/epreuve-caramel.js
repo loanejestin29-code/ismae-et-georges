@@ -2,8 +2,10 @@
 //  epreuve-caramel.js — ÉPREUVE 5 : « Le caramel raté » (Montaigu)
 //
 //  État (Scenes.quete.caramel) : 'aVenir' → 'rencontre' (Ismae a rencontré Rémy) → 'gagne'
+//  · À la descente du car, Linguini vient chercher Ismae (Loane a appelé le restaurant) puis
+//    l'attend devant le restaurant (Scenes.quete.linguini : 'attend', puis 'dedans') ; voir bus.js.
 //  · Dans les rues de Montaigu, les habitants parlent d'une odeur de caramel et d'un chef
-//    « tout petit ». Le restaurant du chef Gusteau est sur la place, à côté de l'église.
+//    « tout petit ». Le restaurant du chef Gusteau est dans la grande rue, à côté de l'église.
 //  · Dans la cuisine, Rémy (le rat cuisinier) cherche quelqu'un pour préparer un caramel.
 //  · Le mini-jeu (caramel.js) : doser le sucre, mélanger, surveiller la cuisson.
 //  · La victoire : le cinquième indice, puis Ismae peut ressortir et se promener.
@@ -28,6 +30,8 @@ const EpreuveCaramel = (() => {
 
   function entreeSalle(J) {
     musiqueResto();
+    J.reperes = []; // Linguini est rentré avec Ismae : plus de flèche
+    if (Q.linguini === 'attend') Q.linguini = 'dedans';
     if (salleVue || Q.caramel === 'gagne') return;
     salleVue = true;
     J.jouerScript([{ attendre: 0.3 }, { dire: K().salle }]);

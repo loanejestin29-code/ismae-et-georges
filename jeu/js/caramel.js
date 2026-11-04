@@ -7,7 +7,7 @@
 //   2. FAIRE FONDRE : on règle le feu (curseur à droite, ou ↑↓) et on remue en rond
 //      (doigt, souris, ou ←→). Le feu chauffe plus fort d'un côté : sans remuer, ça noircit
 //      par endroits ; trop fort, tout brûle ; trop doux, le sucre cristallise.
-//   3. LE BEURRE DEMI-SEL : on coupe la motte sur les pointillés (glisser vers le bas, ou
+//   3. LE BEURRE DEMI-SEL : on coupe la motte sur les pointillés (toucher ou glisser vers le bas, ou
 //      ←→ et Espace), puis on ajoute les morceaux un par un en surveillant la température :
 //      chaque morceau la fait baisser, le feu la fait remonter.
 //   4. LA CRÈME : on maintient pour verser, en remuant en même temps ; trop vite, ça mousse
@@ -25,17 +25,18 @@ const Caramel = (() => {
   const REGLAGES = {
     // grammes ; le sucre met « vol » secondes à tomber ; le débit monte si l'on maintient longtemps ;
     // à chaque fois qu'on penche le paquet, il peut lâcher un « paquet » de sucre (jusqu'à 10 g)
-    sucre: { cible: 200, tol: 6, max: 214, vol: 0.18, debit: 55, debitMax: 90, paquet: [0.5, 4, 10], temps: 13 },
+    sucre: { cible: 200, tol: 8, max: 216, vol: 0.18, debit: 55, debitMax: 90, paquet: [0.5, 4, 10], temps: 15 },
     // fonte (par seconde, à plein feu) ; au-delà de « fort », le sucre colore avant même de fondre
     // le point chaud du brûleur : chaleur de « froid » à « froid + chaud », il dérive et saute d'un coup de temps en temps
     // c'est réussi quand tout a fondu et que la couleur moyenne atteint « dore » ; brûlé à « moyenne » ou à « nbNoirs » points noirs
-    fonte: { temps: 21, fonte: 0.16, cuisson: 0.1, fort: 0.7, forte: 0.25, melange: 0.6, noir: 0.85, nbNoirs: 3, dore: 0.4, moyenne: 0.7, froid: 0.3, chaud: 2.2, saut: [5, 8] },
-    // la découpe (tolérances en pixels du jeu), puis la température (°C) pendant qu'on ajoute le beurre
-    beurre: { lignes: [0.2, 0.4, 0.6, 0.8], tol: 4, travers: 8, ratesMax: 3, temps: 16, T0: 168, monte: [8, 11], baisse: 24, fonte: 1.4, eclabousse: 10, chaud: 192, froid: 135, vert: [150, 182] },
+    fonte: { temps: 24, fonte: 0.16, cuisson: 0.1, fort: 0.7, forte: 0.25, melange: 0.6, noir: 0.85, nbNoirs: 3, dore: 0.4, moyenne: 0.7, froid: 0.3, chaud: 2.2, saut: [5, 8] },
+    // la découpe (tolérances en pixels du jeu : net à « tol », un peu de travers jusqu'à « travers », au-delà c'est raté),
+    // puis la température (°C) pendant qu'on ajoute le beurre
+    beurre: { lignes: [0.2, 0.4, 0.6, 0.8], tol: 7, travers: 12, ratesMax: 5, temps: 24, T0: 168, monte: [8, 11], baisse: 24, fonte: 1.4, eclabousse: 10, chaud: 192, froid: 135, vert: [150, 182] },
     // la crème : débit du pichet, mousse créée par la crème versée, cassée en remuant
     creme: { temps: 22, debit: 0.17, mousse: 7, casse: 1.0, retombe: 0.25, marbre: 0.5, marbreMax: 0.12 },
     // la texture : la consistance monte au-dessus de « seuil » °C ; ça attache au-dessus de « attache » si l'on ne remue pas
-    texture: { temps: 45, fenetre: [0.62, 0.7], dur: 0.8, seuil: 104, epaissit: 0.0085, attache: 106, gratin: 0.035, brule: 128, vert: [108, 116] },
+    texture: { temps: 45, fenetre: [0.6, 0.72], dur: 0.8, seuil: 104, epaissit: 0.0085, attache: 106, gratin: 0.024, brule: 128, vert: [108, 116] },
   };
   const ETAPES = ['sucre', 'fonte', 'beurre', 'creme', 'texture'];
   // la couleur du caramel selon la cuisson (0 : sucre fondu, 1 : charbon)
@@ -164,9 +165,11 @@ const Caramel = (() => {
         const dx = (pos.x - L.px) / L.R, dy = (pos.y - L.py) / (L.R * 0.6);
         if (E.phase === 'jeu' && dx * dx + dy * dy < 1.5) deposer();
       }
+      // on coupe en glissant vers le bas, ou d'un simple toucher sur la motte
       if (E.phase === 'jeu' && d.zone === 'planche' && E.sous === 'coupe') {
         const dy = pos.y - d.y0, dx = pos.x - d.x0;
-        if (dy > L.bloc.h * 0.55 && Math.abs(dx) < dy * 0.7) couper((pos.x + d.x0) / 2);
+        if (dy > L.bloc.h * 0.3 && Math.abs(dx) < dy * 0.8) couper((pos.x + d.x0) / 2);
+        else if (Math.abs(dx) < 6 && Math.abs(dy) < 6) couper(pos.x);
       }
       return;
     }
@@ -259,8 +262,7 @@ const Caramel = (() => {
       E.coupes.push(d <= B.tol ? ligne + (x - ligne) * 0.3 : x);
       Musique.couteau();
       for (let k = 0; k < 6; k++) E.parts.push({ type: 'miette', x, y: L.bloc.y + Math.random() * L.bloc.h, vx: (Math.random() - 0.5) * 40, vy: -20 - Math.random() * 30, t: 0, max: 1.2, sol: L.bloc.y + L.bloc.h });
-      if (d <= B.tol) alerte('coupeBien', 'content', 0.4);
-      else { E.rates++; alerte('coupeTravers', 'inquiet', 0.4); }
+      alerte(d <= B.tol ? 'coupeBien' : 'coupeTravers', d <= B.tol ? 'content' : 'inquiet', 0.4);
     } else { E.rates++; Musique.bip(200, 0.04); alerte('coupeRate', 'inquiet', 0.4); }
     if (E.rates >= B.ratesMax) return rater('miettes');
     if (E.coupes.length === B.lignes.length) {
