@@ -13,7 +13,8 @@
 //    y   0-196  le ciel, la rangée nord (on entre au restaurant du chef GUSTEAU)
 //    y 196-222  le trottoir nord, ses bornes et ses lanternes
 //    y 222-300  la rue pavée : le car s'arrête à l'ouest ; à l'est, les chalets, le manège,
-//               puis la rue barrée (la sixième épreuve viendra plus tard)
+//               puis la rue barrée
+//    (après le caramel, l'antiquaire attend Ismae devant sa boutique, rangée sud : épreuve 6, le grenier)
 //    y 300-330  le trottoir sud (l'abribus, les réverbères et leurs guirlandes)
 //    y 330-452  la rangée sud, dont on voit les façades plus bas
 // =====================================================================
@@ -138,6 +139,7 @@ Jeu.enregistrerCarte('montaigu', () => {
   const MAIRIE = x + 75;
   const mairie = facade({ w: 150, facade: 'creme', boutique: 'hotel', seed: 525, cheminees: 2 }, x, SUD, 'mairieMontaigu', true);
   ecrire(mairie.b, 'MAIRIE', '#efe6d4', '#2a3a6a'); x = mairie.fin;
+  const ANTIQUAIRE = x + 42; // (l'épreuve 6 commence devant sa boutique)
   x = facade({ w: 84, facade: 'gris', boutique: 'antiquaire', seed: 526 }, x, SUD, 'antiquaireMontaigu', true).fin;
   x = facade({ w: 80, facade: 'blanc', boutique: 'atelier', seed: 527 }, x, SUD, 'atelierMontaigu', true).fin;
   x = facade({ w: 66, facade: 'creme', boutique: 'porte', seed: 528 }, x, SUD, null, true).fin;
@@ -191,14 +193,18 @@ Jeu.enregistrerCarte('montaigu', () => {
   habitant({ id: 'monsieur', x: 1370, y: 236, vitesse: 14, chemin: [{ x: 1370, y: 284, pause: 3, regard: 'right' }, { x: 1370, y: 236, pause: 3, regard: 'right' }], cfg: P5.monsieur });
   habitant({ id: 'dameChien', x: 860, y: NORD + 14, vitesse: 14, chemin: [{ x: 1180, y: NORD + 14, pause: 2, regard: 'up' }, { x: 820, y: NORD + 14, pause: 2, regard: 'up' }], cfg: P5.dameChien });
 
-  // Linguini, qui vient chercher Ismae à la descente du car puis l'attend devant le restaurant (bus.js)
+  // Linguini, qui vient chercher Ismae à la descente du car puis rentre l'attendre au restaurant (bus.js)
   C.linguini = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: porteResto, y: NORD + 14, dir: 'down', visible: false, vitesse: 110, dialogue: (J) => EpreuveCaramel.repliques('linguiniRue', J) });
   C.pnj.push(C.linguini);
+  // l'antiquaire, qui attend Ismae devant sa boutique après le caramel et le fait monter au grenier (epreuve-chasse.js)
+  C.antiquaire = new Entites.Perso({ id: 'antiquaire', cfg: CONFIG.chasse.antiquaireCfg, x: ANTIQUAIRE + 16, y: TROT2 - 12, dir: 'up', visible: false, dialogue: (J) => Chasse.antiquaire(J) });
+  C.pnj.push(C.antiquaire);
+  C.arrivees.antiquaire = { x: ANTIQUAIRE - 8, y: TROT2 - 14, dir: 'up' };
 
   // ---------------------------------------------------------------- l'arrivée du car (et Flash McQueen, garé un peu plus loin)
   C.montaigu = { bus: { x: 230, y: 292 }, flash: { x: 470, y: 296 }, porteResto: { x: porteResto, y: NORD + 14 } };
   C.arrivees.bus = { x: 284, y: 312, dir: 'down' };
-  C.onEntree = (J) => Bus.arriveeMontaigu(J);
+  C.onEntree = (J) => { Bus.arriveeMontaigu(J); Chasse.montaigu(J); };
   C.finaliser(0.22);
   return C;
 });

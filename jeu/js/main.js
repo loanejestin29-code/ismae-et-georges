@@ -23,11 +23,12 @@
     { carte: 'arendelle', arrivee: 'arret', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne' }) }, // 3 : l'arrêt de bus
     { carte: 'montaigu', arrivee: 'bus', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne', bus: 'gagne' }) }, // 4 : Montaigu
     { carte: 'montaigu', arrivee: 'devantResto', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne', bus: 'gagne', caramel: 'gagne' }) }, // 5 : après le caramel
+    { carte: 'grenier', arrivee: 'entree', quete: Object.assign({}, FINI1, { sherwood: 'gagne', neige: 'gagne', bus: 'gagne', caramel: 'gagne', chasse: 'gagne' }) }, // 6 : après la chasse
   ];
   // le début de chaque épreuve, pour la rejouer depuis le carnet (l'épreuve 1 commence en entrant au Carrefour)
   const DEBUTS = [{ carte: 'superette', arrivee: 'entree', quete: { intro: 'fini', tom: true, cle: true, porteOuverte: true } }, ...ETAPES.slice(1)];
-  // raccourcis d'essai : #sherwood, #arendelle, #bus, #montaigu, #caramel (après l'épreuve 5)
-  const RACCOURCIS = { sherwood: 1, arendelle: 2, bus: 3, montaigu: 4, caramel: 5 };
+  // raccourcis d'essai : #sherwood, #arendelle, #bus, #montaigu, #caramel (après l'épreuve 5), #grenier (dans le grenier)
+  const RACCOURCIS = { sherwood: 1, arendelle: 2, bus: 3, montaigu: 4, caramel: 5, grenier: 5 };
   function etapeDe() {
     const k = Object.keys(RACCOURCIS).find((n) => location.hash.includes(n));
     if (k) { Indices.simuler(RACCOURCIS[k]); return RACCOURCIS[k]; }
@@ -49,9 +50,13 @@
       EpreuveNeige.init(Jeu);
       Bus.init(Jeu);
       EpreuveCaramel.init(Jeu);
+      Chasse.init(Jeu);
       Indices.init();
       etape = etapeDe();
       rejoue = Indices.aRejouer();
+      // l'épreuve 6 rejouée depuis le carnet repart de zéro ; une chasse commencée reprend dans le grenier
+      if (rejoue === 5) Chasse.effacer();
+      else if (etape === 5 && (Chasse.enCours() || location.hash.includes('grenier'))) ETAPES[5] = { carte: 'grenier', arrivee: 'entree', quete: Object.assign({}, ETAPES[5].quete, { chasse: Chasse.enCours() ? 'quete' : 'aVenir' }) };
       Jeu.init('rue', 'depart');
     } catch (err) {
       $('titre-erreur').hidden = false;
@@ -68,7 +73,7 @@
       recommencer.hidden = location.hash.length > 1;
     }
     const commencer = (depuisLeDebut, depart = ETAPES[etape]) => {
-      if (depuisLeDebut) Indices.effacer(); else partir(depart);
+      if (depuisLeDebut) { Indices.effacer(); Chasse.effacer(); } else partir(depart);
       Musique.demarrer();
       $('titre').classList.add('fini');
       setTimeout(() => { $('titre').hidden = true; Titre.arreter(); }, 650);

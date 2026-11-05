@@ -74,7 +74,7 @@ Jeu.enregistrerCarte('foret', () => {
     [[466, 820], [380, 846], [300, 858], [220, 862]],                              // vers le campement
     [[520, 512], [600, 512], [690, 530], [770, 570], [832, 620], [834, 690], [826, 760], [812, 830]], // vers le pont de l'est et la prairie
     [[470, 540], [380, 560], [300, 600], [250, 628]],                              // vers Frère Tuck
-    [[528, 300], [420, 296], [300, 280], [180, 240], [110, 220], [70, 160], [66, 60], [66, 0]], // vers les montagnes
+    [[528, 300], [420, 296], [300, 284], [200, 274], [150, 262], [104, 232], [80, 196], [70, 160], [66, 60], [66, 0]], // vers les montagnes (il passe devant les gradins)
   ];
   const tamponner = (pts, larg, col, bruit) => {
     for (let s = 0; s < pts.length - 1; s++) {

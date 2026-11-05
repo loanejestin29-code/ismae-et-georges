@@ -18,6 +18,7 @@ const Musique = (() => {
     foret: { bpm: 108, swing: false, plein: 0.62 }, tournoi: { bpm: 126, swing: false, plein: 0.72 },
     arendelle: { bpm: 132, swing: false, plein: 0.6 }, route: { bpm: 150, swing: false, plein: 0.7 },
     montaigu: { bpm: 112, swing: false, plein: 0.62 }, resto: { bpm: 168, swing: false, plein: 0.6 },
+    grenier: { bpm: 100, swing: false, plein: 0.55 },
   };
   let morceau = 'jazz', suivant = null, NOIRE = 60 / MORCEAUX.jazz.bpm;
   let ctx = null, master, bus, sfx, filtre, reverb, wet, debut = 0, prochaine = 0, pas = 0, timer = null;
@@ -389,6 +390,24 @@ const Musique = (() => {
     [4, 0, 2, 79], [4, 2, 2, 82], [4, 4, 2, 86], [5, 0, 3, 77], [5, 3, 1, 76], [5, 4, 2, 74],
     [6, 0, 2, 73], [6, 2, 2, 76], [6, 4, 2, 79], [7, 0, 6, 74],
   ];
+  // ------------------------------------------------------------ le grenier : une boîte à musique un peu mystérieuse (mi mineur, à trois temps)
+  const GRILLE_G = [[52, 55, 59], [48, 52, 55], [45, 48, 52], [47, 51, 54], [52, 55, 59], [48, 52, 55], [45, 48, 52], [47, 51, 54]];
+  const AIR_G = [
+    [0, 0, 2, 76], [0, 2, 2, 79], [0, 4, 2, 83], [1, 0, 3, 84], [1, 3, 1, 83], [1, 4, 2, 79],
+    [2, 0, 2, 81], [2, 2, 2, 84], [2, 4, 2, 88], [3, 0, 4, 87], [3, 4, 2, 83],
+    [4, 0, 2, 79], [4, 2, 2, 83], [4, 4, 2, 88], [5, 0, 3, 84], [5, 3, 1, 83], [5, 4, 2, 79],
+    [6, 0, 2, 76], [6, 2, 2, 81], [6, 4, 2, 78], [7, 0, 6, 75],
+  ];
+  function jouerPasGrenier(i, t) {
+    const mesure = Math.floor(i / 6) % 16, croche = i % 6, mm = mesure % 8, acc = GRILLE_G[mm];
+    if (croche === 0) { contrebasse(acc[0] - 12, t, 0.16); cordes(acc, t, dureeCroches(i, 6), 0.006); }
+    if (croche === 2 || croche === 4) clochette(acc[croche === 2 ? 1 : 2] + 12, t, dureeCroches(i, 1), 0.012);
+    for (const [b, c, d, n] of AIR_G) {
+      if (b !== mm || c !== croche) continue;
+      clochette(n, t, dureeCroches(i, d), 0.038);
+      if (mesure >= 8) clochette(n + 12, t, dureeCroches(i, d), 0.012);
+    }
+  }
   function jouerPasResto(i, t) {
     const mesure = Math.floor(i / 6) % 16, croche = i % 6, mm = mesure % 8, nom = GRILLE_U[mm], r0 = NOTES[nom], tierce = nom === 'A' ? 4 : 3;
     const accord = [0, tierce, 7, nom === 'A' ? 10 : 12].map((iv) => { let m = 60 + ((r0 + iv) % 12); while (m > 70) m -= 12; return m; });
@@ -409,7 +428,7 @@ const Musique = (() => {
       majMix();
     }
     while (prochaine < ctx.currentTime + 0.15) {
-      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : morceau === 'route' ? jouerPasRoute : morceau === 'montaigu' ? jouerPasMontaigu : morceau === 'resto' ? jouerPasResto : jouerPas)(pas, prochaine);
+      (morceau === 'poursuite' ? jouerPasPoursuite : morceau === 'foret' || morceau === 'tournoi' ? jouerPasForet : morceau === 'arendelle' ? jouerPasValse : morceau === 'route' ? jouerPasRoute : morceau === 'montaigu' ? jouerPasMontaigu : morceau === 'resto' ? jouerPasResto : morceau === 'grenier' ? jouerPasGrenier : jouerPas)(pas, prochaine);
       prochaine += dureeCroche(pas);
       pas++;
     }

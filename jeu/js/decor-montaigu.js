@@ -250,30 +250,32 @@ const Montaigu = (() => {
     }
   }
   function flash(sens = -1) {
-    const W = 60, H = 23, { c, P } = mk(W, H);
+    // dessinée sur une grille de 60 × 23, réduite aux 4/5 (q)
+    const K = 0.8, q = (v) => Math.round(v * K), Q = (pts) => pts.map(([x, y]) => [q(x), q(y)]);
+    const W = 48, H = 19, { c, P } = mk(W, H);
     const R = '#d8262c', R2 = '#a3141c', R3 = '#ff5f4f', VITRE = '#2a3348';
     // la caisse, le bas de caisse plus sombre, les reflets
-    poly(P, [[2, 17], [1, 14], [2, 12], [6, 10], [18, 9], [20, 9], [26, 3], [35, 2], [43, 7], [50, 8], [55, 9], [57, 11], [57, 17], [54, 18], [6, 18]], R);
-    poly(P, [[2, 15], [57, 15], [57, 17], [54, 18], [6, 18], [2, 17]], R2);
-    P.hline(7, 10, 11, R3); P.hline(3, 11, 4, R3); P.hline(44, 8, 10, R3); P.hline(27, 3, 8, R3);
+    poly(P, Q([[2, 17], [1, 14], [2, 12], [6, 10], [18, 9], [20, 9], [26, 3], [35, 2], [43, 7], [50, 8], [55, 9], [57, 11], [57, 17], [54, 18], [6, 18]]), R);
+    poly(P, Q([[2, 15], [57, 15], [57, 17], [54, 18], [6, 18], [2, 17]]), R2);
+    P.hline(6, 8, 8, R3); P.hline(3, 9, 3, R3); P.hline(35, 6, 8, R3); P.hline(22, 2, 6, R3);
     // les vitres, et son œil sur le pare-brise (il regarde devant, l'air sûr de lui)
-    poly(P, [[21, 9], [27, 4], [35, 4], [41, 8]], VITRE); P.vline(31, 4, 5, R);
-    P.ellipse(26, 6, 2, 1, '#f4f6fa'); P.rect(24, 5, 2, 2, '#3a7ad8'); P.px(24, 6, '#1d1626'); P.px(25, 5, '#ffffff'); P.hline(24, 4, 4, R2);
+    poly(P, Q([[21, 9], [27, 4], [35, 4], [41, 8]]), VITRE); P.vline(25, 3, 4, R);
+    P.rect(19, 4, 4, 2, '#f4f6fa'); P.px(23, 5, '#f4f6fa'); P.rect(19, 4, 2, 2, '#3a7ad8'); P.px(19, 5, '#1d1626'); P.px(20, 4, '#ffffff'); P.hline(19, 3, 4, R2);
     // l'aileron
-    P.rect(49, 4, 2, 4, '#1d1626'); P.rect(46, 3, 12, 2, R); P.hline(46, 3, 12, R3); P.rect(56, 1, 2, 4, R);
+    P.rect(39, 3, 2, 3, '#1d1626'); P.rect(37, 2, 10, 2, R); P.hline(37, 2, 10, R3); P.rect(45, 1, 2, 3, R);
     // l'éclair jaune-orange sur le côté
-    poly(P, [[15, 13], [26, 11], [25, 12], [38, 10], [36, 12], [47, 11], [35, 15], [36, 13], [25, 15], [26, 14]], '#f6c02a');
-    for (let x = 34; x < 48; x++) for (let y = 10; y < 16; y++) if ((x + y) % 3 === 0 && P.g.getImageData(x, y, 1, 1).data[1] > 150) P.px(x, y, '#f08a24');
+    poly(P, Q([[15, 13], [26, 11], [25, 12], [38, 10], [36, 12], [47, 11], [35, 15], [36, 13], [25, 15], [26, 14]]), '#f6c02a');
+    for (let x = 27; x < 38; x++) for (let y = 8; y < 13; y++) if ((x + y) % 3 === 0 && P.g.getImageData(x, y, 1, 1).data[1] > 150) P.px(x, y, '#f08a24');
     // le phare autocollant et le sourire sur le pare-chocs
-    P.rect(4, 11, 2, 2, '#f6d23a');
-    for (const [x, y] of [[2, 14], [3, 15], [4, 15], [5, 15], [6, 14]]) P.px(x, y, '#1d1626');
-    P.hline(3, 14, 3, '#ffffff');
+    P.rect(3, 9, 2, 1, '#f6d23a');
+    for (const [x, y] of [[2, 11], [3, 12], [4, 12], [5, 12], [6, 11]]) P.px(x, y, '#1d1626');
+    P.hline(3, 11, 3, '#ffffff');
     // les roues : pneus noirs, jantes rouges
-    for (const wx of [12, 47]) { P.ellipse(wx, 18, 5, 4, '#1d1626'); P.ellipse(wx, 18, 4, 3, '#2a2632'); P.ellipse(wx, 18, 2, 2, '#c8202a'); P.px(wx, 18, '#c8ccd8'); }
+    for (const wx of [10, 38]) { P.ellipse(wx, 15, 4, 3, '#1d1626'); P.ellipse(wx, 15, 3, 2, '#2a2632'); P.ellipse(wx, 15, 1, 1, '#c8202a'); P.px(wx, 15, '#c8ccd8'); }
     const img = sens < 0 ? c : PX.flipX(c);
     if (sens > 0) img.getContext('2d').setTransform(1, 0, 0, 1, 0, 0); // flipX laisse le miroir actif : le 95 s'écrit à l'endroit
-    const P2 = PX.painter(img), tx = sens < 0 ? 28 : W - 28 - A.largeurTexte('95');
-    A.texte(P2, '95', tx + 1, 11, '#1d1626'); A.texte(P2, '95', tx, 10, '#fff4d0');
+    const P2 = PX.painter(img), tx = sens < 0 ? 22 : W - 22 - A.largeurTexte('95');
+    A.texte(P2, '95', tx + 1, 9, '#1d1626'); A.texte(P2, '95', tx, 8, '#fff4d0');
     return { img: PX.outline(img, '#1d1626'), ax: W / 2, ay: H - 1 };
   }
   // son portrait pour les dialogues, vu de face : les deux grands yeux sur le pare-brise, le capot, le grand sourire

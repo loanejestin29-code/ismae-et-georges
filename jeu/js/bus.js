@@ -56,7 +56,7 @@ const Bus = (() => {
 
   // ------------------------------------------------------------ les sprites (vue du dessus, l'avant vers le haut)
   const SP = {};
-  function mk(w, h, f) { const c = PX.canvas(w, h); f(PX.painter(c), c); return PX.outline(c, '#1d1626'); }
+  function mk(w, h, f, contour = '#1d1626') { const c = PX.canvas(w, h); f(PX.painter(c), c); return PX.outline(c, contour); }
   function voiture(col, toit) {
     return mk(14, 24, (P) => {
       for (const [x, y] of [[0, 4], [12, 4], [0, 17], [12, 17]]) P.rect(x, y, 2, 4, '#1d1a22');
@@ -123,6 +123,8 @@ const Bus = (() => {
     SP.coeur = PX.outline(PX.fromRows(['.rr.rr.', 'rRrrrrr', 'rRrrrrr', '.rrrrr.', '..rrr..', '...r...'], { r: '#ff4a6a', R: '#ffc4d0' }), '#3a1426');
     // le décor des bas-côtés (voir plus bas : sapinNeige, arbreNu, rocherNeige…)
     SP.sapins = [[20, 0.6], [24, 0.7], [28, 0.85], [32, 1], [22, 0.35], [30, 0.5], [26, 0.9]].map(([h, n], k) => sapinNeige(h, n, 300 + k));
+    // ceux du cœur de la forêt : deux tailles proches, un contour vert sombre (de loin, les cimes se fondent en une seule masse)
+    SP.sapinsForet = [[28, 0.75], [30, 0.5], [29, 0.95], [31, 0.7], [27, 0.35], [33, 0.85]].map(([h, n], k) => sapinNeige(h, n, 700 + k, '#0f2418'));
     SP.arbresNus = [22, 26, 30].map((h, k) => arbreNu(h, 400 + k));
     SP.rochers = [[36, 22], [26, 17], [44, 26]].map(([w, h], k) => rocherNeige(w, h, 500 + k));
     SP.lac = lacGele(64, 26);
@@ -209,7 +211,7 @@ const Bus = (() => {
   // même pour une tranche donnée), dessiné une fois dans une image, puis simplement recopié à l'écran. Au passage d'un
   // paysage à l'autre, chaque élément tire au sort son paysage, de plus en plus souvent le suivant : la forêt s'épaissit
   // peu à peu, puis s'éclaircit, les champs puis les maisons arrivent petit à petit.
-  function sapinNeige(h, neige, seed) {
+  function sapinNeige(h, neige, seed, contour) {
     const w = (Math.round(h * 0.36) * 2) + 1, n = h >= 26 ? 4 : 3, base = h - 3, th = base / n, cx = (w - 1) / 2, r = PX.rng(seed);
     return mk(w, h, (P) => {
       P.rect(cx - 1, base, 3, 3, '#5a3a26'); P.px(cx - 1, base, '#7a5236');
@@ -231,7 +233,7 @@ const Bus = (() => {
         }
       }
       P.px(cx, 0, '#f4f8ff');
-    });
+    }, contour);
   }
   function arbreNu(h, seed) { // un arbre sans feuilles (sans contour : les branches restent fines), la neige sur les branches
     const w = Math.round(h * 0.9) | 1, r = PX.rng(seed), c = PX.canvas(w, h), P = PX.painter(c), cx = (w - 1) / 2, segs = [];
@@ -312,22 +314,58 @@ const Bus = (() => {
             }
             if (d0 > 120) for (let n = 0; n < 3; n++) pose(pick(SP.sapins), xa + r() * (xb - xa), py0 + r() * (py1 - py0));
           } else if (p === 'foret') {
-            // une forêt bien serrée : des sapins enneigés et des arbres nus, un cerf de temps en temps
-            for (let y = py0; y < py1; y += 11) for (let x = xa; x < xb; x += 13) {
-              if (r() < 0.12) continue;
-              const px = x + r() * 10, py = y + r() * 9;
-              if (r() < 0.01) pose(SP.cerf, px, py); else pose(r() < 0.62 ? pick(SP.sapins) : pick(SP.arbresNus), px, py);
+            // une forêt dense, vue d'en haut : des rangées de sapins en quinconce, alignées sur toute la forêt (pas de
+            // couture entre deux parcelles) ; parfois une clairière, un cerf ; en lisière, côté route, la forêt s'effiloche :
+            // des trous, de jeunes sapins et des arbres nus devant
+            const clair = r() < 0.3 ? { x: xa + 18 + r() * Math.max(0, xb - xa - 36), y: py0 + 18 + r() * (py1 - py0 - 36), r: 12 + r() * 9 } : null;
+            const dist = (x) => (x - bord) * c; // distance à la route
+            // entre deux paysages, les bords des bouts de forêt s'effilochent aussi (sinon : des rectangles de sapins)
+            const mel = melange((py0 + py1) / 2 / LONGUEUR), doux = mel.a.id !== mel.b.id;
+            const auBord = (x, y) => Math.min(x - xa, xb - x, y - py0, py1 - y);
+            for (let y = Math.ceil(py0 / 10) * 10; y < py1; y += 10) {
+              const dec = (y / 10) % 2 ? 7 : 0;
+              for (let x = Math.ceil((xa - dec) / 14) * 14 + dec; x < xb; x += 14) {
+                const px = x + Math.floor(r() * 5) - 2, py = y + Math.floor(r() * 3) - 1;
+                if (clair && Math.hypot((px - clair.x) / 1.4, py - clair.y) < clair.r) continue;
+                if (dist(px) < 34 && r() < (34 - dist(px)) / 24) continue;
+                if (doux && auBord(px, py) < 20 && r() < (20 - auBord(px, py)) / 16) continue;
+                pose(pick(SP.sapinsForet), px, py);
+              }
+            }
+            if (clair && r() < 0.5) pose(SP.cerf, clair.x, clair.y + 5);
+            if (d0 < 20) for (let y = py0 + r() * 12; y < py1; y += 10 + r() * 16) {
+              const d = 10 + r() * 18;
+              pose(r() < 0.45 ? pick(SP.arbresNus) : SP.sapins[r() < 0.5 ? 0 : 4], X(d), y);
             }
           } else {
-            // la montagne : des bosquets de sapins, des rochers, parfois un chalet, un lac gelé, un bonhomme de neige
-            const dens = 0.5 + 0.5 * Math.sin(k * 1.7 + d0 * 0.05 + c);
-            if (r() < 0.12 && d0 > 30) pose(SP.lac, (xa + xb) / 2, py0 + 6 + r() * 20);
-            for (let y = py0; y < py1; y += 14) for (let x = xa; x < xb; x += 15) {
-              const px = x + r() * 12, py = y + r() * 10, q = r();
-              if (q < 0.12 + 0.42 * dens) pose(pick(SP.sapins), px, py);
-              else if (q < 0.15 + 0.42 * dens) pose(SP.rochers[r() < 0.6 ? 1 : Math.floor(r() * 3)], px, py);
-              else if (q < 0.16 + 0.42 * dens && d0 > 30) pose(r() < 0.75 ? SP.chalet : SP.bonhomme, px, py);
+            // la montagne : de grandes étendues de neige, des bosquets de sapins serrés, des rochers, parfois un chalet,
+            // un lac gelé ou un bonhomme de neige ; les sapins ne passent jamais devant ce qui est déjà posé, et rien ne
+            // déborde sur la parcelle d'à côté (y : le long de la route, vers le haut de l'écran ; une image monte de y à y + h)
+            const pris = [];
+            const boite = (img, x, y) => ({ x0: x - img.width / 2 - 2, x1: x + img.width / 2 + 2, y0: y - 3, y1: y + img.height + 2 });
+            const libre = (b) => b.x0 > xa && b.x1 < xb && b.y0 > py0 - 4 && b.y1 < py1 + 6 && !pris.some((q) => b.x0 < q.x1 && b.x1 > q.x0 && b.y0 < q.y1 && b.y1 > q.y0);
+            const poseSi = (img, x, y, garder) => { const b = boite(img, x, y); if (!libre(b)) return false; if (garder) pris.push(b); pose(img, x, y); return true; };
+            const hy = py1 - py0;
+            // (au-dessus des 24 premiers pixels : une forêt juste en dessous pourrait les cacher)
+            const ou = (img) => py0 + 24 + r() * Math.max(0, hy - 28 - img.height);
+            if (r() < 0.14 && d0 > 30) poseSi(SP.lac, (xa + xb) / 2, ou(SP.lac), true);
+            const maison = r() < 0.8 ? SP.chalet : SP.bonhomme;
+            if (r() < 0.3 && d0 > 30) poseSi(maison, xa + 20 + r() * (xb - xa - 40), ou(maison), true);
+            for (let n = Math.floor(r() * 2.4); n > 0; n--) { const ro = SP.rochers[r() < 0.6 ? 1 : Math.floor(r() * 3)]; poseSi(ro, xa + 12 + r() * (xb - xa - 24), ou(ro), true); }
+            // les bosquets : des sapins serrés autour d'un centre, les plus grands au milieu
+            for (let n = (Math.sin(k * 1.7 + d0 * 0.05 + c) > -0.3 ? 1 : 0) + (r() < 0.5 ? 1 : 0); n > 0; n--) {
+              const rx = 14 + r() * 14, ry = Math.min(9 + r() * 8, (hy - 36) / 2), gx = xa + 16 + r() * (xb - xa - 32), gy = py0 + ry + 2 + r() * Math.max(0, hy - 2 * ry - 34);
+              for (let y = Math.ceil((gy - ry) / 8) * 8; y <= gy + ry; y += 8) {
+                const dec = (y / 8) % 2 ? 5 : 0;
+                for (let x = Math.ceil((gx - rx - dec) / 10) * 10 + dec; x <= gx + rx; x += 10) {
+                  const e = ((x - gx) / rx) ** 2 + ((y - gy) / ry) ** 2;
+                  if (e > 1 || (e > 0.6 && r() < 0.5)) continue;
+                  poseSi(SP.sapins[e < 0.3 ? (r() < 0.5 ? 3 : 5) : e < 0.65 ? (r() < 0.5 ? 2 : 6) : (r() < 0.5 ? 0 : 4)], x + Math.floor(r() * 3) - 1, y);
+                }
+              }
             }
+            // et quelques sapins isolés
+            for (let n = 1 + Math.floor(r() * 3); n > 0; n--) poseSi(SP.sapins[r() < 0.5 ? 0 : 4], xa + 10 + r() * (xb - xa - 20), py0 + 2 + r() * (hy - 26));
           }
         }
         d0 = d1;
@@ -749,7 +787,7 @@ const Bus = (() => {
   // ------------------------------------------------------------ l'arrivée à Montaigu
   // au bout du trajet, on descend du car ; Flash McQueen (la voiture de course rouge de la route) est garé
   // un peu plus loin : c'est lui qui remet le quatrième indice. Puis Linguini sort en courant du restaurant :
-  // Loane a appelé, il faut un caramel au beurre salé, le chef attend Ismae en cuisine.
+  // Loane a appelé, il faut un caramel au beurre salé, le chef attend Ismae en cuisine ; et il y rentre aussitôt.
   function victoire(J) {
     Q.bus = 'arrive';
     Musique.victoireCourte();
@@ -761,7 +799,7 @@ const Bus = (() => {
       update() {}, draw(g, J) {
         if (!this.visible) return;
         const s = imgs[this.sens], dy = this.roule ? Math.round(Math.sin((J.t || 0) * 30) * 0.6) : 0;
-        Entites.ombre(g, this.x, this.y, 24);
+        Entites.ombre(g, this.x, this.y, 20);
         g.drawImage(s.img, Math.round(this.x - s.ax), Math.round(this.y - s.ay + dy));
         if (this.phares > 0 && Math.floor(this.phares * 6) % 2) { // l'appel de phares
           const px = Math.round(this.x + (this.sens < 0 ? -s.ax - 4 : s.ax + 1));
@@ -774,8 +812,9 @@ const Bus = (() => {
   function arriveeMontaigu(J) {
     const C = J.carte, p = J.joueur, G = J.georges, B = CONFIG.route, S = C.montaigu, lin = C.linguini;
     Musique.morceau('montaigu');
-    // Linguini attend devant le restaurant (avec une flèche quand il sort de l'écran), jusqu'à ce qu'Ismae entre
-    const attend = () => { lin.visible = Q.caramel === 'aVenir' && Q.linguini === 'attend'; lin.x = S.porteResto.x; lin.y = S.porteResto.y; lin.dir = 'down'; J.reperes = lin.visible ? [lin] : []; };
+    // Linguini est rentré au restaurant : une flèche montre la porte (quand elle sort de l'écran), jusqu'à ce qu'Ismae entre
+    const porte = { visible: true, x: S.porteResto.x, y: S.porteResto.y };
+    const attend = () => { lin.visible = false; J.reperes = Q.caramel === 'aVenir' && Q.linguini === 'attend' ? [porte] : []; };
     attend();
     const parBus = Math.hypot(p.x - C.arrivees.bus.x, p.y - C.arrivees.bus.y) < 2;
     if (!parBus || Q.caramel !== 'aVenir' || (Q.bus === 'gagne' && Q.linguini === 'attend')) return;
@@ -814,13 +853,14 @@ const Bus = (() => {
       { jusqua: () => !lin.chemin },
       { faire: () => { lin.dir = 'left'; } },
       { dire: B.linguini },
-      { faire: () => { lin.allerVers([{ x: p.x + 28, y: 262 }, { x: S.porteResto.x, y: 262 }, { x: S.porteResto.x, y: S.porteResto.y }], 110); } },
+      // … et il rentre dans le restaurant (c'est là qu'Ismae le retrouvera)
+      { faire: () => { lin.allerVers([{ x: p.x + 28, y: 262 }, { x: S.porteResto.x, y: 262 }, { x: S.porteResto.x, y: S.porteResto.y }, { x: S.porteResto.x, y: S.porteResto.y - 8 }], 110, () => { lin.visible = false; }); } },
       { attendre: 0.6 },
     );
     J.jouerScript(etapes, () => {
       J.cinematique = false;
       Q.linguini = 'attend';
-      J.reperes = [lin];
+      J.reperes = [porte];
       Indices.suite(CONFIG.caramel.annonce);
     });
   }

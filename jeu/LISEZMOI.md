@@ -1,10 +1,11 @@
-# Juste un indice… — la rue des chats, le Carrefour, Sherwood, Arendelle, la route de Montaigu
+# Juste un indice… — la rue des chats, le Carrefour, Sherwood, Arendelle, la route de Montaigu, le grenier
 
 Petit jeu d'aventure en pixel art, vue de dessus en trois quarts, à jouer sur iPhone, à
 l'horizontale. Tout le décor, les personnages et la musique sont générés par le code : aucune
 image ni aucun son externe.
 
 > Règle d'or : ne jamais écrire le nom de la ville de destination, nulle part. C'est une surprise.
+> Seule exception, voulue : le mini Paris-Brest de l'épreuve 6 (le dessert).
 
 ## Ce que contient la zone 1
 
@@ -153,9 +154,11 @@ image ni aucun son externe.
   cadeaux à ramasser, et parfois un cœur qui rend une vie.
 - **Les paysages** : montagnes enneigées (jalons à neige, chalets), forêt, campagne (le bocage, les
   moulins, les vaches, les bottes de foin), petites villes illuminées pour Noël, puis Montaigu. Tout est
-  sous la neige ; on passe d'un paysage à l'autre en douceur : la montagne (sapins enneigés, rochers,
-  chalets, lacs gelés) devient une forêt de plus en plus serrée, qui laisse peu à peu la place aux
-  champs bordés de haies, puis aux maisons.
+  sous la neige ; on passe d'un paysage à l'autre en douceur : la montagne (de grandes étendues de
+  neige, des bosquets de sapins, des rochers, des chalets, des lacs gelés ; rien ne se chevauche)
+  devient une forêt dense, vue d'en haut (des rangées de sapins en quinconce, une lisière qui
+  s'effiloche le long de la route, une clairière et un cerf de temps en temps), qui laisse peu à peu
+  la place aux champs bordés de haies, puis aux maisons.
   Des panneaux « MONTAIGU … km » et une barre de progression montrent la distance qui reste.
 - **Les clins d'œil** : une voiture de course rouge n° 95 qui double à toute allure (« Ka-chow ! »),
   une vieille dépanneuse rouillée sur le bas-côté, la station-service « Radiator Springs » (route 66).
@@ -166,8 +169,8 @@ image ni aucun son externe.
   Puis il repart vers Radiator Springs.
 - **Linguini vient chercher Ismae** : il sort en courant du restaurant du chef Gusteau. Loane a appelé
   le restaurant (« Si vous avez un problème de caramel, c'est lui qu'il vous faut ») ; le chef attend
-  Ismae en cuisine, le dîner de Noël commence dans une heure. L'écran annonce l'épreuve 5 ; Linguini
-  attend devant le restaurant (une flèche le montre quand il sort de l'écran).
+  Ismae en cuisine, le dîner de Noël commence dans une heure. Il rentre aussitôt au restaurant (c'est là
+  qu'Ismae le retrouve) ; l'écran annonce l'épreuve 5, et une flèche montre la porte du restaurant.
 
 ## Épreuve 5 : « Le caramel raté » (à Montaigu)
 
@@ -201,7 +204,7 @@ image ni aucun son externe.
 - **La rencontre** : Rémy explique qu'il manque le caramel au beurre salé du dîner de Noël
   (Linguini a essayé avec du beurre doux, une catastrophe), et lance à Ismae qu'une certaine Loane
   lui a parlé de son dernier caramel… « un morceau de charbon ».
-- **Le mini-jeu du caramel au beurre salé** (façon Cooking Mama, cinq étapes, environ une minute
+- **Le mini-jeu du caramel au beurre salé** (façon Cooking Mama, six étapes, environ deux minutes
   et demie quand tout va bien ; Rémy, à gauche, réagit à tout) :
   1. *Le sucre* : on maintient (doigt, clic ou Espace) pour pencher le paquet. Il faut 200 g à
      8 g près, sur la balance. Le sucre continue de tomber quand on relâche, et le paquet lâche
@@ -223,11 +226,19 @@ image ni aucun son externe.
      la température dans le vert, remuer sans arrêt (sinon ça attache au fond), et appuyer sur
      « RETIRER DU FEU » quand la consistance est dans le vert (la cuillère, à gauche, montre si
      ça coule, si ça nappe ou si c'est trop épais). La fenêtre dure environ une seconde.
-- **Les échecs**, à regarder (douze en tout) : Rémy enseveli sous le sucre, Rémy qui s'endort
+  6. *Le petit pot* : on verse le caramel dans un petit pot en verre. Un doigt glisse pour
+     déplacer la casserole, l'autre maintient « VERSER » (ou ←→ et Espace). Plus on penche, plus
+     le filet coule fort… et plus il tombe loin : il faut suivre avec la casserole. Le filet coule
+     encore un instant quand on relâche, et le débit baisse à mesure que la casserole se vide. Et
+     Georges, caché sous le plan de travail, vient de temps en temps pousser le pot d'un coup de
+     patte ! Réussi quand le pot est rempli jusqu'à la ligne verte ; raté s'il déborde, ou s'il y
+     en a trop à côté (la jauge « À CÔTÉ »).
+- **Les échecs**, à regarder (quatorze en tout) : Rémy enseveli sous le sucre, Rémy qui s'endort
   (« Zzz… »), fumée noire et alarme (il panique puis tousse), sucre cristallisé, beurre en
   miettes ou fondu en flaque sur la planche (Rémy pleure), caramel figé avec la cuillère plantée
   dedans, crème qui déborde jusqu'à noyer Rémy dans la mousse, caramel trop liquide qui
-  éclabousse, caramel trop épais (Rémy tire sur la cuillère… et tombe à la renverse). On
+  éclabousse, caramel trop épais (Rémy tire sur la cuillère… et tombe à la renverse), petit pot
+  qui déborde, caramel partout sur le plan de travail. On
   recommence l'étape ratée autant de fois qu'on veut. Les réglages de difficulté sont `REGLAGES`,
   en haut de `js/caramel.js` (ils ont été vérifiés avec des centaines de parties simulées : la
   dernière étape est la plus exigeante).
@@ -235,14 +246,54 @@ image ni aucun son externe.
   Linguini emporte le caramel en salle, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE
   OBTENU ! ». Ismae peut ensuite ressortir et se promener dans Montaigu (les habitants ont de
   nouvelles répliques).
-- **La suite** : un écran annonce l'épreuve 6, qui n'est pas encore faite (la route est barrée).
+- **La suite** : un écran annonce l'épreuve 6 : l'antiquaire de la grande rue attend Ismae devant
+  sa boutique (une flèche le montre).
+
+## Épreuve 6 : « La grande chasse » (le grenier de l'antiquaire, à Montaigu)
+
+- **L'antiquaire** (barbe blanche, lunettes, chapeau melon) attend sur le trottoir sud, devant sa
+  boutique : Loane est passée ce matin et a monté des choses dans son grenier… un sacré bazar. Il
+  fait monter Ismae par la trappe.
+- **Le grenier**, la nuit : le pignon en planches et son œil-de-bœuf (la lune, la neige), la
+  charpente, des toiles d'araignée, deux ampoules nues, un lampadaire, la lampe verte du bureau, le
+  clair de lune par terre. Et partout du bric-à-brac : armoire, bibliothèque, horloge comtoise
+  arrêtée à minuit, vieux sapin en plastique, tableaux de famille, miroir, chaises empilées, luge et
+  skis, meubles sous des draps, malle, cheval à bascule, globe, cage à oiseau, mannequin de
+  couturière, valises à étiquettes, boîtes à chapeaux, cartons (« LIVRES », « NOËL », « FRAGILE »),
+  gramophone, berceau et son ours, machine à coudre, coffre à jouets, maison de poupée, commode,
+  fauteuil, portemanteau, caisse de pommes, radio, machine à écrire, guitare, panier de laine…
+- **L'arrivée** : une souris détale, Georges file derrière elle et disparaît dans le coin sombre.
+  Un mot de Loane, épinglé à une poutre : cinq souvenirs se sont cachés dans le grenier, « regarde
+  bien leur dos ».
+- **La chasse** : presque tout se fouille (bouton A : le meuble tremble, la poussière vole) ;
+  trente-cinq cachettes, dont six bonnes. Rien n'est visible avant d'avoir fouillé. Tout près d'une
+  bonne cachette, une petite étincelle brille de temps en temps ; dans le coin sombre, on devine
+  deux yeux jaunes qui clignent, et on entend miauler quand on s'approche. Les cinq souvenirs :
+  le pansement (le doigt coupé chez le boucher, et le bisou magique), la mini-couronne du Prince
+  Jean (Sherwood), l'écharpe de Jack (celle de Loane, qui porte son parfum), un ticket de car pour
+  Montaigu, le mini Paris-Brest (le dessert du soir) ; et Georges.
+- **Une découverte** : le jeu s'arrête, l'objet apparaît en grand au milieu de l'écran, puis se
+  retourne comme une carte : au dos, un symbole d'une langue inconnue, inventée pour le jeu (un par
+  objet). Il file ensuite dans la collection (en haut à gauche : six cases et « n/6 » ; un toucher
+  ouvre la fenêtre des objets retrouvés, avec leurs symboles) et sur le présentoir, la longue table
+  de velours au milieu du grenier. Un objet trouvé ne peut pas l'être deux fois.
+- **Georges** : il surgit en grand, couvert de poussière et d'une toile d'araignée, se secoue,
+  éternue (« ATCHOUM ! »), puis saute rejoindre Ismae et le suit de nouveau. Pas de symbole pour lui.
+- **La fin** : les six retrouvés, les objets se rangent sur le présentoir, dans l'ordre des
+  épreuves, se retournent un à un, et leurs cinq symboles montent former une phrase… illisible.
+  Ismae comprend qu'il lui faudrait un traducteur ; une carte de Loane explique qu'il ne se gagne
+  qu'en répondant à des questions sur elle. « ÉPREUVE 6/6 TERMINÉE ! — SIXIÈME INDICE OBTENU ! »,
+  puis l'écran annonce le quiz final. La phrase flotte ensuite au-dessus du présentoir (le toucher
+  la remontre en grand).
+- **Sauvegarde** : les trouvailles et les endroits déjà fouillés restent sur le téléphone ; une
+  chasse commencée reprend directement dans le grenier.
 
 ## Sauvegarde
 
 Le carnet d'indices sert aussi de sauvegarde. Sur l'écran titre, s'il y a déjà des épreuves réussies,
 le bouton devient « Reprendre l'aventure » (on repart au début de l'épreuve suivante), avec en dessous
 « Recommencer depuis le début » (qui vide le carnet). Après l'épreuve 5, on reprend devant le
-restaurant, à Montaigu.
+restaurant, à Montaigu ; après l'épreuve 6, dans le grenier, devant le message.
 
 Dans le carnet (bouton ✦ en haut à droite), chaque indice déjà obtenu porte « ▶ Rejouer l'épreuve » :
 le toucher téléporte Ismae et Georges au début de cette épreuve (l'épreuve 1 commence en entrant au
@@ -323,8 +374,11 @@ se met à jour tout seul en moins d'une minute.
 | `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (tables, fourneau, plans de travail…) |
 | `js/persos-resto.js` | Rémy (petit sur la carte, grand dans le mini-jeu) et le portrait de Gusteau |
 | `js/epreuve-caramel.js` | l'épreuve 5 : les habitants, la rencontre avec Rémy, la victoire |
-| `js/caramel.js` | le mini-jeu du caramel au beurre salé (5 étapes) et ses échecs |
-| `js/musique.js` | l'orchestre de jazz, la poursuite, la forêt, la valse d'Arendelle, la route, Montaigu, la valse musette du restaurant, et les bruitages |
+| `js/caramel.js` | le mini-jeu du caramel au beurre salé (6 étapes) et ses échecs |
+| `js/carte-grenier.js` | le grenier de l'antiquaire : le pignon, la charpente, les meubles et les cachettes |
+| `js/decor-grenier.js` | les meubles et le bric-à-brac du grenier, les cinq souvenirs, leur verso et les symboles de la langue inconnue |
+| `js/epreuve-chasse.js` | l'épreuve 6 : l'antiquaire, la fouille, les découvertes (l'objet qui se retourne), Georges, la collection, la phrase |
+| `js/musique.js` | l'orchestre de jazz, la poursuite, la forêt, la valse d'Arendelle, la route, Montaigu, la valse musette du restaurant, la boîte à musique du grenier, et les bruitages |
 | `js/titre.js` | le décor animé de l'écran d'accueil (le titre lui-même est dans `index.html`) |
 | `js/characters.js` | tous les sprites, dont Ismae (grilles de lettres : une lettre = un pixel) |
 | `js/entites.js` | Ismae, Georges, les chats, les musiciens, les habitants |
@@ -338,10 +392,11 @@ se met à jour tout seul en moins d'une minute.
 - `#sherwood` à la fin de l'adresse : commence directement dans la forêt (pour essayer l'épreuve 2).
 - `#arendelle` à la fin de l'adresse : commence directement à Arendelle (pour essayer l'épreuve 3).
 - `#bus` : directement à l'arrêt de bus d'Arendelle (épreuve 4) ; `#montaigu` : à l'arrivée à Montaigu
-  (épreuve 5) ; `#caramel` : devant le restaurant, l'épreuve 5 déjà réussie.
+  (épreuve 5) ; `#caramel` : devant le restaurant, l'épreuve 5 déjà réussie ; `#grenier` : directement
+  dans le grenier (épreuve 6).
 - `apercu.html` : tous les personnages en grand (non publié sur le site).
 
 ## Pas encore fait
 
-- Le texte des cinq premiers indices (`indices` dans `js/config.js`).
-- L'épreuve 6 (la route barrée, à l'est de Montaigu, est prévue pour y mener).
+- Le texte des six indices (`indices` dans `js/config.js`).
+- Le quiz final (questions sur Loane) et le traducteur du message.

@@ -290,7 +290,7 @@ const Entites = (() => {
       if (this.etat === 'couche' && Math.random() < dt * 0.5) jeu.particule('z', this.x + 4, this.y - 12);
     }
     get sortY() { return this.y; }
-    zone() { return { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.texteScript || (this.mode === 'script' ? 'georgesPoursuite' : 'georges'), chat: this }; }
+    zone() { return this.visible === false ? null : { x: this.x - 10, y: this.y - 12, w: 20, h: 16, texte: this.texteScript || (this.mode === 'script' ? 'georgesPoursuite' : 'georges'), chat: this }; }
     draw(g) {
       if (this.visible === false) return;
       const s = SPR.georges, y0 = this.y;

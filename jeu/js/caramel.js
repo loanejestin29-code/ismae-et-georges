@@ -1,7 +1,7 @@
 // =====================================================================
 //  caramel.js — le mini-jeu du CARAMEL AU BEURRE SALÉ (épreuve 5), façon « Cooking Mama »
 //
-//  Cinq étapes, devant le fourneau, avec Rémy à gauche qui réagit à tout :
+//  Six étapes, devant le fourneau, avec Rémy à gauche qui réagit à tout :
 //   1. LE SUCRE : on maintient (doigt, clic ou Espace) pour pencher le paquet ; il faut
 //      200 g à 8 g près. Le sucre continue de tomber un instant quand on relâche.
 //   2. FAIRE FONDRE : on règle le feu (curseur à droite, ou ↑↓) et on remue en rond
@@ -15,6 +15,11 @@
 //   5. LA TEXTURE : tout à la fois. Garder la bonne température (le feu a de l'inertie et
 //      il varie), remuer sans arrêt pour que ça n'attache pas, et retirer du feu quand le
 //      caramel nappe la cuillère.
+//   6. LE PETIT POT : on verse le caramel dans un petit pot en verre. Un doigt déplace la casserole,
+//      l'autre maintient VERSER (ou ←→ et Espace). Plus on penche, plus le filet coule fort… et plus
+//      il tombe loin : il faut suivre avec la casserole. Le filet coule encore un instant quand on
+//      relâche. Et Georges, caché sous le plan de travail, vient pousser le pot d'un coup de patte !
+//      Réussi quand le pot est rempli jusqu'à la ligne ; raté s'il déborde ou s'il y en a partout.
 //  Après un échec, on recommence l'étape ratée, autant de fois qu'il le faut.
 //  Les réglages de difficulté sont en haut (REGLAGES) ; les textes dans config.js → caramel.jeu.
 // =====================================================================
@@ -37,8 +42,14 @@ const Caramel = (() => {
     creme: { temps: 22, debit: 0.17, mousse: 7, casse: 1.0, retombe: 0.25, marbre: 0.5, marbreMax: 0.12 },
     // la texture : la consistance monte au-dessus de « seuil » °C ; ça attache au-dessus de « attache » si l'on ne remue pas
     texture: { temps: 45, fenetre: [0.6, 0.72], dur: 0.8, seuil: 104, epaissit: 0.0085, attache: 106, gratin: 0.024, brule: 128, vert: [108, 116] },
+    // le petit pot : la casserole penche en « penche » s, se redresse en « redresse » s ; ça coule au-delà de « seuil »
+    // (plus la casserole se vide, plus il faut pencher) ; « remplit » : le pot par seconde à plein débit ; le filet tombe
+    // de arc[0] à arc[1] pixels devant le bec selon le débit ; « bouche » : la demi-largeur de l'ouverture du pot ;
+    // réussi entre ligne[0] et ligne[1] ; ça déborde au-dessus de 1 ; raté quand ce qui tombe à côté atteint « taches » ;
+    // Georges pousse le pot de « patte » pixels, toutes les « pattes » secondes (une fois qu'on a commencé à verser)
+    pot: { temps: 28, penche: 1.1, redresse: 0.45, seuil: [0.3, 0.6], debit: 1.8, remplit: 0.22, arc: [7, 25], bouche: 6, ligne: [0.8, 0.96], taches: 0.25, vitesse: 90, patte: [12, 20], pattes: [1.4, 2.6] },
   };
-  const ETAPES = ['sucre', 'fonte', 'beurre', 'creme', 'texture'];
+  const ETAPES = ['sucre', 'fonte', 'beurre', 'creme', 'texture', 'pot'], DERNIERE = ETAPES.length - 1;
   // la couleur du caramel selon la cuisson (0 : sucre fondu, 1 : charbon)
   const NUANCES = [[0, '#fbf0c8'], [0.3, '#f4d68a'], [0.45, '#f0c264'], [0.6, '#dc962e'], [0.7, '#bd661c'], [0.8, '#8a3a12'], [0.9, '#4a1e0e'], [1, '#1d0e0a']];
   const nuance = (c) => {
@@ -93,7 +104,7 @@ const Caramel = (() => {
     E.alertes[cle] = E.t + delai;
     remy(pose, T().remy.alertes[cle]);
   }
-  const limite = () => ({ sucre: REGLAGES.sucre.temps, fonte: REGLAGES.fonte.temps, beurre: E.sous === 'coupe' ? REGLAGES.beurre.temps : 0, creme: REGLAGES.creme.temps, texture: REGLAGES.texture.temps }[ETAPES[E.etape]]);
+  const limite = () => ({ sucre: REGLAGES.sucre.temps, fonte: REGLAGES.fonte.temps, beurre: E.sous === 'coupe' ? REGLAGES.beurre.temps : 0, creme: REGLAGES.creme.temps, texture: REGLAGES.texture.temps, pot: REGLAGES.pot.temps }[ETAPES[E.etape]]);
 
   function reussir(final) {
     E.phase = 'reussi'; E.tPhase = 0;
@@ -102,9 +113,10 @@ const Caramel = (() => {
     if (final) { message(T().parfait, 'bon'); remy('joie', T().remy.parfait); }
     else { message(choix(T().bravo), 'bon'); remy('content', T().remy.reussi[E.etape]); }
     const L = mise(E.J.V);
-    for (let k = 0; k < (final ? 40 : 18); k++) E.etincelles.push({ x: L.px + (Math.random() - 0.5) * L.R * 2, y: L.py - Math.random() * L.R, t: 0, a: Math.random() * 6.28 });
+    const cx = ETAPES[E.etape] === 'pot' ? E.potX : L.px, cy = ETAPES[E.etape] === 'pot' ? L.potY - 20 : L.py;
+    for (let k = 0; k < (final ? 40 : 18); k++) E.etincelles.push({ x: cx + (Math.random() - 0.5) * L.R * 2, y: cy - Math.random() * L.R, t: 0, a: Math.random() * 6.28 });
   }
-  const POSES_ECHEC = { trop: 'panique', dodo: 'dort', brule: 'panique', attache: 'panique', cristal: 'desespoir', miettes: 'desespoir', fondu: 'pleure', fige: 'tire', deborde: 'panique', durci: 'tire', liquide: 'goute', dur: 'tire' };
+  const POSES_ECHEC = { trop: 'panique', dodo: 'dort', brule: 'panique', attache: 'panique', cristal: 'desespoir', miettes: 'desespoir', fondu: 'pleure', fige: 'tire', deborde: 'panique', durci: 'tire', liquide: 'goute', dur: 'tire', renverse: 'panique', tache: 'desespoir' };
   function rater(type) {
     E.phase = 'rate'; E.tPhase = 0; E.echec = type;
     message(T().echecs[type], 'rate'); aide(null);
@@ -135,7 +147,7 @@ const Caramel = (() => {
   function zoneDe(pos, L) {
     const n = ETAPES[E.etape];
     if ((n === 'fonte' || n === 'texture') && Math.abs(pos.x - L.feuX) < 18 && pos.y > L.feuY0 - 14 && pos.y < L.feuY1 + 14) return 'feu';
-    if (n === 'texture' && dans(pos, L.bouton)) return 'bouton';
+    if ((n === 'texture' || n === 'pot') && dans(pos, L.bouton)) return 'bouton';
     if (n === 'beurre' && dans(pos, { x: L.planche.x - 6, y: L.planche.y - 26, w: L.planche.w + 12, h: L.planche.h + 32 })) return 'planche';
     const dx = (pos.x - L.px) / L.R, dy = (pos.y - L.py) / (L.R * 0.6);
     if (dx * dx + dy * dy < 1.7) return 'pot';
@@ -148,7 +160,7 @@ const Caramel = (() => {
     if (type === 'down') {
       if (E.phase === 'rate') { if (E.tPhase > 2) recommencer(); return; }
       const z = zoneDe(pos, L);
-      E.doigts.set(id, { zone: z, x: pos.x, y: pos.y, x0: pos.x, y0: pos.y, a: null });
+      E.doigts.set(id, { zone: z, x: pos.x, y: pos.y, x0: pos.x, y0: pos.y, a: null, pan: E.panX }); // pan : la casserole suit le doigt qui glisse
       if (E.phase !== 'jeu') return;
       if (z === 'feu') reglerFeu(pos.y, L);
       if (z === 'bouton') retirer();
@@ -178,6 +190,7 @@ const Caramel = (() => {
     if (d.zone === 'feu') reglerFeu(pos.y, L);
     if (E.tenu && E.tenu.id === id) { E.tenu.x = pos.x; E.tenu.y = pos.y; }
     if (d.zone === 'planche' && E.sous === 'coupe') E.couteau = pos.x;
+    if (n0() === 'pot' && d.zone !== 'bouton') E.panX = clamp(d.pan + (pos.x - d.x0), L.panMin, L.panMax);
     if (d.zone === 'pot') {
       // le mélange : on compte les tours faits autour du milieu de la casserole
       const ux = pos.x - L.px, uy = (pos.y - L.py) / 0.55, r = Math.hypot(ux, uy), a = Math.atan2(uy, ux);
@@ -189,8 +202,10 @@ const Caramel = (() => {
       E.cuillere = { x: pos.x, y: pos.y, t: E.t };
     }
   }
-  // on verse (sucre, crème) tant qu'on maintient : Espace, ou un doigt (pour la crème : hors de la casserole)
-  const verse = () => E.touche || [...E.doigts.values()].some((d) => (E.etape === 0) || (E.etape === 3 && d.zone === 'ailleurs'));
+  const n0 = () => ETAPES[E.etape];
+  // on verse (sucre, crème, le pot) tant qu'on maintient : Espace, ou un doigt (pour la crème : hors de la casserole ;
+  // pour le pot : sur le bouton VERSER)
+  const verse = () => E.touche || [...E.doigts.values()].some((d) => (E.etape === 0) || (E.etape === 3 && d.zone === 'ailleurs') || (E.etape === 5 && d.zone === 'bouton'));
 
   // ------------------------------------------------------------ 1. LE SUCRE
   const INIT = {};
@@ -344,11 +359,74 @@ const Caramel = (() => {
     if (ETAPES[E.etape] !== 'texture' || E.phase !== 'jeu') return;
     const [a, b] = REGLAGES.texture.fenetre;
     E.flamme = 0; E.puissance = 0; E.feu = 0;
-    if (E.epais < a) rater('liquide'); else if (E.epais > b) rater('dur'); else reussir(true);
+    if (E.epais < a) rater('liquide'); else if (E.epais > b) rater('dur'); else reussir();
+  }
+
+  // ------------------------------------------------------------ 6. LE PETIT POT
+  INIT.pot = () => {
+    const L = mise(E.J.V);
+    E.potX = Math.round(L.w * (0.4 + Math.random() * 0.16));
+    Object.assign(E, { panX: Math.min(L.panMax, E.potX + 64 + Math.random() * 30), incl: 0, debitP: 0, plein: 0, sale: 0, taches: [], arret: 0, flamme: 0, debordPot: 0, patte: null, prochainePatte: 0.8 });
+  };
+  // où tombe le filet (x), et ce qu'il touche : 'pot', 'bord' ou 'table'
+  function filet(L) {
+    const X = REGLAGES.pot, x = E.panX - (X.arc[0] + (X.arc[1] - X.arc[0]) * E.debitP), d = Math.abs(x - E.potX);
+    return { x, ou: d <= X.bouche ? 'pot' : d <= X.bouche + 4 ? 'bord' : 'table' };
+  }
+  // Georges, sous le plan de travail : la patte monte (on la voit venir), pousse le pot, puis redescend
+  function majPatte(dt, L) {
+    const X = REGLAGES.pot, P = E.patte;
+    if (!P) {
+      if (E.plein < 0.05 || (E.prochainePatte -= dt) > 0) return;
+      const mil = (L.panMin + L.panMax) / 2 - 20, dir = E.potX < mil - 30 ? 1 : E.potX > mil + 30 ? -1 : Math.random() < 0.5 ? -1 : 1;
+      E.patte = { etat: 'monte', t: 0, dir, de: E.potX, dist: X.patte[0] + Math.random() * (X.patte[1] - X.patte[0]) };
+      return;
+    }
+    P.t += dt;
+    if (P.etat === 'monte' && P.t > 0.55) { P.etat = 'pousse'; P.t = 0; Musique.miaou(1.1, 0.06); alerte('chat', 'panique', 3); }
+    else if (P.etat === 'pousse') {
+      const k = Math.min(1, P.t / 0.3);
+      E.potX = Math.round(P.de + P.dir * P.dist * k * (2 - k));
+      if (k >= 1) { P.etat = 'redescend'; P.t = 0; }
+    } else if (P.etat === 'redescend' && P.t > 0.45) { E.patte = null; E.prochainePatte = X.pattes[0] + Math.random() * (X.pattes[1] - X.pattes[0]); }
+  }
+  function majPot(dt, L) {
+    const X = REGLAGES.pot, tient = verse();
+    E.panX = clamp(E.panX + E.J.input.x * X.vitesse * dt, L.panMin, L.panMax);
+    E.incl = tient ? Math.min(1, E.incl + dt / X.penche) : Math.max(0, E.incl - dt / X.redresse);
+    const reste = clamp(1 - E.plein * 0.8 - E.sale), seuil = X.seuil[0] + (X.seuil[1] - X.seuil[0]) * (1 - reste);
+    E.seuilP = seuil;
+    E.debitP = clamp((E.incl - seuil) * X.debit); // le débit baisse à mesure que la casserole se vide : le filet se rapproche
+    if (E.debitP > 0) {
+      const f = filet(L);
+      if (f.ou === 'pot') E.plein += E.debitP * X.remplit * dt;
+      else {
+        // à côté : ça éclabousse et ça fait des taches sur le plan de travail
+        E.sale += E.debitP * X.remplit * dt * (f.ou === 'bord' ? 0.6 : 1);
+        if (f.ou === 'bord') E.plein += E.debitP * X.remplit * dt * 0.4;
+        if (Math.random() < dt * 10) {
+          const ty = f.ou === 'bord' ? L.potY - L.potH : L.potY;
+          E.parts.push({ type: 'goutte', col: nuance(0.62), x: f.x, y: ty, vx: (Math.random() - 0.5) * 70, vy: -30 - Math.random() * 50, t: 0, max: 1.2, sol: L.potY + 2 + Math.random() * 10 });
+        }
+        const tx = f.ou === 'bord' ? f.x + Math.sign(f.x - E.potX) * 4 : f.x, last = E.taches[E.taches.length - 1];
+        if (last && Math.abs(last.x - tx) < 4) last.r = Math.min(9, last.r + dt * 6 * E.debitP);
+        else E.taches.push({ x: tx, y: L.potY + 2 + Math.round(Math.random() * 6), r: 1.5 });
+        alerte('aCote', 'panique', 2.5);
+      }
+      if (Math.random() < dt * 5) Musique.bulle();
+      if (E.plein > X.ligne[0] - 0.12 && E.plein < X.ligne[1]) alerte('presquePlein', 'inquiet', 4);
+    }
+    majPatte(dt, L);
+    if (E.plein > 1) return rater('renverse');
+    if (E.sale >= X.taches) return rater('tache');
+    // réussi : on a arrêté de verser, et le pot est rempli jusqu'à la ligne
+    E.arret = E.debitP > 0 || tient ? 0 : E.arret + dt;
+    if (E.arret > 0.5 && E.plein >= X.ligne[0]) return reussir(true);
+    if (E.temps > X.temps) rater('durci');
   }
 
   // ------------------------------------------------------------ la boucle
-  const MAJ = { sucre: majSucre, fonte: majFonte, beurre: majBeurre, creme: majCreme, texture: majTexture };
+  const MAJ = { sucre: majSucre, fonte: majFonte, beurre: majBeurre, creme: majCreme, texture: majTexture, pot: majPot };
   function update(dt, J) {
     if (!E) return;
     dt = Math.min(dt, 0.05);
@@ -376,8 +454,8 @@ const Caramel = (() => {
     if (E.phase === 'intro' && E.tPhase > 1.6) { E.phase = 'jeu'; E.tPhase = 0; message(null); if (E.remy === 'parle') remy('neutre'); }
     if (E.phase === 'jeu') { E.temps += dt; MAJ[n](dt, L); }
     else if (E.phase === 'rate') echecAnime(dt, L);
-    else if (E.phase === 'reussi' && E.tPhase > (E.etape === 4 ? 3 : 1.6)) {
-      if (E.etape < 4) etape(E.etape + 1); else fermer(true);
+    else if (E.phase === 'reussi' && E.tPhase > (E.etape === DERNIERE ? 3 : 1.6)) {
+      if (E.etape < DERNIERE) etape(E.etape + 1); else fermer(true);
     }
   }
   // les échecs, à regarder
@@ -399,6 +477,12 @@ const Caramel = (() => {
     if (k === 'deborde') { E.debord = Math.min(1, E.debord + dt * 0.55); if (Math.random() < dt * 10) Musique.bulle(); if (E.debord > 0.75 && E.remy !== 'enseveli') remy('enseveli'); }
     if (k === 'liquide') { if (tp > 1 && tp < 1.8 && Math.random() < dt * 30) splash(); if (tp > 1.2 && E.remy === 'goute') remy('pleure'); }
     if (k === 'dur') { if (tp > 1.3 && !E.chute) { E.chute = 0.01; Musique.choc(); } if (E.chute) E.chute = Math.min(1, E.chute + dt * 4); }
+    if (k === 'renverse' || k === 'tache') { // la casserole se redresse ; le pot dégouline, les taches s'étalent
+      E.incl = Math.max(0, E.incl - dt / 0.35); E.debitP = 0;
+      if (k === 'renverse') { E.debordPot = Math.min(1, E.debordPot + dt * 0.7); if (Math.random() < dt * 6) Musique.bulle(); }
+      for (const q of E.taches) q.r = Math.min(10, q.r + dt * 1.5);
+      if (tp > 1.6 && E.remy === 'panique') remy('desespoir');
+    }
     if (tp > 2.2 && $('cui-aide').hidden) aide(T().reessayer[doigt() ? 0 : 1]);
   }
 
@@ -423,6 +507,9 @@ const Caramel = (() => {
     L.bloc = { x: L.planche.x + Math.round(L.planche.w * 0.12), w: Math.round(L.planche.w * 0.76), h: 24 };
     L.bloc.y = L.planche.y + Math.round(L.planche.h / 2) - 14;
     L.remyX = Math.round(w * 0.15); L.remyY = Math.round(h * 0.96 - 38 * L.rs);
+    // le petit pot, posé sur le plan de travail, et la casserole qu'on tient au-dessus (le bec : à gauche)
+    L.potY = Math.round(h * 0.7) + 14; L.potH = 28; L.becY = L.potY - L.potH - 40;
+    L.panMin = Math.round(w * 0.3); L.panMax = Math.round(w * 0.78);
     return L;
   }
 
@@ -668,7 +755,8 @@ const Caramel = (() => {
     }
     // 3. la planche, la motte de beurre demi-sel, le couteau
     if (n === 'beurre') planche(g, P, L, t);
-    casserole(g, P, L, t, n === 'beurre' ? -1 : 1);
+    if (n === 'pot') versement(g, P, L, t);
+    else casserole(g, P, L, t, n === 'beurre' ? -1 : 1);
     // 4. le pichet de crème et son filet
     if (n === 'creme') pichet(g, P, L, t);
     // les particules
@@ -724,6 +812,17 @@ const Caramel = (() => {
       const B = L.bouton, appuye = E.phase !== 'jeu';
       cadre(g, B.x, B.y, B.w, B.h); g.fillStyle = appuye ? '#8a7a5a' : '#e8b54a'; g.fillRect(B.x, B.y, B.w, B.h); g.fillStyle = '#fff1bb'; g.fillRect(B.x, B.y, B.w, 2); g.fillStyle = '#a8742e'; g.fillRect(B.x, B.y + B.h - 2, B.w, 2);
       Arendelle.texte(P, T().bouton, B.x + Math.round((B.w - Arendelle.largeurTexte(T().bouton)) / 2), B.y + 9, '#2a1e18');
+    } else if (n === 'pot') {
+      const X = REGLAGES.pot, y0 = Math.round(h * 0.2), y1 = Math.round(h * 0.68), m = 1.1;
+      jauge(g, L.jauge, y0, y1, E.plein / m, [{ a: X.ligne[0] / m, b: X.ligne[1] / m, col: '#3aa85a' }, { a: 1 / m, b: 1, col: '#c84a3a' }], nuance(0.62));
+      Arendelle.texte(P, 'POT', L.jauge - 4, y1 + 12, '#1d1626');
+      // ce qui est tombé à côté
+      g.fillStyle = '#1d1626'; g.fillRect(L.gauche - 2, y1 + 6, 26, 4); g.fillStyle = E.sale > X.taches * 0.6 ? '#ff6a3a' : '#8a5a3a'; g.fillRect(L.gauche - 1, y1 + 7, Math.round(24 * clamp(E.sale / X.taches)), 2);
+      Arendelle.texte(P, 'A COTE', L.gauche - 2, y1 + 13, '#1d1626');
+      // le bouton VERSER (on le maintient)
+      const B = L.bouton, appuye = E.phase === 'jeu' && verse();
+      cadre(g, B.x, B.y, B.w, B.h); g.fillStyle = appuye ? '#c8902e' : '#e8b54a'; g.fillRect(B.x, B.y, B.w, B.h); g.fillStyle = appuye ? '#e8b54a' : '#fff1bb'; g.fillRect(B.x, B.y, B.w, 2); g.fillStyle = '#a8742e'; g.fillRect(B.x, B.y + B.h - 2, B.w, 2);
+      Arendelle.texte(P, T().verser, B.x + Math.round((B.w - Arendelle.largeurTexte(T().verser)) / 2), B.y + 9 + (appuye ? 1 : 0), '#2a1e18');
     }
     // la flaque de beurre fondu (échec), la fumée, l'assombrissement
     if (E.flaque > 0) { const b = L.bloc; P.ellipse(b.x + b.w / 2, b.y + b.h, Math.round(b.w / 2 + E.flaque * 20), Math.round(4 + E.flaque * 8), '#f2d050'); P.ellipse(b.x + b.w / 2 - 4, b.y + b.h - 2, Math.round(b.w / 3 + E.flaque * 10), Math.round(2 + E.flaque * 4), '#fae890'); }
@@ -734,6 +833,80 @@ const Caramel = (() => {
     if (E.tenu) motte(P, Math.round(E.tenu.x - 6), Math.round(E.tenu.y - 5), 12, 9);
     tempsRestant(g, L);
     for (const s of E.etincelles) { const d = s.t * 50; g.fillStyle = s.t % 0.2 < 0.1 ? '#fff4c0' : '#ffd27a'; g.fillRect(Math.round(s.x + Math.cos(s.a) * d), Math.round(s.y + Math.sin(s.a) * d - s.t * 20), 2, 2); }
+  }
+  // 6. le petit pot en verre et la casserole qui penche au-dessus, avec son filet de caramel
+  function versement(g, P, L, t) {
+    const X = REGLAGES.pot, px = E.potX, by = L.potY, ph = L.potH, top = by - ph, col = nuance(0.62);
+    // les taches sur le plan de travail
+    for (const q of E.taches) { P.ellipse(Math.round(q.x), Math.round(q.y), Math.round(q.r) + 1, Math.max(1, Math.round(q.r * 0.45)), PX.shade(col, -0.2)); P.ellipse(Math.round(q.x) - 1, Math.round(q.y) - 1, Math.round(q.r), Math.max(1, Math.round(q.r * 0.35)), col); }
+    // le pot : du verre, un fond épais, le caramel qui monte, la ligne à atteindre ; son couvercle à carreaux, posé à côté
+    P.ellipse(px, by + 1, 15, 3, 'rgba(40,30,50,0.25)');
+    P.rect(px - 12, top, 25, ph, '#1d1626'); P.rect(px - 11, top, 23, ph - 1, '#cfe2ee'); P.rect(px - 10, top + 1, 21, ph - 3, '#e6f2f8');
+    const nv = Math.round(Math.min(1, E.plein) * (ph - 5)), dome = E.plein > 0.97 ? Math.round((E.plein - 0.97) * 60) : 0;
+    if (nv > 0) { P.rect(px - 10, by - 3 - nv, 21, nv, col); P.hline(px - 10, by - 3 - nv, 21, PX.shade(col, 0.25)); P.vline(px + 9, by - 3 - nv, nv, PX.shade(col, -0.15)); }
+    if (dome > 0) P.ellipse(px, top + 1, 11, Math.min(4, dome), col);
+    for (let x = px - 10; x <= px + 10; x += 3) P.px(x, by - 3 - Math.round(X.ligne[0] * (ph - 5)), '#2a9a4a'); // la ligne
+    P.rect(px - 12, top - 3, 25, 4, '#1d1626'); P.rect(px - 11, top - 2, 23, 2, '#b8ccd8'); P.hline(px - 11, top - 2, 23, '#ffffff');
+    P.vline(px - 9, top + 3, ph - 9, '#ffffff'); P.vline(px - 8, top + 3, 5, '#ffffff'); // le reflet
+    P.rect(px - 11, by - 3, 23, 2, '#a8bccc');
+    if (E.debordPot > 0) { // ça coule le long du pot, puis sur la table
+      const hh = Math.round(E.debordPot * ph);
+      for (const sx of [-13, 12]) P.rect(px + sx, top - 1, 2, hh, col);
+      P.ellipse(px, by + 2, Math.round(12 + E.debordPot * 26), Math.round(2 + E.debordPot * 4), col);
+    }
+    const cx = Math.round(L.w * 0.18) + 46, cy = by + 2;
+    P.ellipse(cx, cy, 11, 3, '#c8343a'); for (let k = -9; k <= 9; k += 4) P.px(cx + k, cy - 1, '#ffffff'); P.hline(cx - 9, cy, 18, '#ffffff');
+    patteGeorges(g, P, L, t);
+    // le filet : il part du bec et retombe en arc, plus loin quand ça coule fort
+    const bx = Math.round(E.panX), byc = L.becY;
+    if (E.debitP > 0.01) {
+      const f = filet(L), fin = f.ou === 'pot' ? by - 3 - nv : f.ou === 'bord' ? top - 3 : by + 3, ep = 1 + Math.round(E.debitP * 2);
+      for (let y = byc; y < fin; y++) {
+        const p = (y - byc) / Math.max(1, fin - byc), x = Math.round(bx - (bx - f.x) * Math.sqrt(p) + Math.sin(t * 20 + y * 0.4) * 0.4);
+        g.fillStyle = col; g.fillRect(x - (ep >> 1), y, ep, 1);
+        if (ep > 1) { g.fillStyle = PX.shade(col, 0.3); g.fillRect(x - (ep >> 1), y, 1, 1); }
+      }
+    }
+    // la casserole, vue de côté : elle pivote autour de son bec ; le caramel y reste à l'horizontale
+    const a = -(0.06 + E.incl * 0.6), BW = 46, BH = 22;
+    g.save(); g.translate(bx, byc); g.rotate(a);
+    // le manche, un peu relevé
+    g.save(); g.translate(BW - 1, 6); g.rotate(-0.18);
+    g.fillStyle = '#1d1626'; g.fillRect(0, -3, 42, 7); g.fillStyle = '#6a6e7c'; g.fillRect(0, -2, 26, 5); g.fillStyle = '#9aa0b0'; g.fillRect(0, -2, 26, 1);
+    g.fillStyle = '#2a2a34'; g.fillRect(26, -2, 15, 5); g.fillStyle = '#4a4a58'; g.fillRect(26, -2, 15, 1);
+    g.restore();
+    // la cuve : contour sombre, inox, reflet vertical, fond arrondi, et le bord roulé avec son petit bec
+    g.fillStyle = '#1d1626'; g.fillRect(-1, -1, BW + 2, BH + 1); g.fillRect(1, BH, BW - 2, 1);
+    g.fillStyle = '#7a7e8c'; g.fillRect(0, 0, BW, BH - 1); g.fillRect(1, BH - 1, BW - 2, 1);
+    g.fillStyle = '#a4aab8'; g.fillRect(2, 2, BW - 8, BH - 5); g.fillStyle = '#c8ccd8'; g.fillRect(4, 2, 3, BH - 6); g.fillStyle = '#e8ecf4'; g.fillRect(5, 3, 1, BH - 9);
+    g.fillStyle = '#5a5e6c'; g.fillRect(0, BH - 3, BW, 2);
+    g.fillStyle = '#1d1626'; g.fillRect(-4, -4, BW + 6, 4); g.fillStyle = '#d8dce6'; g.fillRect(-3, -3, BW + 4, 2); g.fillStyle = '#ffffff'; g.fillRect(-3, -3, 8, 1);
+    g.restore();
+    // le caramel dedans : une surface horizontale, au ras du bec quand ça coule
+    // (on le voit par-dessus le bord : la cuve est vue un peu d'en haut quand elle penche)
+    g.save(); g.translate(bx, byc); g.rotate(a); g.beginPath(); g.rect(-2, -40, BW + 1, 40); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0);
+    const reste = clamp(1 - E.plein * 0.8 - E.sale), surf = Math.round(byc - 2 + Math.max(0, (E.seuilP || 0.3) - E.incl) * 20 + (1 - reste) * 4);
+    if (reste > 0.02 && E.incl > 0.05) { g.fillStyle = col; g.fillRect(bx - 6, surf, BW + 40, 60); g.fillStyle = PX.shade(col, 0.3); g.fillRect(bx - 6, surf, BW + 40, 1); }
+    g.restore();
+  }
+  // Georges, sous le plan de travail : ses oreilles, ses yeux jaunes, et la patte qui monte pousser le pot
+  function patteGeorges(g, P, L, t) {
+    const Pa = E.patte;
+    if (!Pa) return;
+    const k = Pa.etat === 'monte' ? Math.min(1, Pa.t / 0.4) : Pa.etat === 'redescend' ? Math.max(0, 1 - Pa.t / 0.35) : 1;
+    const ax = Math.round(E.potX - Pa.dir * 17), tete = L.h + 12 - Math.round(k * 20);
+    // la tête qui dépasse du bas de l'écran
+    P.ellipse(ax - Pa.dir * 10, tete + 8, 13, 9, '#1d1a22');
+    for (const s of [-1, 1]) { const ox = ax - Pa.dir * 10 + s * 8; for (let i = 0; i < 6; i++) P.hline(ox - Math.floor(i / 2) - (s < 0 ? 0 : 0), tete - 6 + i, 1 + i, '#1d1a22'); }
+    for (const s of [-1, 1]) { const ex = ax - Pa.dir * 10 + s * 5; P.rect(ex - 1, tete + 3, 3, 3, '#f2c230'); P.px(ex, tete + 4, '#1d1626'); }
+    // la patte : le bras qui monte jusqu'au pied du pot
+    const py = L.potY - 4 - Math.round((1 - k) * 30), bx = ax + (Pa.etat === 'pousse' ? Math.round(Pa.dir * 3 * Math.min(1, Pa.t / 0.3)) : 0);
+    if (py < L.h) {
+      g.fillStyle = '#1d1a22'; g.fillRect(bx - 3, py, 7, L.h - py);
+      g.fillStyle = '#3a3646'; g.fillRect(bx - (Pa.dir > 0 ? 3 : -3), py + 4, 1, L.h - py - 4);
+      P.ellipse(bx + Pa.dir, py, 5, 4, '#1d1a22');
+      for (const dy of [-2, 0, 2]) P.px(bx + Pa.dir * 5, py + dy, '#4a3a4a'); // les coussinets
+    }
   }
   function planche(g, P, L, t) {
     const pl = L.planche, b = L.bloc;

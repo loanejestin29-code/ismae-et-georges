@@ -101,7 +101,7 @@ const CONFIG = {
     { epreuve: 'Le bonhomme de neige', texte: '(Troisième indice à écrire ici)' },
     { epreuve: 'En route vers Montaigu', texte: '(Quatrième indice à écrire ici)' },
     { epreuve: 'Le caramel raté', texte: '(Cinquième indice à écrire ici)' },
-    { epreuve: '???', texte: '' },
+    { epreuve: 'La grande chasse', texte: '(Sixième indice à écrire ici)' },
   ],
 
   // ------------------------------------------------------------------
@@ -398,7 +398,7 @@ const CONFIG = {
       ['linguini', 'Attendez ! ATTENDEZ ! … Un garçon avec un chat noir… Tu es Ismae ? C\'est forcément toi.'],
       ['ismae', 'Euh… oui ? On se connaît ?'],
       ['linguini', 'Linguini, je travaille chez Gusteau, le restaurant, là-bas, à côté de l\'église. Une certaine Loane a appelé tout à l\'heure.'],
-      ['linguini', 'Elle a dit : « Ismae arrive par le car de ce soir. Si vous avez un problème de caramel, c\'est elle qu\'il vous faut. »'],
+      ['linguini', 'Elle a dit : « Ismae arrive par le car de ce soir. Si vous avez un problème de caramel, c\'est lui qu\'il vous faut. »'],
       ['ismae', 'Encore Loane ?! Mais qu\'est-ce qu\'elle a manigancé…'],
       ['linguini', 'Et justement, on a un ÉNORME problème de caramel. Le chef t\'attend en cuisine. Vite, le dîner de Noël commence dans une heure !'],
       'Linguini repart en courant vers le restaurant… et manque de glisser sur une plaque de verglas.',
@@ -627,7 +627,7 @@ const CONFIG = {
       dameChien: { peau: '#f0c8a8', cheveux: '#a83a2a', coiffure: 'meche', barbe: 'aucune', yeux: '#3a5a3a', veste: '#2a5a7a', echarpe: '#f2c230', coupe: 'robe', pantalon: '#2a3a5a', chaussures: '#2a2026' },
     },
     // l'annonce de l'épreuve, à la descente du car
-    annonce: { haut: 'Épreuve suivante', titre: 'ÉPREUVE 5/6 · Le caramel raté', lieu: 'Montaigu', texte: 'Au restaurant du chef Gusteau, le caramel au beurre salé du dîner de Noël est raté… et Loane a donné ton nom. Linguini t\'attend devant le restaurant, à côté de l\'église.', bouton: 'C\'est parti !' },
+    annonce: { haut: 'Épreuve suivante', titre: 'ÉPREUVE 5/6 · Le caramel raté', lieu: 'Montaigu', texte: 'Au restaurant du chef Gusteau, le caramel au beurre salé du dîner de Noël est raté… et Loane a donné ton nom. Linguini est reparti t\'attendre au restaurant, à côté de l\'église.', bouton: 'C\'est parti !' },
     // en entrant pour la première fois dans le restaurant
     salle: [
       'Une odeur de beurre, de thym… et, quelque part, de caramel au beurre salé.',
@@ -660,7 +660,7 @@ const CONFIG = {
     },
     // pendant le mini-jeu (les messages en haut de l'écran et les répliques de Rémy)
     jeu: {
-      titres: ['1/5 · Le sucre', '2/5 · Faire fondre', '3/5 · Le beurre demi-sel', '4/5 · La crème', '5/5 · La texture'],
+      titres: ['1/6 · Le sucre', '2/6 · Faire fondre', '3/6 · Le beurre demi-sel', '4/6 · La crème', '5/6 · La texture', '6/6 · Le petit pot'],
       // [au doigt, au clavier et à la souris]
       consignes: {
         sucre: ['Maintiens le doigt pour verser 200 g', 'Maintiens Espace (ou le clic) pour verser 200 g'],
@@ -669,14 +669,17 @@ const CONFIG = {
         ajout: ['Glisse les morceaux un par un dans la casserole', 'Espace : un morceau (ou glisser à la souris)'],
         creme: ['Maintiens hors de la casserole pour verser, et remue', 'Verser : Espace · Remuer : ← → ou en rond à la souris'],
         texture: ['Feu à droite, remue sans arrêt, puis RETIRER DU FEU', 'Feu : ↑ ↓ · Remuer : ← → · Retirer : Espace'],
+        pot: ['Glisse un doigt pour bouger la casserole · maintiens VERSER', 'Casserole : ← → · Verser : maintiens Espace'],
       },
       bouton: 'RETIRER DU FEU',
+      verser: 'VERSER',
       bravo: ['Bien joué !', 'Parfait !', 'Bravo !'],
       parfait: 'Caramel au beurre salé parfait !',
       echecs: {
         trop: 'Trop de sucre !', dodo: 'Rémy s\'est endormi…', brule: 'Brûlé !', cristal: 'Le sucre a cristallisé !',
         miettes: 'Le beurre est en miettes !', fondu: 'Le beurre a fondu sur la planche !', fige: 'Le caramel a figé !',
         deborde: 'Ça déborde !', durci: 'Le caramel a durci !', liquide: 'Trop liquide !', dur: 'Trop épais !', attache: 'Ça a attaché au fond !',
+        renverse: 'Le pot a débordé !', tache: 'Il y en a partout !',
       },
       reessayer: ['Réessayer : touche l\'écran', 'Réessayer : Espace ou clic'],
       remy: {
@@ -686,6 +689,7 @@ const CONFIG = {
           'Le beurre demi-sel ! Coupe-le sur les pointillés. Bien droit, hein.',
           'La crème, maintenant. Verse doucement et remue en même temps, sinon ça mousse !',
           'Le plus dur : la texture. Bon feu, on remue sans arrêt, et on retire quand ça nappe la cuillère.',
+          'Dernière étape : on verse dans le petit pot. Jusqu\'à la ligne verte, et pas une goutte à côté !',
         ],
         ajout: 'Un morceau à la fois ! Chaque morceau refroidit le caramel, le feu le réchauffe. Garde le vert !',
         reussi: [
@@ -693,6 +697,7 @@ const CONFIG = {
           'Fondu, doré, pas brûlé. Je suis presque ému.',
           'Ah, le beurre demi-sel… ça sent la Bretagne !',
           'Lisse et onctueux. Magnifique.',
+          'Ça nappe la cuillère ! Exactement comme il faut.',
         ],
         parfait: 'Un caramel au beurre salé parfait ! Les Bretons peuvent être fiers de toi !',
         alertes: {
@@ -713,6 +718,9 @@ const CONFIG = {
           attache: 'Ça attache au fond ! Remue !',
           tropChaud: 'Trop chaud ! Baisse le feu !',
           presque: 'Ça nappe presque… tiens-toi prêt !',
+          aCote: 'À côté ! Vise le pot !',
+          presquePlein: 'Doucement… c\'est presque à la ligne !',
+          chat: 'GEORGES ! On ne touche pas au pot !',
         },
         echecs: {
           trop: ['Au secours ! Je suis sous le sucre !', 'Bon. On a assez de sucre pour toute la Bretagne.'],
@@ -727,6 +735,8 @@ const CONFIG = {
           durci: ['Trop lent… il a durci. On pourrait faire du patin dessus.'],
           liquide: ['C\'est de la soupe, ça. De la soupe au caramel.', 'Ça coule comme de l\'eau… Il fallait attendre que ça nappe !'],
           dur: ['Il est dur comme du granit breton ! Ma cuillère !', 'Trop cuit ! On pourrait s\'en servir de pavé.'],
+          renverse: ['Ça déborde du pot ! Il fallait s\'arrêter à la ligne !', 'Le pot est plein… et la table aussi.'],
+          tache: ['Il y en a partout ! Sur le plan de travail, sur moi…', 'On vise le POT, chef ! Le pot !'],
         },
         encore: ['Allez, on recommence. Je n\'ai rien vu.', 'On réessaie ! Les plus grands chefs ont tout raté un jour.', 'Respire. Concentre-toi. Et ne regarde pas le chat.'],
       },
@@ -744,7 +754,8 @@ const CONFIG = {
       ['remy', 'Reviens quand tu veux. Mais laisse le chat dehors.'],
     ],
     // l'annonce de la dernière épreuve (pas encore développée)
-    suite: { haut: 'À suivre…', titre: 'ÉPREUVE 6/6', lieu: '???', texte: 'La dernière épreuve arrive bientôt. En attendant, Montaigu brille de mille feux : profites-en !', bouton: 'Se promener à Montaigu' },
+    // l'annonce de la dernière épreuve (epreuve-chasse.js)
+    suite: { haut: 'Épreuve suivante', titre: 'ÉPREUVE 6/6 · La grande chasse', lieu: 'Montaigu, chez l\'antiquaire', texte: 'L\'antiquaire de la grande rue t\'attend devant sa boutique : son grenier cache quelque chose pour toi… si tu arrives à le trouver dans tout ce bazar.', bouton: 'C\'est parti !' },
     // les répliques des habitants et des gens du restaurant : avant / après le caramel
     pnj: {
       mamie: { avant: [['mamie', 'Tu sens ? Ça sent le caramel au beurre salé jusqu\'ici. Ça vient du restaurant, à côté de l\'église.'], ['mamie', 'Paraît que le chef est tout petit. Mais alors, tout petit.']], apres: [['mamie', 'Le caramel au beurre salé de ce soir, une merveille ! C\'est toi qui l\'as fait ? Bravo, mon grand.']] },
@@ -760,6 +771,104 @@ const CONFIG = {
       clientResto: { avant: [['clientResto', 'On attend le dessert depuis une heure. Il paraît qu\'il manque le caramel.']], apres: [['clientResto', 'Enfin, le dessert ! Ça valait le coup d\'attendre.']] },
       coletteChef: { avant: [['coletteChef', 'Le chef t\'attend près du fourneau. Lave-toi les mains d\'abord !']], apres: [['coletteChef', 'Pas mal du tout. Tu veux un tablier ? Il te reste plein de choses à apprendre.']] },
     },
+  },
+
+  // ---------------------------------------------------------------- ÉPREUVE 6 : la grande chasse, dans le grenier de l'antiquaire
+  chasse: {
+    // l'antiquaire, devant sa boutique (rangée sud de la grande rue)
+    antiquaireCfg: { peau: '#ecc8a8', cheveux: '#d8dce4', coiffure: 'rase', barbe: 'pleine', lunettes: true, yeux: '#3a3a4a', chapeau: 'melon', couleurChapeau: '#3a3040', veste: '#7a5a3a', pantalon: '#4a4048', chaussures: '#2a2026' },
+    antiquaire: {
+      avant: [
+        ['antiquaire', 'Ah ! Un garçon avec un chat noir… Tu dois être Ismae !'],
+        ['ismae', 'Laissez-moi deviner : Loane est passée par ici ?'],
+        ['antiquaire', 'Ce matin même ! Elle a monté des choses dans mon grenier, pour toi. Mais mon grenier… c\'est un sacré bazar.'],
+        ['antiquaire', 'Monte donc, la trappe est ouverte. Et bon courage !'],
+      ],
+      pendant: [['antiquaire', 'Tu retournes au grenier ? La trappe est toujours ouverte. Fouille bien partout !']],
+      apres: [['antiquaire', 'Alors, ce drôle de message ? Moi, je n\'y comprends rien. Mais Loane avait l\'air très fière d\'elle.']],
+    },
+    // en arrivant au grenier : Georges file après une souris, puis le mot de Loane
+    arrivee: [
+      'Le grenier de l\'antiquaire. Ça sent la poussière, le vieux bois… et les souvenirs.',
+      ['ismae', 'Waouh. Il y a de tout, ici.'],
+    ],
+    georgesFile: [
+      ['ismae', 'Georges ! Non ! Reviens !'],
+      ['ismae', '… Super. Il a disparu dans tout ce bazar.'],
+    ],
+    mot: [
+      'Un petit mot est épinglé à la poutre, juste au-dessus de la trappe. Cette écriture… c\'est celle de Loane.',
+      '« Ismae, cinq souvenirs de ton voyage se sont cachés dans ce grenier. Fouille partout pour les retrouver… et regarde bien leur dos. Bisous. L. »',
+      ['ismae', 'Cinq souvenirs… et un chat. C\'est parti !'],
+    ],
+    deja: ['Tu as déjà fouillé ici.'],
+    vide: ['Il n\'y a plus rien ici.'],
+    rien: ['Rien d\'intéressant.'],
+    symbole: 'Au dos : un symbole… dans une langue inconnue !',
+    continuer: ['Touche l\'écran pour continuer', 'Espace pour continuer'],
+    // les six trouvailles (le nom et le texte s'affichent en grand ; « trouve » : ce que dit Ismae ensuite)
+    objets: {
+      pansement: { nom: 'Le pansement', texte: 'Le doigt coupé chez le boucher… et le bisou magique de Loane.',
+        trouve: [['ismae', 'Un pansement… comme celui que Loane m\'a mis chez le boucher.'], ['ismae', 'Avec un bisou magique par-dessus. Ça marche toujours, ce truc.']] },
+      couronne: { nom: 'La mini-couronne du Prince Jean', texte: 'Le souvenir du tournoi de Sherwood.',
+        trouve: [['ismae', 'La couronne du Prince Jean ! En modèle réduit… et pourtant toujours trop grande pour lui.']] },
+      echarpe: { nom: 'L\'écharpe de Jack', texte: 'L\'écharpe de Loane, prêtée à Jack Snow. Elle porte encore son parfum.',
+        trouve: [['ismae', 'L\'écharpe de Jack Snow… Non : l\'écharpe de Loane.'], 'Ismae la respire un instant. Elle sent encore son parfum.'] },
+      ticket: { nom: 'Le ticket de car pour Montaigu', texte: 'Un aller pour Montaigu, comme tous ceux pris pour venir voir Loane.',
+        trouve: [['ismae', 'Glissé entre deux étiquettes de voyage… Un ticket de car pour Montaigu.'], ['ismae', 'J\'en ai pris, des cars, pour venir la voir.']] },
+      chou: { nom: 'Le mini Paris-Brest', texte: 'Une couronne de pâte à choux et de crème pralinée : votre dessert du soir.',
+        trouve: [['ismae', 'Une boîte de pâtissier, au milieu des boîtes à chapeaux… Un mini Paris-Brest !'], ['ismae', 'Notre dessert du soir. Avec le caramel de Rémy, ce serait parfait.']] },
+      georges: { nom: 'Georges !', texte: 'Il était caché sous les draps… couvert de poussière, et très fier de lui.',
+        trouve: [['ismae', 'Georges ! Te voilà ! Tu m\'as fait peur, tu sais.'], 'Georges ronronne. Il a encore une toile d\'araignée sur l\'oreille.'] },
+    },
+    // ce qu'on trouve en fouillant le reste du bric-à-brac
+    fouilles: {
+      horloge: ['Une vieille horloge comtoise. Elle s\'est arrêtée à minuit pile. Comme dans un conte.'],
+      sapin: ['Un vieux sapin en plastique. Il lui reste trois boules… et beaucoup de poussière.'],
+      bureau: ['Dans les tiroirs du bureau : des lettres jaunies, des timbres et un vieux stylo-plume.'],
+      tableaux: ['Des tableaux de famille. Le monsieur moustachu a l\'air de te surveiller.'],
+      miroir: ['Dans le miroir : un garçon courageux… avec de la poussière sur le nez.'],
+      chaises: ['Des chaises empilées en équilibre. Mieux vaut ne pas trop y toucher.'],
+      luge: ['Une vieille luge en bois et une paire de skis. Elles en ont dévalé, des pentes.'],
+      drap: ['Tu soulèves le drap : un vieux fauteuil… et une araignée vexée.'],
+      cheval: ['Un cheval à bascule. Il grince : « hiii… hiii… ». Rien sous la selle.'],
+      globe: ['Un vieux globe. Il y a des pays dessus qui n\'existent même plus.'],
+      cage: ['Une cage à oiseau, vide. L\'oiseau s\'est envolé depuis longtemps.'],
+      mannequin: ['Un mannequin de couturière, plein d\'épingles. Rien dans les poches du gilet.'],
+      bibliotheque: ['Des livres reliés, des contes, un vieil atlas… Tu les feuillettes : rien entre les pages.'],
+      commode: ['Dans les tiroirs de la commode : des napperons, des boutons, une boîte de photos jaunies.'],
+      fauteuil: ['Tu fouilles sous les coussins du fauteuil : une pièce de dix centimes et beaucoup de miettes.'],
+      portemanteau: ['Dans les poches du vieux manteau : un mouchoir brodé et une bille bleue.'],
+      pommes: ['Une caisse de pommes. Elles sentent encore bon. Rien d\'autre dedans.'],
+      radio: ['Une vieille radio. Tu tournes le bouton : « … ce soir, il neige sur toute la Vendée… »'],
+      machine: ['Une machine à écrire. Sur la feuille, quelqu\'un a tapé : « azertyuiop ». Passionnant.'],
+      laine: ['Un panier de pelotes de laine. Un vrai piège à chat.'],
+      cartonA: ['Des vieux magazines. « Spécial Noël », il y a très, très longtemps.'],
+      gramophone: ['Tu tournes la manivelle du gramophone : une petite valse grésille. Rien d\'autre.'],
+      cartonB: ['Des chaussettes dépareillées. Des dizaines. Mais où sont passées les autres ?'],
+      berceau: ['Un ours en peluche dort dans le berceau. Chut… Il n\'a rien vu.'],
+      cartonNoel: ['Des guirlandes emmêlées. TRÈS emmêlées. Il faudrait la journée pour les démêler.'],
+      livres: ['Une pile de vieux livres. Des contes, surtout.'],
+      tapis: ['Tu déroules un peu le tapis : rien dedans, à part de la poussière. Atchoum !'],
+      jouets: ['Un tambour, un soldat de bois, des cubes… Pas ce que tu cherches.'],
+      poupees: ['Une maison de poupée. Tout est minuscule… même la poussière.'],
+    },
+    // le présentoir, au milieu du grenier ({n} : le nombre d'objets posés dessus)
+    presentoir: ['Une longue table, un chemin de velours et cinq petits coussins. On dirait qu\'elle attend quelque chose.', 'Le présentoir : {n} sur 5. Chaque souvenir a trouvé son coussin.'],
+    // les six retrouvés : la phrase, le traducteur, le quiz final
+    finale: {
+      debut: [['ismae', 'Les cinq souvenirs… et Georges ! Je les ai tous !'], 'Sur le présentoir, les objets se mettent à briller doucement.'],
+      legende: 'Une phrase entière… dans une langue que personne ne connaît.',
+      apres: [
+        ['ismae', 'C\'est une phrase… Mais dans quelle langue ?!'],
+        ['ismae', 'Je ne connais aucune de ces lettres. Il me faudrait… un traducteur.'],
+        'Sous le présentoir, une petite carte, de la même écriture que le mot de l\'entrée :',
+        '« Le traducteur ne se gagne qu\'en répondant à des questions… sur moi. Prêt ? L. »',
+        ['ismae', 'Des questions sur Loane ? Ça, c\'est ma matière préférée.'],
+      ],
+    },
+    relire: [['ismae', 'Ce message… Il me faut ce traducteur.']],
+    suite: { haut: 'Dernière étape', titre: 'LE QUIZ FINAL', lieu: 'Le traducteur', texte: 'Pour traduire le message, il faut le traducteur… et il ne s\'obtient qu\'en répondant à des questions sur Loane. Le quiz final arrive bientôt !', bouton: 'À suivre…' },
   },
 
   textes: {
@@ -935,4 +1044,6 @@ Object.assign(CONFIG.personnages, {
   ego: { nom: 'Anton Ego', couleur: '#b8a0c8', bip: 190 }, clienteResto: { nom: 'Une cliente', couleur: '#e7a0c8' }, clientResto: { nom: 'Un client', couleur: '#a8c0e0', bip: 300 },
   mamie: { nom: 'Mamie Jeannette', couleur: '#d8b0e0', bip: 700 }, vendeuse: { nom: 'La marchande', couleur: '#9ad0a0' }, petitGarcon: { nom: 'Un petit garçon', couleur: '#f2c230', bip: 900 },
   facteur: { nom: 'Le facteur', couleur: '#e8c840', bip: 380 }, monsieur: { nom: 'Un monsieur', couleur: '#c8b8a0', bip: 260 }, dameChien: { nom: 'Une dame', couleur: '#f0a080' },
+  // le grenier de l'antiquaire (épreuve 6)
+  antiquaire: { nom: 'L\'antiquaire', couleur: '#d8b878', bip: 340 },
 });
