@@ -253,7 +253,7 @@ const Jeu = (() => {
     J.trace = [{ x: gx, y: gy }, { x: a.x, y: a.y }];
     J.pnj = carte.pnj;
     J.particules = [];
-    Musique.etouffer(carte.ambiance === 'interieur');
+    Musique.etouffer(carte.ambiance === 'interieur' || carte.ambiance === 'magasin');
     camera(true);
     if (J.onCarte) J.onCarte(carte);
     if (carte.onEntree) carte.onEntree(J);
@@ -359,7 +359,7 @@ const Jeu = (() => {
     if (carte.ambiance !== 'interieur') {
       for (const f of carte.fumees) {
         f.t -= dt;
-        if (f.t < 0) { f.t = 0.5 + Math.random() * 0.4; if (Math.abs(f.x - cam.x - V.w / 2) < V.w && Math.abs(f.y - cam.y - V.h / 2) < V.h) J.particule('fumee', f.x, f.y, { vx: 5 + Math.random() * 3, vy: -9, max: 3.2 }); }
+        if (f.t < 0) { f.t = 0.5 + Math.random() * 0.4; if (Math.abs(f.x - cam.x - V.w / 2) < V.w && Math.abs(f.y - cam.y - V.h / 2) < V.h) J.particule('fumee', f.x, f.y, { vx: f.vx !== undefined ? f.vx + Math.random() * 2 - 1 : 5 + Math.random() * 3, vy: f.vy || -9, max: 3.2 }); }
       }
       // neige : partout dans la rue ; dans la forêt, seulement près du chemin des montagnes (carte.neige(J) = 0 à 1)
       const kn = carte.neige === undefined ? 1 : typeof carte.neige === 'function' ? carte.neige(J) : +carte.neige;
@@ -396,7 +396,8 @@ const Jeu = (() => {
     return (lumCache[key] = c);
   }
   // crepuscule : la forêt en fin de journée, plus claire que la rue le soir, avec les mêmes lumières chaudes
-  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb', foret: '#f6ecd6', crepuscule: '#c7a9c3' };
+  // chaud : la salle du restaurant, aux bougies ; cuisine : sa cuisine, sous les lampes (les deux ont leurs lumières)
+  const AMB = { soir: '#a39fcb', jour: '#fff6ea', interieur: '#f1f3fb', foret: '#f6ecd6', crepuscule: '#c7a9c3', chaud: '#b0948e', cuisine: '#d2c2ba', magasin: '#d9dbe8' };
 
   let eauTiles = null;
   function tuilesEau() {
@@ -474,7 +475,7 @@ const Jeu = (() => {
     lg.setTransform(1, 0, 0, 1, 0, 0);
     lg.globalCompositeOperation = 'source-over';
     lg.fillStyle = AMB[amb]; lg.fillRect(0, 0, V.w, V.h);
-    if (amb === 'soir' || amb === 'crepuscule') {
+    if (amb === 'soir' || amb === 'crepuscule' || amb === 'chaud' || amb === 'cuisine' || amb === 'magasin') {
       lg.globalCompositeOperation = 'lighter';
       lg.setTransform(1, 0, 0, 1, -cx, -cy);
       for (let i = 0; i < carte.lumieres.length; i++) {

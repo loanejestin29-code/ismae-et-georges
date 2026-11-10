@@ -186,7 +186,17 @@
     font-size: 15px; padding: 6px 12px 5px; background: rgba(18, 13, 34, 0.86); color: var(--or); animation: rebondCentre 0.8s steps(2) infinite;
     box-shadow: 0 -2px 0 0 #0b0816, 0 2px 0 0 #0b0816, -2px 0 0 0 #0b0816, 2px 0 0 0 #0b0816; }
   body.cuisine #btn-b, body.cuisine #btn-a, body.cuisine #btn-indices, body.cuisine #aide, body.cuisine #inventaire { display: none; }
+  /* le service de Noël (service.js) : la bulle des clients, le titre plus petit, l'aide au-dessus des onglets */
+  #cui-client { position: absolute; margin: 0; padding: 6px 10px 6px; font-size: 16px; font-weight: 700; line-height: 1.25; color: #2a1e18; background: #fff8ec;
+    box-shadow: 0 -2px 0 0 #1d1626, 0 2px 0 0 #1d1626, -2px 0 0 0 #1d1626, 2px 0 0 0 #1d1626; }
+  #cui-client b { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  #cui-client.arrive { animation: bullePop 0.25s steps(3); }
+  body.service #cui-titre { top: calc(2px + env(safe-area-inset-top, 0px)); font-size: 13px; padding: 3px 10px 2px; }
+  body.service #cui-aide { animation: none; }
+  body.service #cui-message { top: 30%; }
   @media (max-height: 460px) { #cui-message { font-size: 21px; } #cui-bulle { font-size: 15px; } #cui-aide { font-size: 13px; } }
+  @media (max-height: 460px) { #cui-client { font-size: 14px; } }
+  #cui-client::after { content: ""; position: absolute; left: 60px; bottom: -8px; border: 5px solid transparent; border-top-color: #1d1626; }
   /* la route vers Montaigu */
   #route { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
   .route-haut { position: absolute; left: 50%; top: calc(8px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; gap: 8px; white-space: nowrap; }
@@ -299,7 +309,7 @@
     .carnet-texte { font-size: 13px; }
   }
 
-  @media (prefers-reduced-motion: reduce) { #cui-aide, #cui-message.arrive, #cui-bulle.arrive, #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #route-message.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive, #chasse.arrive, #trv-aide { animation: none; } #titre, #aide { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { #cui-aide, #cui-message.arrive, #cui-bulle.arrive, #cui-client.arrive, #dlg-suite, .telephone, #btn-jouer, #banniere.arrive, #btn-indices.nouveau, .etoiles i, #tir-message.arrive, #tir-aide, #inventaire.arrive, #route-message.arrive, #toast.arrive, .inv-case.nouveau, #asm-message.arrive, #chasse.arrive, #trv-aide { animation: none; } #titre, #aide { transition: none; } }
 </style>
 </head>
 <body>
@@ -322,6 +332,7 @@
   <p id="cui-message" hidden></p>
   <p id="cui-bulle" hidden></p>
   <p id="cui-aide"></p>
+  <p id="cui-client" hidden></p>
 </div>
 
 <div id="assemblage" hidden>
@@ -441,8 +452,9 @@
 <script src="js/persos-resto.js"></script>
 <script src="js/decor-montaigu.js"></script>
 <script src="js/carte-montaigu.js"></script>
+<script src="js/decor-resto.js"></script>
 <script src="js/carte-restaurant.js"></script>
-<script src="js/caramel.js"></script>
+<script src="js/service.js"></script>
 <script src="js/epreuve-caramel.js"></script>
 <script src="js/decor-grenier.js"></script>
 <script src="js/carte-grenier.js"></script>

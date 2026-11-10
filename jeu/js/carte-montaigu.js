@@ -196,8 +196,9 @@ Jeu.enregistrerCarte('montaigu', () => {
   // Linguini, qui vient chercher Ismae à la descente du car puis rentre l'attendre au restaurant (bus.js)
   C.linguini = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: porteResto, y: NORD + 14, dir: 'down', visible: false, vitesse: 110, dialogue: (J) => EpreuveCaramel.repliques('linguiniRue', J) });
   C.pnj.push(C.linguini);
-  // l'antiquaire, qui attend Ismae devant sa boutique après le caramel et le fait monter au grenier (epreuve-chasse.js)
-  C.antiquaire = new Entites.Perso({ id: 'antiquaire', cfg: CONFIG.chasse.antiquaireCfg, x: ANTIQUAIRE + 16, y: TROT2 - 12, dir: 'up', visible: false, dialogue: (J) => Chasse.antiquaire(J) });
+  // l'antiquaire, qui attend Ismae dans la rue, juste en face du restaurant, après le caramel ; il le fait monter
+  // au grenier (epreuve-chasse.js)
+  C.antiquaire = new Entites.Perso({ id: 'antiquaire', cfg: CONFIG.chasse.antiquaireCfg, x: ANTIQUAIRE + 16, y: RUE2 - 26, dir: 'down', visible: false, dialogue: (J) => Chasse.antiquaire(J) });
   C.pnj.push(C.antiquaire);
   C.arrivees.antiquaire = { x: ANTIQUAIRE - 8, y: TROT2 - 14, dir: 'up' };
 

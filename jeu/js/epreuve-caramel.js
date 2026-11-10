@@ -7,7 +7,8 @@
 //  · Dans les rues de Montaigu, les habitants parlent d'une odeur de caramel et d'un chef
 //    « tout petit ». Le restaurant du chef Gusteau est dans la grande rue, à côté de l'église.
 //  · Dans la cuisine, Rémy (le rat cuisinier) cherche quelqu'un pour préparer un caramel.
-//  · Le mini-jeu (caramel.js) : doser le sucre, mélanger, surveiller la cuisson.
+//  · Le mini-jeu (service.js) : le service de Noël. Trois clients, trois Paris-Brest au caramel au
+//    beurre salé, cinq postes (commande, caramel, four, montage, dressage), Rémy qui supervise.
 //  · La victoire : le cinquième indice, puis Ismae peut ressortir et se promener.
 //  Tous les textes sont dans config.js → caramel.
 // =====================================================================
@@ -67,7 +68,7 @@ const EpreuveCaramel = (() => {
 
   function lancerJeu(J) {
     J.carte.remy.pose = null;
-    Caramel.lancer(J, { fin: (gagne) => { if (gagne) victoire(J); } });
+    Service.lancer(J, { fin: (gagne) => { if (gagne) victoire(J); } });
   }
 
   // la victoire : Rémy saute de joie, Linguini arrive en patins, puis le cinquième indice
@@ -79,7 +80,7 @@ const EpreuveCaramel = (() => {
     J.jouerScript([
       { attendre: 0.4 },
       { dire: K().victoire.slice(0, 2) },
-      { faire: () => { if (lin) { lin.visible = true; lin.x = 176; lin.y = 236; lin.allerVers([{ x: 210, y: 176 }], 80); } } },
+      { faire: () => { if (lin) { lin.visible = true; lin.x = 288; lin.y = 340; lin.allerVers([{ x: 288, y: 290 }, { x: 196, y: 276 }], 80); } } },
       { jusqua: () => !lin || !lin.chemin },
       { dire: K().victoire.slice(2) },
       { faire: () => { remy.pose = null; Musique.victoire(); Indices.gagner(4, () => apres(J)); } },
@@ -89,7 +90,7 @@ const EpreuveCaramel = (() => {
     Q.caramel = 'gagne';
     J.cinematique = false;
     const lin = J.carte.linguiniCuisine;
-    J.dire(K().apres, () => { if (lin) lin.allerVers([{ x: 176, y: 250 }], 80, () => { lin.visible = false; }); Indices.suite(K().suite); });
+    J.dire(K().apres, () => { if (lin) lin.allerVers([{ x: 288, y: 290 }, { x: 288, y: 372 }], 80, () => { lin.visible = false; }); Indices.suite(K().suite); });
   }
 
   return { init, repliques, entreeSalle, entreeCuisine, parlerRemy, lancerJeu, dev: { victoire } };

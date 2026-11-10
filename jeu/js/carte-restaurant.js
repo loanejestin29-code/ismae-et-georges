@@ -1,243 +1,320 @@
 // =====================================================================
 //  carte-restaurant.js — le restaurant du chef Gusteau, à Montaigu (épreuve 5)
 //
-//  · 'restaurant' : la salle. Parquet, papier peint bordeaux et doré, la cheminée,
-//    le portrait de Gusteau, le sapin, les tables dressées aux chandelles, Anton Ego
-//    qui attend son dessert, Linguini qui sert… en patins à roulettes.
-//    Au fond à droite, les portes battantes de la cuisine.
-//  · 'cuisine' : carrelage noir et blanc, faïence blanche, casseroles en cuivre,
-//    le grand fourneau qui fume, les légumes de la ratatouille, les sacs de sucre,
-//    Colette… et Rémy, debout sur son plan de travail.
+//  · 'restaurant' : la salle, à la lueur des bougies. Parquet à chevrons, grand tapis,
+//    papier peint bordeaux et doré, pilastres de noyer, miroirs, lustres de cristal,
+//    la cheminée, le portrait de Gusteau, le bar en zinc, le chariot des desserts, le
+//    piano et son pianiste, les tables nappées, Anton Ego qui attend son dessert,
+//    Linguini qui sert… en patins à roulettes. Au fond à droite, les portes de la cuisine.
+//  · 'cuisine' : tomettes, faïence blanche et frise bleue, la grande hotte et ses
+//    casseroles de cuivre, le piano de cuisson qui fume, la chambre froide, la plonge,
+//    l'îlot de marbre de la pâtisserie (le poste de Rémy), le billot de Colette, et
+//    au premier plan le passe, sous ses lampes chauffantes. Horst touille sa sauce,
+//    Colette coupe ses légumes, Lalo fait la vaisselle.
+//  Les objets sont dessinés dans decor-resto.js ; le mini-jeu du service dans service.js.
 // =====================================================================
 'use strict';
 
-const RestoDecor = (() => {
-  function mk(w, h) { const c = PX.canvas(w, h); return { c, P: PX.painter(c) }; }
-  const OR = '#e8b54a';
-  // une table ronde dressée : nappe blanche, chemin de table rouge, chandelier, assiettes dorées
-  function table(seed) {
-    const r = PX.rng(seed), { c, P } = mk(36, 34), base = 33;
-    P.ellipse(18, 22, 16, 6, '#d8d4cc'); P.rect(2, 22, 33, 9, '#e8e4dc'); for (let x = 4; x < 34; x += 5) P.vline(x, 23, 8, '#d0ccc4'); P.hline(2, 30, 33, '#c8c4bc');
-    P.ellipse(18, 21, 16, 6, '#f6f4ee'); P.ellipse(18, 21, 14, 4, '#ffffff');
-    P.rect(16, 15, 4, 13, '#a8343a'); P.hline(16, 27, 4, '#7a2a2a');
-    for (const [px, py] of [[8, 20], [28, 20], [12, 24], [24, 24]]) { P.ellipse(px, py, 3, 1, OR); P.ellipse(px, py, 2, 1, '#ffffff'); }
-    for (const [gx, gy] of [[5, 18], [31, 18]]) { P.rect(gx, gy - 3, 2, 3, '#bfe0f0'); P.px(gx, gy - 3, '#ffffff'); }
-    // le chandelier à trois branches et ses grosses bougies
-    P.rect(17, 12, 2, 9, OR); P.ellipse(18, 20, 3, 1, OR); P.hline(12, 12, 12, OR); P.px(12, 11, OR); P.px(23, 11, OR);
-    for (const [x, y] of [[12, 6], [17, 3], [22, 6]]) { P.rect(x, y, 2, 6, '#f6f2e6'); P.vline(x + 1, y, 6, '#d8d0c0'); P.px(x, y - 1, '#ffd27a'); P.px(x, y - 2, '#fff4b0'); P.px(x + 1, y - 1, '#f08a24'); }
-    P.rect(4, 31, 2, 3, '#5a3a24'); P.rect(30, 31, 2, 3, '#5a3a24');
-    return { img: PX.outline(c, 'auto'), ax: 18, ay: base, flammes: [[12, 4], [17, 1], [22, 4]] };
-  }
-  function chaise(face) {
-    const { c, P } = mk(10, 16), base = 15;
-    if (face) { P.rect(1, 0, 8, 9, '#5a3424'); P.rect(2, 1, 6, 6, '#8a2a2a'); P.rect(1, 9, 8, 3, '#6a4428'); }
-    else { P.rect(1, 8, 8, 3, '#8a2a2a'); P.hline(1, 8, 8, '#a8343a'); }
-    P.vline(1, 11, 5, '#4a2a1c'); P.vline(8, 11, 5, '#4a2a1c');
-    return { img: PX.outline(c, 'auto'), ax: 5, ay: base };
-  }
-  // un plan de travail en inox ; contenu : 'legumes' | 'fromages' | 'planche' | 'sucre' | 'vide'
-  function plan(w, contenu, seed = 1) {
-    const r = PX.rng(seed), H = 30, { c, P } = mk(w, H), base = H - 1, top = 10;
-    P.rect(0, top, w, 6, '#c8ccd8'); P.hline(0, top, w, '#eef0f6'); P.hline(0, top + 5, w, '#8a90a0');
-    P.rect(1, top + 6, w - 2, H - top - 9, '#a8aebc'); for (let x = 3; x < w - 2; x += 8) P.vline(x, top + 7, H - top - 10, '#9aa0b0');
-    P.rect(2, H - 3, 3, 3, '#5a6070'); P.rect(w - 5, H - 3, 3, 3, '#5a6070');
-    const L = [];
-    if (contenu === 'legumes') {
-      for (let x = 4; x < w - 6; x += 9) {
-        const k = (x / 9 | 0) % 4;
-        if (k === 0) { P.ellipse(x + 3, top - 1, 3, 3, '#d8323a'); P.px(x + 3, top - 4, '#3a8a3a'); P.px(x + 2, top - 2, '#ff8a8a'); } // tomate
-        else if (k === 1) { P.rect(x, top - 3, 8, 3, '#3a7a3a'); P.hline(x, top - 3, 8, '#5aa05a'); } // courgette
-        else if (k === 2) { P.ellipse(x + 3, top - 2, 3, 2, '#5a2a6a'); P.px(x, top - 3, '#3a8a3a'); P.px(x + 2, top - 3, '#8a5a9a'); } // aubergine
-        else { P.rect(x + 1, top - 4, 5, 4, ['#f2c230', '#e8603a'][r.int(2)]); P.px(x + 3, top - 5, '#3a8a3a'); } // poivron
-      }
-    } else if (contenu === 'fromages') {
-      for (let x = 3; x < w - 8; x += 12) { P.ellipse(x + 5, top - 2, 5, 3, '#f2d36b'); P.ellipse(x + 5, top - 3, 5, 2, '#fff0a0'); P.rect(x + 5, top - 4, 4, 3, '#e8c050'); }
-    } else if (contenu === 'planche') {
-      P.rect(4, top - 2, 18, 4, '#c89a5a'); P.hline(4, top - 2, 18, '#e0b878'); P.rect(8, top - 3, 8, 1, '#c8ccd8'); P.rect(16, top - 3, 4, 1, '#3a2a24');
-      for (let k = 0; k < 6; k++) P.ellipse(26 + k * 3, top - 1, 1, 1, ['#3a7a3a', '#d8323a', '#f2c230'][k % 3]);
-      P.ellipse(w - 10, top - 3, 6, 3, '#e8e4dc'); P.ellipse(w - 10, top - 4, 5, 2, '#ffffff'); // un saladier
-    } else if (contenu === 'sucre') {
-      for (const x of [3, 15, 27]) { if (x + 12 > w) break; P.rect(x, top - 10, 11, 11, '#f4efe2'); P.hline(x, top - 10, 11, '#ffffff'); P.rect(x + 1, top - 6, 9, 4, '#3a6aa8'); P.rect(x + 4, top - 5, 3, 2, '#ffffff'); }
-    } else if (contenu === 'casserole') {
-      P.rect(w - 30, top - 6, 12, 6, '#c8ccd8'); P.ellipse(w - 24, top - 6, 6, 2, '#8a90a0'); P.hline(w - 30, top - 4, 12, '#eef0f6'); P.rect(w - 18, top - 5, 9, 2, '#3a3a46');
-      P.rect(w - 44, top - 2, 10, 2, '#c89a5a'); P.ellipse(w - 46, top - 1, 2, 1, '#c89a5a'); // la cuillère en bois
-      P.rect(6, top - 4, 6, 4, '#f4efe2'); P.rect(7, top - 3, 4, 2, '#3a6aa8'); // un petit sac de sucre
-    }
-    return { img: PX.outline(c, 'auto'), ax: 0, ay: base, top };
-  }
-  // le grand fourneau (piano de cuisson) : 6 feux, des casseroles et une marmite
-  function fourneau() {
-    const W = 104, H = 44, { c, P } = mk(W, H), base = H - 1;
-    P.rect(0, 14, W, H - 14, '#3a3e4c'); P.rect(0, 14, W, 12, '#5a6070'); P.hline(0, 14, W, '#8a90a0');
-    for (let x = 4; x < W - 4; x += 16) { P.rect(x, 30, 12, 9, '#2a2e3a'); P.hline(x, 30, 12, '#6a7080'); P.rect(x + 4, 33, 4, 1, '#c8ccd8'); } // les portes du four
-    P.rect(0, base - 2, W, 3, '#2a2e3a');
-    const feux = [];
-    for (let k = 0; k < 6; k++) { const x = 9 + k * 17, y = 20; P.ellipse(x, y, 6, 3, '#2a2a34'); P.ellipse(x, y, 4, 2, '#4a4a58'); feux.push([x, y]); }
-    // une marmite, une casserole, une poêle
-    P.rect(5, 2, 14, 16, '#c8ccd8'); P.ellipse(12, 2, 7, 2, '#8a90a0'); P.hline(5, 6, 14, '#eef0f6'); P.rect(3, 6, 2, 2, '#8a90a0'); P.rect(19, 6, 2, 2, '#8a90a0');
-    P.rect(39, 9, 12, 9, '#c86a3a'); P.ellipse(45, 9, 6, 2, '#e8903a'); P.hline(39, 11, 12, '#e8a06a'); P.rect(51, 11, 9, 2, '#5a3a24');
-    P.ellipse(80, 16, 8, 2, '#3a3a46'); P.ellipse(80, 15, 7, 2, '#5a5a6a'); P.rect(88, 15, 10, 2, '#2a2a34');
-    return { img: PX.outline(c, '#1d1626'), ax: W / 2, ay: base, feux };
-  }
-  function frigo() {
-    const { c, P } = mk(30, 56), base = 55;
-    P.rect(0, 0, 30, 56, '#b8bcc8'); P.rect(2, 2, 26, 52, '#d8dce6'); P.vline(15, 2, 52, '#9aa0b0');
-    P.rect(11, 20, 2, 12, '#6a7080'); P.rect(17, 20, 2, 12, '#6a7080'); P.vline(3, 2, 52, '#eef0f6');
-    return { img: PX.outline(c, '#1d1626'), ax: 15, ay: base };
-  }
-  function evier() {
-    const { c, P } = mk(42, 30), base = 29;
-    P.rect(0, 8, 42, 22, '#a8aebc'); P.rect(0, 8, 42, 6, '#c8ccd8'); P.hline(0, 8, 42, '#eef0f6');
-    P.rect(4, 9, 16, 4, '#6a7080'); P.rect(22, 9, 16, 4, '#6a7080');
-    for (let k = 0; k < 6; k++) P.ellipse(10 + k, 6 - k, 5, 1, k % 2 ? '#f4f2ec' : '#d8d4cc'); // la pile d'assiettes
-    P.rect(28, 2, 2, 7, '#8a90a0'); P.hline(28, 2, 6, '#8a90a0');
-    return { img: PX.outline(c, '#1d1626'), ax: 21, ay: base };
-  }
-  return { table, chaise, plan, fourneau, frigo, evier };
-})();
+// pose un objet avec ses lumières et ses flammes de bougie
+function poserResto(C, def, x, y, o = {}) {
+  const ob = C.objet(def, x, y, o);
+  (def.lumieres || []).forEach(([lx, ly, rr, k]) => C.lumiere(ob.x + lx, ob.y + ly, rr, k));
+  (def.flammes || []).forEach(([fx, fy]) => C.lumiere(ob.x + fx, ob.y + fy, o.rayonFlamme || 18, 'feu'));
+  (def.twinkles || []).forEach(([tx, ty]) => C.scintille.push([ob.x + tx, ob.y + ty]));
+  return ob;
+}
 
 // ---------------------------------------------------------------- LA SALLE
 Jeu.enregistrerCarte('restaurant', () => {
-  const W = 352, H = 236, FOND = 80, D = RestoDecor, M = Montaigu;
-  const C = new Carte('restaurant', W, H, { ambiance: 'interieur', fond: '#1a0e10' });
-  const P = C.P, r = PX.rng(707), OR = '#e8b54a', A = Arendelle;
-  // le parquet en chevrons
-  for (let y = FOND; y < H; y += 4) for (let x = ((y / 4) % 2) * 6 - 6; x < W; x += 12) {
-    P.rect(x, y, 6, 4, r.pick(['#8a5a32', '#946238', '#82542e'])); P.rect(x + 6, y, 6, 4, r.pick(['#a0703e', '#9a6a3a'])); P.hline(x, y, 12, '#a8743e'); P.px(x + 6, y + 1, '#5a3a22');
+  const W = 576, H = 336, FOND = 104, D = RestoDecor, M = Montaigu, Q = Scenes.quete;
+  const C = new Carte('restaurant', W, H, { ambiance: 'chaud', fond: '#1a0e10' });
+  C.neige = 0;
+  const P = C.P, r = PX.rng(707), OR = D.OR, N = D.NOYER, V = D.VELOURS;
+  const poser = (def, x, y, o) => poserResto(C, def, x, y, o);
+
+  // ---- le parquet à chevrons, usé au milieu, plus sombre le long des murs
+  for (let y = FOND, j = 0; y < H; y += 4, j++) for (let x = -((j * 3) % 12); x < W; x += 12) {
+    const a = r.pick(['#6e4024', '#7a4a28', '#84522c', '#704226']), b = r.pick(['#8e5a32', '#9a6640', '#8a5834', '#94603a']);
+    P.rect(x, y, 6, 4, a); P.rect(x + 6, y, 6, 4, b);
+    P.hline(x, y, 6, PX.shade(a, 0.14)); P.hline(x + 6, y, 6, PX.shade(b, 0.16));
+    P.vline(x + 6, y, 4, '#3e2214'); P.px(x + 1 + r.int(4), y + 2, PX.shade(a, -0.18)); if (r.chance(0.3)) P.px(x + 7 + r.int(4), y + 1 + r.int(2), PX.shade(b, 0.25));
   }
-  P.ellipse(W / 2, 150, 110, 40, 'rgba(122,26,34,0.35)'); P.ellipse(W / 2, 150, 100, 34, 'rgba(160,40,48,0.3)'); // le grand tapis
-  // le mur du fond : papier peint bordeaux à motifs dorés, boiseries, corniche
-  P.rect(0, 0, W, FOND, '#5a1a24');
-  for (let y = 6; y < FOND - 26; y += 10) for (let x = (y / 10 % 2) * 8 + 4; x < W; x += 16) { P.px(x, y, '#a8742e'); P.px(x - 1, y + 1, '#8a5a2a'); P.px(x + 1, y + 1, '#8a5a2a'); P.px(x, y + 2, '#a8742e'); }
-  P.rect(0, 0, W, 4, '#3a1018'); P.hline(0, 4, W, OR);
-  P.rect(0, FOND - 26, W, 26, '#4a2a1c'); for (let x = 4; x < W; x += 24) { P.rect(x, FOND - 22, 20, 16, '#5a3424'); P.hline(x, FOND - 22, 20, '#6a4430'); }
-  P.hline(0, FOND - 27, W, OR); P.dither(0, FOND - 6, W, 6, '#1a0e10', 5);
+  P.dither(0, FOND, W, 12, '#1a0a06', 9); P.dither(0, FOND + 12, W, 10, '#1a0a06', 4);
+  P.dither(0, FOND, 16, H - FOND, '#1a0a06', 6); P.dither(W - 16, FOND, 16, H - FOND, '#1a0a06', 6);
+  // ---- le grand tapis d'Orient au milieu, et le chemin de l'entrée
+  const tapis = (x, y, w, h) => {
+    P.rect(x - 2, y, w + 4, h, '#efe6d0'); for (let xx = x - 2; xx < x + w + 2; xx += 2) { P.vline(xx, y - 3, 3, '#e0d4b8'); P.vline(xx, y + h, 3, '#e0d4b8'); }
+    P.rect(x, y, w, h, '#22183a'); P.rect(x + 3, y + 3, w - 6, h - 6, OR[2]); P.rect(x + 5, y + 5, w - 10, h - 10, '#22183a');
+    for (let xx = x + 9; xx < x + w - 6; xx += 8) for (const yy of [y + 8, y + h - 9]) { P.px(xx, yy - 1, OR[3]); P.hline(xx - 1, yy, 3, V[4]); P.px(xx, yy + 1, OR[3]); }
+    for (let yy = y + 12; yy < y + h - 8; yy += 8) for (const xx of [x + 8, x + w - 9]) { P.px(xx, yy - 1, OR[3]); P.hline(xx - 1, yy, 3, V[4]); P.px(xx, yy + 1, OR[3]); }
+    P.rect(x + 12, y + 12, w - 24, h - 24, V[2]); P.rect(x + 13, y + 13, w - 26, 1, OR[1]); P.rect(x + 13, y + h - 14, w - 26, 1, OR[1]);
+    for (let yy = y + 16; yy < y + h - 16; yy += 6) for (let xx = x + 16 + ((yy / 6) % 2) * 6; xx < x + w - 16; xx += 12) { P.px(xx, yy, V[4]); P.px(xx - 1, yy + 1, V[1]); P.px(xx + 1, yy + 1, V[1]); }
+    const cx = x + w / 2, cy = y + h / 2;
+    P.ellipse(cx, cy, 34, 16, '#22183a'); P.ellipse(cx, cy, 31, 14, OR[2]); P.ellipse(cx, cy, 28, 12, V[3]); P.ellipse(cx, cy, 16, 7, '#22183a'); P.ellipse(cx, cy, 9, 4, OR[3]); P.ellipse(cx, cy, 4, 2, V[4]);
+    P.dither(x, y, w, h, '#000000', 2);
+  };
+  tapis(150, 158, 276, 136);
+  P.rect(262, 294, 52, H - 294, V[2]); P.vline(263, 294, H - 294, OR[2]); P.vline(312, 294, H - 294, OR[2]); P.dither(262, 294, 52, H - 294, V[1], 4);
+  // le seuil de l'entrée : damier de marbre noir et blanc, paillasson, porte vitrée
+  for (let y = H - 22, j = 0; y < H; y += 6, j++) for (let x = 232 + (j % 2) * 6, k = 0; x < 344; x += 6, k++) if (x < 262 || x > 312) P.rect(x, y, 6, 6, k % 2 ? '#e8e4dc' : '#2a2430');
+  P.rect(266, H - 12, 44, 8, '#4a2a1a'); P.dither(266, H - 12, 44, 8, '#6a3a24', 6); P.rect(258, H - 3, 60, 3, '#120a0c');
+
+  // ---- le mur du fond : corniche, papier peint, cimaise, lambris
+  D.papierPeint(P, 0, 6, W, 56);
+  P.rect(0, 0, W, 6, N[1]); P.hline(0, 5, W, OR[3]); P.hline(0, 4, W, N[3]);
+  P.rect(0, 60, W, 5, N[3]); P.hline(0, 60, W, N[5]); P.hline(0, 62, W, OR[3]); P.hline(0, 64, W, N[1]);
+  P.rect(0, 65, W, FOND - 65, N[2]); for (let x = 2; x < W - 20; x += 24) D.panneau(P, x, 68, 22, FOND - 76);
+  P.rect(0, FOND - 6, W, 6, N[1]); P.hline(0, FOND - 6, W, N[4]); P.hline(0, FOND - 5, W, OR[2]);
+  // la guirlande lumineuse le long de la corniche
+  for (let x = 0; x < W; x++) { const y = 8 + Math.round(Math.sin(((x % 48) / 48) * Math.PI) * 4); P.px(x, y, D.VERT[1]); P.px(x, y - 1, D.VERT[2]); if (x % 6 === 0) { P.px(x, y + 1, M.AMPOULES[(x / 6 | 0) % 5]); C.scintille.push([x, y + 1]); } }
+  // la cheminée et son miroir ; le miroir de la banquette ; le portrait de Gusteau entre deux miroirs ; le bar ; les portes de la cuisine
+  D.miroir(P, 28, 8, 56, 24);
+  D.miroir(P, 120, 12, 72, 46);
+  D.miroir(P, 214, 14, 34, 44); D.miroir(P, 328, 14, 34, 44);
+  D.grandPortrait(P, 271, 16);
+  P.rect(268, 66, 40, 9, OR[2]); P.rect(269, 67, 38, 7, N[1]); for (let k = 0; k < 5; k++) { const sx = 274 + k * 7; P.px(sx, 69, OR[4]); P.hline(sx - 1, 70, 3, OR[4]); P.px(sx, 71, OR[4]); }
+  D.etageresBar(P, 380, 10, 84, 52);
+  D.portesCuisine(P, 500, 36, FOND - 36);
+  for (const px of [104, 200, 368, 468]) D.pilastre(P, px, 6, FOND - 6);
+  P.rect(0, 0, 8, FOND, N[1]); P.rect(W - 8, 0, 8, FOND, N[1]);
+  for (const [ax, ay] of [[108, 34], [204, 34], [260, 30], [316, 30], [372, 34], [472, 34]]) { D.applique(P, ax, ay); C.lumiere(ax, ay - 1, 34, 'lamp'); }
+  C.lumiere(288, 22, 30, 'halo');
+  for (const [hx, hy] of [[511, 48], [534, 48]]) C.lumiere(hx, hy, 22, 'win');
+  P.rect(0, FOND, 6, H - FOND, N[1]); P.rect(W - 6, FOND, 6, H - FOND, N[1]); P.vline(5, FOND, H - FOND, N[3]); P.vline(W - 6, FOND, H - FOND, N[3]);
   C.solide(0, 0, W, FOND + 4); C.solide(0, 0, 8, H); C.solide(W - 8, 0, 8, H);
-  P.rect(0, FOND, 8, H - FOND, '#3a1a14'); P.rect(W - 8, FOND, 8, H - FOND, '#3a1a14');
-  // une guirlande lumineuse et des couronnes tout le long du mur
-  for (let x = 10; x < W - 10; x++) { const y = 8 + Math.round(Math.sin(((x - 10) % 40) / 40 * Math.PI) * 4); P.px(x, y, '#2a4a2a'); if (x % 6 === 0) { P.px(x, y + 1, M.AMPOULES[(x / 6 | 0) % 5]); C.scintille.push([x, y + 1]); } }
-  // la cheminée et son feu
-  P.rect(22, 30, 54, FOND - 30, '#d8cdb4'); P.rect(22, 28, 54, 4, '#b8ad94'); P.hline(22, 28, 54, '#f0e6cc');
-  P.rect(32, 42, 34, FOND - 42, '#1a1214'); P.ellipse(49, FOND - 6, 12, 4, '#8a3a1a');
-  C.dynamiques.push({ sortY: FOND, draw(g, J) {
-    const t = J.t || 0;
-    for (let k = 0; k < 7; k++) { const h = 6 + Math.round(Math.abs(Math.sin(t * 7 + k * 1.7)) * 8); g.fillStyle = k % 2 ? '#f08a24' : '#ffd27a'; g.fillRect(38 + k * 3, FOND - 6 - h, 3, h); }
-    g.fillStyle = '#5a3a24'; g.fillRect(38, FOND - 6, 22, 3);
+  C.porte(504, FOND - 2, 36, 14, 'cuisine', 'entree', 'up');
+  C.arrivees.devantCuisine = { x: 522, y: FOND + 16, dir: 'down' };
+  C.zone(502, FOND, 40, 10, 'portesCuisine');
+
+  // ---- la cheminée, son feu, la pendule
+  const ch = poser(D.cheminee(), 56, FOND + 4, { solide: [-40, -8, 80, 8], rayonFlamme: 14 });
+  C.lumiere(ch.x + ch.def.foyer.x + 13, ch.y + ch.def.foyer.y - 4, 60, 'feu');
+  C.zone(26, FOND + 2, 60, 10, 'cheminee');
+  C.dynamiques.push({ sortY: FOND + 4.5, draw(g, J) {
+    const t = J.t || 0, f = ch.def.foyer, x0 = ch.x + f.x, y0 = ch.y + f.y;
+    for (let k = 0; k < 9; k++) { const h = 5 + Math.round(Math.abs(Math.sin(t * 7 + k * 1.7)) * 9 + Math.sin(t * 3 + k) * 2); g.fillStyle = k % 3 === 1 ? '#ffd27a' : k % 3 ? '#f08a24' : '#e8501e'; g.fillRect(x0 + k * 3, y0 - h, 3, h); if (h > 9) { g.fillStyle = '#fff4b0'; g.fillRect(x0 + k * 3 + 1, y0 - h + 2, 1, 3); } }
+    if (Math.sin(t * 5.3) > 0.7) { g.fillStyle = '#ffd27a'; g.fillRect(x0 + 6 + Math.round(Math.sin(t * 9) * 8), y0 - 16 - Math.round((t * 30) % 12), 1, 1); }
   } });
-  for (const [cx, col] of [[36, '#d8323a'], [49, '#3a8a4a'], [62, '#d8323a']]) { P.rect(cx - 2, 33, 5, 7, col); P.rect(cx - 2, 38, 7, 3, col); P.hline(cx - 2, 33, 5, '#ffffff'); } // les chaussettes
-  C.zone(26, FOND, 46, 10, 'cheminee');
-  // le portrait de Gusteau
-  const gu = Resto.gusteau(); P.draw(gu, 108, 14);
-  C.zone(104, FOND, 42, 10, 'portraitGusteau');
-  // les appliques
-  for (const ax of [96, 160, 236]) { P.rect(ax, 32, 3, 6, '#a8742e'); P.ellipse(ax + 1, 30, 3, 2, '#fff1bb'); C.lumiere(ax + 1, 30, 30, 'lamp'); }
-  // les portes battantes de la cuisine, avec leurs hublots
-  const KX = 270;
-  P.rect(KX - 3, 22, 46, FOND - 22, '#3a1a14'); A.texte(P, 'CUISINE', KX + 6, 14, OR);
-  for (const dx of [0, 21]) { P.rect(KX + dx, 26, 19, FOND - 26, '#6a4428'); P.hline(KX + dx, 26, 19, '#8a5a32'); P.ellipse(KX + dx + 9, 40, 5, 5, '#c8ccd8'); P.ellipse(KX + dx + 9, 40, 4, 4, '#ffe6a0'); P.rect(KX + dx + 3, 60, 13, 2, '#c8ccd8'); }
-  C.porte(KX + 4, FOND - 2, 32, 14, 'cuisine', 'entree', 'up');
-  C.arrivees.devantCuisine = { x: KX + 20, y: FOND + 14, dir: 'down' };
-  // le sapin dans le coin, la vitrine des desserts, le pupitre de l'entrée
-  C.objet(Objets.grandSapin(41), 24, 118, { solide: [-8, -4, 16, 5], lumiere: true, rayon: 50, k: 'xmas' });
-  C.zone(12, 112, 24, 10, 'sapinResto');
-  const vit = (() => { const { c, P: V } = (() => { const cc = PX.canvas(40, 34); return { c: cc, P: PX.painter(cc) }; })();
-    V.rect(0, 8, 40, 26, '#5a3424'); V.rect(2, 2, 36, 18, '#bfe0f0'); V.rect(3, 3, 34, 16, '#fff4dc');
-    for (let x = 5; x < 34; x += 7) { V.rect(x, 9, 5, 4, ['#f6c6d6', '#7a4a32', '#fff1e0', '#e8b54a', '#9fd8b8'][(x / 7) | 0]); V.px(x + 2, 8, '#d8323c'); }
-    V.rect(6, 15, 24, 4, '#6a3a24'); V.hline(6, 15, 24, '#8a4a2a'); V.px(10, 14, '#f4f2ec'); V.px(20, 14, '#3a8a3a'); // la bûche, sans caramel
-    V.hline(2, 2, 36, '#ffffff'); return { img: PX.outline(c, 'auto'), ax: 20, ay: 33 }; })();
-  C.objet(vit, W - 34, 200, { solide: [-20, -8, 40, 8], texte: 'vitrineDesserts', zw: 36 });
-  const pup = (() => { const cc = PX.canvas(20, 26), V = PX.painter(cc); V.rect(2, 8, 16, 18, '#5a3424'); V.rect(0, 6, 20, 4, '#7a4a2a'); V.rect(4, 4, 12, 3, '#f4f2ec'); V.vline(10, 4, 3, '#8a2a2a'); V.rect(15, 0, 2, 6, OR); V.ellipse(16, 0, 2, 1, '#fff1bb'); return { img: PX.outline(cc, 'auto'), ax: 10, ay: 25 }; })();
-  C.objet(pup, 120, 214, { solide: [-10, -6, 20, 6], texte: 'pupitre', zw: 22 });
-  // les tables dressées, leurs chaises et leurs chandelles
-  const TABLES = [[82, 132], [176, 120], [260, 134], [108, 182], [206, 176], [292, 188]];
-  const CONVIVES = { 0: [-9, 9], 1: [9], 4: [-9] }; // les places occupées (décalage par rapport au milieu de la table)
-  TABLES.forEach(([tx, ty], k) => {
-    const t = D.table(30 + k);
-    for (const dx of CONVIVES[k] || [0]) C.objet(D.chaise(true), tx + dx, ty - 14, { solide: [-4, -3, 8, 3] });
-    C.objet(t, tx, ty, { solide: [-16, -8, 32, 8], texte: 'tableResto', zw: 30 });
-    t.flammes.forEach(([fx, fy]) => C.lumiere(tx - t.ax + fx, ty - t.ay + fy, 18, 'feu'));
-    C.objet(D.chaise(false), tx - 20, ty + 2, { solide: [-4, -3, 8, 3] }); C.objet(D.chaise(false), tx + 20, ty + 2, { solide: [-4, -3, 8, 3] });
+  // ---- le sapin et ses cadeaux, dans le coin
+  poser(Objets.grandSapin(41), 30, 238, { solide: [-10, -4, 20, 5], lumiere: true, rayon: 52, k: 'xmas' });
+  poser(D.cadeaux(4), 34, 246, { solide: [-16, -6, 32, 6] });
+  C.zone(14, 236, 34, 12, 'sapinResto');
+  // ---- les lustres, accrochés au plafond (au premier plan)
+  for (const lx of [176, 404]) { C.lumiere(lx, 196, 96, 'lamp'); const l = D.lustre(); C.dessusImg(l.img, lx - l.ax, -6); l.lumieres.forEach(([x, y, rr, k]) => C.lumiere(lx - l.ax + x, y - 6, rr, k)); for (let k = 0; k < 4; k++) C.scintille.push([lx - 8 + k * 5, 36]); }
+  // ---- la banquette de velours et ses deux petites tables
+  poser(D.banquette(78), 118, FOND + 12, { solide: [0, -10, 78, 10] });
+  for (const tx of [138, 178]) { const t = poser(D.tableCarree(tx), tx, FOND + 38, { solide: [-12, -8, 24, 8], texte: 'tableResto', zw: 24 }); void t; poser(D.chaise('dos'), tx, FOND + 46, { solide: [-4, -3, 8, 3] }); }
+  // ---- le portrait de Gusteau et le chariot des desserts
+  C.zone(266, FOND, 44, 10, 'portraitGusteau');
+  const chariot = poser(D.chariot(), 288, FOND + 26, { solide: [-22, -8, 44, 8], texte: 'chariotDesserts', zw: 40 });
+  const pb = D.parisBrestMini();
+  C.dynamiques.push({ sortY: FOND + 26.5, draw(g) { if (Q.caramel === 'gagne') g.drawImage(pb.img, chariot.x + chariot.def.place[0] - pb.ax, chariot.y + chariot.def.place[1] - pb.ay + 2); } });
+  // ---- le bar en zinc, ses tabourets, le percolateur qui fume
+  const bar = poser(D.bar(88), 378, FOND + 26, { solide: [0, -16, 88, 16] });
+  C.zone(380, FOND + 10, 84, 18, 'barResto');
+  for (const sx of [390, 412, 434, 456]) poser(D.tabouret(), sx, FOND + 40, { solide: [-3, -2, 6, 2] });
+  C.fumees.push({ x: bar.x + bar.def.percolateur[0], y: bar.y + bar.def.percolateur[1] - 2, t: 0, vx: 0.5, vy: -7 });
+  // ---- l'ardoise du menu, la desserte, les palmiers, le portemanteau, le pupitre du maître d'hôtel
+  poser(D.ardoise(['MENU', 'NOEL']), 486, FOND + 26, { solide: [-8, -4, 16, 4], texte: 'menuResto', zw: 20 });
+  poser(D.desserte(), 548, 168, { solide: [-20, -8, 40, 8], texte: 'desserte', zw: 36 });
+  poser(D.palmier(3), 22, 330, { solide: [-6, -4, 12, 4] });
+  poser(D.palmier(8), 556, 330, { solide: [-6, -4, 12, 4] });
+  poser(D.portemanteau(), 226, 326, { solide: [-5, -3, 10, 3], texte: 'portemanteauResto', zw: 18 });
+  poser(D.pupitre(), 352, 326, { solide: [-12, -6, 24, 6], texte: 'pupitre', zw: 24 });
+  // ---- le piano à queue et son pianiste
+  const pi = poser(D.piano(), 506, 292, { solide: [-30, -20, 60, 20], dy: -24, texte: 'piano', zw: 40 });
+  void pi;
+  // ---- les tables rondes : [x, y, options] ; les chaises autour
+  const TABLES = [
+    [110, 196, { couverts: 4, mets: true, pain: true }], [290, 190, { couverts: 2, mets: false, chemin: true, rose: true, vin: true }],
+    [432, 198, { couverts: 2, mets: true, vin: true }], [168, 262, { couverts: 4, mets: false, rose: true }],
+    [300, 272, { couverts: 4, mets: true, pain: true }], [430, 268, { couverts: 3, mets: false, chemin: true }],
+  ];
+  const PLEINES = { 0: [-9, 9], 1: [0], 2: [0] };
+  TABLES.forEach(([tx, ty, o], k) => {
+    const t = D.tableRonde(30 + k, o);
+    for (const dx of PLEINES[k] || [-9, 9]) poser(D.chaise('face'), tx + dx, ty - 22, { solide: [-4, -3, 8, 3] });
+    poser(t, tx, ty, { solide: [-18, -9, 36, 9], texte: k === 3 ? null : 'tableResto', zw: 32 });
+    for (const dx of [-12, 12]) poser(D.chaise('dos'), tx + dx, ty + 6, { solide: [-4, -3, 8, 3] });
   });
-  // les clients : Anton Ego, seul à sa table, et un couple
+  C.zone(152, 254, 34, 12, null, { dialogue: () => ['Une table dressée, mais vide. Les serviettes sont pliées en forme de cygne.', 'Un petit carton dit : « Réservé — Loane ».'] });
+  poser(D.seauChampagne(), 316, 196, { solide: [-3, -2, 6, 2] });
+
+  // ---- les clients
   const P5 = CONFIG.caramel.persos;
-  const assis = (id, x, y) => { const p = new Entites.Perso({ id, cfg: P5[id], x, y, dir: 'down', fixe: true, dialogue: (J) => EpreuveCaramel.repliques(id, J) }); p.zone = () => ({ x: x - 12, y: y + 6, w: 24, h: 16, dialogue: p.dialogue }); C.pnj.push(p); return p; };
-  assis('ego', 185, 108);
-  assis('clienteResto', 73, 120); assis('clientResto', 91, 120);
-  C.zone(188, 170, 36, 12, null, { dialogue: () => ['Une place libre. La serviette est pliée en forme de cygne.'] });
+  const assis = (id, x, y, dir = 'down') => { const p = new Entites.Perso({ id, cfg: P5[id], x, y, dir, fixe: true, dialogue: (J) => EpreuveCaramel.repliques(id, J) }); p.zone = () => ({ x: x - 12, y: y + 6, w: 24, h: 18, dialogue: p.dialogue }); C.pnj.push(p); return p; };
+  assis('ego', 290, 170);
+  assis('clienteResto', 138, FOND + 22); assis('clientResto', 178, FOND + 22);
+  assis('dameResto', 101, 176); assis('enfantResto', 119, 176);
+  assis('papiResto', 432, 178);
+  // le pianiste, de dos ; ses notes s'envolent
+  const pia = new Entites.Perso({ id: 'pianiste', cfg: P5.pianiste, x: 494, y: 280, dir: 'up', fixe: true, dialogue: (J) => EpreuveCaramel.repliques('pianiste', J) });
+  pia.zone = () => ({ x: 480, y: 280, w: 28, h: 16, dialogue: pia.dialogue });
+  C.pnj.push(pia);
+  poser(D.bancPiano(), 494, 287, { solide: [-10, -3, 20, 3] });
+  let noteT = 0;
+  C.dynamiques.push({ sortY: 0, update(dt, J) { if ((noteT -= dt) < 0) { noteT = 0.7 + Math.random() * 0.6; J.particule('note', 486 + Math.random() * 24, 250, { vy: -10 - Math.random() * 6, vx: -3 + Math.random() * 6, max: 2.2, v: Math.random() < 0.5 ? 0 : 1 }); } }, draw() {} });
+  // le maître d'hôtel, derrière son pupitre
+  const mus = new Entites.Perso({ id: 'mustafa', cfg: P5.mustafa, x: 352, y: 302, dir: 'down', fixe: true, dialogue: (J) => EpreuveCaramel.repliques('mustafa', J) });
+  mus.zone = () => ({ x: 338, y: 316, w: 28, h: 14, dialogue: mus.dialogue });
+  C.pnj.push(mus);
   // Linguini, en patins à roulettes, qui fait le tour de la salle à toute allure
-  const lin = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: 140, y: 150, dir: 'right', vitesse: 70, dialogue: (J) => EpreuveCaramel.repliques('linguini', J) });
-  const tour = [{ x: 236, y: 150 }, { x: 236, y: 206 }, { x: 150, y: 210 }, { x: 52, y: 196 }, { x: 52, y: 150 }, { x: 140, y: 150 }];
-  const rouler = () => lin.allerVers(tour.map((p) => ({ x: p.x, y: p.y })), 70, () => { lin.pauseT = 1.2; });
+  const lin = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: 240, y: 230, dir: 'right', vitesse: 72, dialogue: (J) => EpreuveCaramel.repliques('linguini', J) });
+  const tour = [{ x: 370, y: 230 }, { x: 372, y: 300 }, { x: 236, y: 304 }, { x: 70, y: 300 }, { x: 64, y: 230 }, { x: 150, y: 228 }, { x: 240, y: 230 }];
+  const rouler = () => lin.allerVers(tour.map((p) => ({ x: p.x, y: p.y })), 72, () => { lin.pauseT = 1.4; });
   lin.update = ((orig) => function (dt, J) { if (this.pauseT > 0) { this.pauseT -= dt; if (this.pauseT <= 0) rouler(); } orig.call(this, dt, J); })(lin.update);
   rouler();
   C.pnj.push(lin); C.linguini = lin;
-  // la sortie vers la place
-  P.rect(W / 2 - 22, H - 6, 44, 6, '#3a2618'); P.rect(W / 2 - 16, H - 10, 32, 4, '#7a2a2a');
+
+  // ---- la sortie vers la grande rue
   C.porte(W / 2 - 20, H - 10, 40, 10, 'montaigu', 'devantResto', 'down');
   C.arrivees.entree = { x: W / 2, y: H - 22, dir: 'up' };
   C.onEntree = (J) => EpreuveCaramel.entreeSalle(J);
-  C.finaliser(0.2);
+  C.finaliser(0.3);
   return C;
 });
 
 // ---------------------------------------------------------------- LA CUISINE
 Jeu.enregistrerCarte('cuisine', () => {
-  const W = 352, H = 244, FOND = 80, D = RestoDecor, A = Arendelle;
-  const C = new Carte('cuisine', W, H, { ambiance: 'interieur', fond: '#101418' });
+  const W = 576, H = 352, FOND = 112, D = RestoDecor, I = D.INOX;
+  const C = new Carte('cuisine', W, H, { ambiance: 'cuisine', fond: '#101418' });
+  C.neige = 0;
   const P = C.P, r = PX.rng(808);
-  // le carrelage noir et blanc
-  for (let y = FOND; y < H; y += 7) for (let x = 0; x < W; x += 9) { const n = ((x / 9) + (y - FOND) / 7) % 2; P.rect(x, y, 9, 7, n ? '#e8e8ee' : '#3a3a46'); if (!n) P.px(x + 1, y + 1, '#4a4a58'); else P.hline(x, y, 9, '#f6f6fa'); }
-  // la faïence blanche du mur, la barre aux casseroles en cuivre
-  P.rect(0, 0, W, FOND, '#eef0f4'); for (let y = 0; y < FOND; y += 5) P.hline(0, y, W, '#c8ccd8'); for (let y = 0, k = 0; y < FOND; y += 5, k++) for (let x = (k % 2) * 5; x < W; x += 10) P.vline(x, y, 5, '#c8ccd8');
-  P.rect(0, 0, W, 6, '#5a6070'); P.dither(0, FOND - 8, W, 8, '#101418', 5);
-  for (let x = 8; x < W - 8; x++) { const y = 8 + Math.round(Math.sin(((x - 8) % 44) / 44 * Math.PI) * 3); P.px(x, y, '#2a4a2a'); if (x % 6 === 3) { P.px(x, y + 1, Montaigu.AMPOULES[(x / 6 | 0) % 5]); C.scintille.push([x, y + 1]); } }
-  P.ellipse(178, 30, 7, 7, '#1e4a2a'); P.ellipse(178, 30, 5, 5, '#2f6a3a'); P.ellipse(178, 30, 3, 3, '#eef0f4'); P.rect(176, 36, 5, 3, '#d8323a'); P.px(173, 27, '#d8323a'); P.px(183, 32, '#d8323a');
-  P.rect(20, 12, 150, 2, '#5a6070');
-  for (let k = 0; k < 9; k++) { const x = 26 + k * 16, s = 3 + (k % 3); P.vline(x, 14, 4, '#3a3a46'); P.ellipse(x, 18 + s, s + 1, s + 1, '#a8582a'); P.ellipse(x, 18 + s, s, s, '#d8783a'); P.px(x - 1, 17 + s, '#f8b07a'); P.rect(x - 1, 18, 2, 3, '#7a3a1a'); }
-  C.zone(20, FOND, 150, 10, 'casseroles');
-  // les étagères à épices et le vieux livre de Gusteau
-  for (const y of [34, 52]) { P.rect(186, y, 70, 3, '#7a4a2a'); P.hline(186, y, 70, '#a8743e'); }
-  for (let k = 0; k < 9; k++) { const x = 190 + k * 7; P.rect(x, 26, 5, 8, r.pick(['#d8323a', '#f2c230', '#3a8a4a', '#e8603a', '#8a5a3a'])); P.rect(x, 25, 5, 2, '#c8ccd8'); }
-  P.rect(190, 42, 16, 10, '#7a2a2a'); P.rect(191, 43, 14, 8, '#a8343a'); P.hline(192, 46, 12, '#e8b54a'); P.rect(209, 44, 4, 8, '#2a4a6a'); P.rect(214, 43, 5, 9, '#3a6a3a');
-  for (let k = 0; k < 4; k++) P.ellipse(228 + k * 7, 49, 3, 3, ['#f2d36b', '#e8e4dc', '#c89a5a', '#f2d36b'][k]);
-  C.zone(186, FOND, 30, 10, 'livreGusteau'); C.zone(216, FOND, 40, 10, 'epices');
-  // le passe-plat et ses lampes chauffantes
-  P.rect(270, 30, 70, 30, '#8a90a0'); P.rect(272, 32, 66, 26, '#2a2e3a'); P.rect(270, 56, 70, 4, '#c8ccd8');
-  for (const x of [282, 304, 326]) { P.rect(x, 32, 6, 4, '#c84a2a'); P.px(x + 2, 36, '#ffb070'); C.lumiere(x + 3, 38, 24, 'feu'); }
-  for (let k = 0; k < 4; k++) P.rect(276 + k * 15, 40, 8, 10, '#f4f2ec');
-  C.zone(270, FOND, 70, 10, 'passe');
+  const poser = (def, x, y, o) => poserResto(C, def, x, y, o);
+
+  // ---- les tomettes de terre cuite, un peu usées ; tapis de caoutchouc, grille d'évacuation, farine, flaque
+  const TOMETTES = ['#a8482c', '#b4502e', '#9c4428', '#bc5a36', '#ac4e30', '#a44a2c'];
+  P.rect(0, FOND, W, H - FOND, '#5e2c1c');
+  for (let y = FOND, j = 0; y < H; y += 6, j++) for (let x = (j % 2) * 5 - 5; x < W; x += 10) {
+    const col = r.pick(TOMETTES);
+    P.rect(x + 1, y, 7, 5, col); P.rect(x, y + 1, 9, 3, col);
+    P.hline(x + 1, y, 7, PX.shade(col, 0.16)); P.px(x, y + 1, PX.shade(col, 0.1)); P.hline(x + 1, y + 4, 7, PX.shade(col, -0.14));
+    if (r.chance(0.18)) P.px(x + 2 + r.int(5), y + 1 + r.int(3), PX.shade(col, r.chance(0.5) ? -0.25 : 0.22));
+  }
+  P.dither(0, FOND, W, 14, '#1a0a06', 9); P.dither(0, FOND + 14, W, 10, '#1a0a06', 4);
+  P.dither(0, FOND, 14, H - FOND, '#1a0a06', 6); P.dither(W - 14, FOND, 14, H - FOND, '#1a0a06', 6);
+  const tapisCaoutchouc = (x, y, w, h) => { P.rect(x, y, w, h, '#26262e'); P.hline(x, y, w, '#3a3a46'); for (let yy = y + 2; yy < y + h - 1; yy += 3) for (let xx = x + 2 + ((yy / 3) % 2); xx < x + w - 1; xx += 3) P.px(xx, yy, '#141418'); };
+  tapisCaoutchouc(196, FOND + 38, 190, 12); tapisCaoutchouc(478, FOND + 34, 90, 10);
+  P.ellipse(300, 214, 9, 4, I[1]); P.ellipse(300, 214, 8, 3, I[3]); for (let x = 294; x < 307; x += 2) P.vline(x, 212, 5, I[0]);
+  for (let k = 0; k < 260; k++) { const a = r() * Math.PI * 2, d = Math.sqrt(r()); P.px(Math.round(128 + Math.cos(a) * d * 64), Math.round(262 + Math.sin(a) * d * 12), r.pick(['#f4efe2', '#ffffff', '#e8dcc8'])); }
+  P.ellipse(524, 170, 16, 4, '#6a6a7a'); P.ellipse(522, 169, 13, 3, '#8a96a8'); P.px(516, 168, '#d8e8f8'); P.px(530, 170, '#d8e8f8');
+  for (let k = 0; k < 12; k++) P.px(330 + r.int(140), 270 + r.int(40), r.pick(['#3a7a3a', '#d8323a', '#f2c230']));
+
+  // ---- le mur du fond
+  D.faience(P, 0, 0, W, FOND);
+  P.rect(0, 0, W, 7, I[3]); P.hline(0, 6, W, I[1]); P.hline(0, 1, W, I[5]); for (let x = 20; x < W; x += 48) { P.rect(x, 0, 3, 7, I[2]); P.px(x + 1, 3, I[5]); }
+  for (let x = 0; x < W; x++) { const y = 10 + Math.round(Math.sin(((x % 52) / 52) * Math.PI) * 3); P.px(x, y, D.VERT[1]); if (x % 6 === 3) { P.px(x, y + 1, Montaigu.AMPOULES[(x / 6 | 0) % 5]); C.scintille.push([x, y + 1]); } }
+  // la pâtisserie : bocaux de farine, de sucre, d'amandes, de noisettes ; l'affiche de Gusteau
+  D.etageresMur(P, 8, 12, 100, [22, 42], 3, { patisserie: true });
+  D.afficheGusteau(P, 30, 60);
+  // la chambre froide (et sa couronne de Noël)
+  D.chambreFroide(P, 120, 30, 54, FOND - 30);
+  P.ellipse(140, 66, 7, 7, D.VERT[1]); P.ellipse(140, 66, 6, 6, D.VERT[2]); P.ellipse(140, 66, 3, 3, I[4]); for (const [dx, dy] of [[-5, -2], [4, -4], [5, 3], [-3, 5]]) P.px(140 + dx, 66 + dy, '#d8323a'); P.rect(138, 72, 5, 3, '#d8323a');
+  // la hotte et ses casseroles ; le garde-manger, sa fenêtre et ses herbes ; la plonge, son tableau et son horloge
+  D.hotte(P, 186, 6, 208);
+  D.fenetre(P, 412, 14, 44, 26);
+  D.etageresMur(P, 402, 46, 68, [18, 38], 9, { herbes: 5 });
+  D.tableauRecettes(P, 482, 20); D.horloge(P, 544, 32);
+  for (const [lx, ly] of [[207, 40], [251, 40], [295, 40], [339, 40], [383, 40]]) C.lumiere(lx, ly, 48, 'lamp');
+  C.lumiere(434, 28, 26, 'win');
   C.solide(0, 0, W, FOND + 4); C.solide(0, 0, 6, H); C.solide(W - 6, 0, 6, H);
-  // le grand fourneau au milieu, ses feux et sa vapeur
-  const fo = D.fourneau(), FX = 150, FY = 150;
-  C.objet(fo, FX, FY, { solide: [-52, -26, 104, 26], texte: 'fourneau', zw: 60 });
+  P.rect(0, FOND, 4, H - FOND, '#1a1418'); P.rect(W - 4, FOND, 4, H - FOND, '#1a1418');
+  C.zone(30, FOND, 60, 10, 'afficheGusteau'); C.zone(120, FOND, 54, 10, 'frigo'); C.zone(10, FOND, 20, 10, 'bocaux');
+  C.zone(404, FOND, 66, 10, 'epices'); C.zone(482, FOND, 34, 10, 'recettes');
+
+  // ---- le piano de cuisson, sous la hotte : feux animés, bouillons, vapeur, fours rougeoyants
+  const fo = D.fourneau(196), FX = 190, FY = FOND + 36;
+  const four = poser(fo, FX, FY, { solide: [0, -28, 196, 28], texte: 'fourneau', zw: 120 });
+  for (const [fx, fy] of fo.fumees) C.fumees.push({ x: four.x + fx, y: four.y + fy, t: Math.random(), vx: 0.6, vy: -11 });
+  for (const ox of [30, 76, 122]) C.lumiere(four.x + ox, four.y + fo.devant + 19, 22, 'feu');
   C.dynamiques.push({ sortY: FY + 0.5, draw(g, J) {
     const t = J.t || 0;
-    for (const [fx, fy] of fo.feux) for (let k = 0; k < 4; k++) { if (Math.sin(t * 9 + k * 2 + fx) < -0.3) continue; g.fillStyle = k % 2 ? '#5ab0ff' : '#a8e0ff'; g.fillRect(FX - fo.ax + fx - 3 + k * 2, FY - fo.ay + fy - 1, 1, 1); }
+    fo.feux.forEach(([fx, fy], k) => {
+      const x = four.x + fx, y = four.y + fy, plein = k === 0;
+      for (let i = -7; i <= 7; i++) {
+        if (!plein && Math.abs(i) < 6) continue;
+        const h = 1 + ((Math.sin(t * 13 + i * 1.9 + k) > 0.2) ? 1 : 0);
+        g.fillStyle = Math.sin(t * 9 + i + k) > 0.6 ? '#ffb070' : '#6ab8ff'; g.fillRect(x + i, y + 1 - h, 1, h);
+      }
+    });
+    for (const [bx, by, rx, ry, col] of fo.bulles) for (let k = 0; k < 4; k++) { const ph = (t * 1.7 + k * 0.37) % 1; if (ph > 0.75) continue; const a = k * 2.4 + Math.floor(t * 1.7 + k * 0.37) * 1.3; g.fillStyle = ph > 0.5 ? '#ffffff' : col; g.fillRect(Math.round(four.x + bx + Math.cos(a) * rx * 0.7), Math.round(four.y + by + Math.sin(a) * ry * 0.6), 1, 1); }
+    // la cuillère de bois de Horst tourne dans la sauce
+    const [sx, sy] = fo.feux[2], a = t * 4.5, cx = four.x + sx + Math.round(Math.cos(a) * 3), cy = four.y + sy - 9 + Math.round(Math.sin(a) * 1);
+    g.fillStyle = '#c49e68'; for (let k = 0; k < 10; k++) g.fillRect(cx + Math.round(k * 0.4), cy - k, 1, 1); g.fillStyle = '#a88050'; g.fillRect(cx - 1, cy, 2, 1);
+    // les fours rougeoient
+    g.globalAlpha = 0.25 + Math.sin(t * 3) * 0.12; g.fillStyle = '#ff9a40';
+    for (const [ox, ow] of [[6, 42], [52, 42], [98, 42]]) g.fillRect(four.x + ox + 7, four.y + fo.devant + 15, ow - 12, 8);
+    g.globalAlpha = 1;
   } });
-  for (const [vx, vy] of [[FX - 40, FY - 44], [FX - 5, FY - 36]]) C.fumees.push({ x: vx, y: vy, t: r() });
-  C.lumiere(FX, FY - 20, 40, 'feu');
-  // les plans de travail : légumes de la ratatouille, fromages, planche de Colette, sucre près de Rémy
-  const plans = [[22, 132, 72, 'legumes', 'legumes'], [22, 196, 64, 'fromages', 'fromages'], [104, 214, 80, 'planche', null], [236, 150, 70, 'casserole', null], [236, 214, 42, 'sucre', 'sacsSucre']];
-  for (const [px, py, pw, contenu, texte] of plans) { const pl = D.plan(pw, contenu, px + py); C.objet(pl, px, py, { solide: [0, -16, pw, 16] }); if (texte) C.zone(px + 4, py - 2, pw - 8, 10, texte); }
-  // le plan de travail de Rémy, à droite du fourneau, avec sa petite casserole
-  const RX = 271, RY = 150;
-  // le frigo, l'évier
-  C.objet(D.frigo(), 326, 120, { solide: [-15, -12, 30, 12], texte: 'frigo', zw: 26 });
-  C.objet(D.evier(), 34, 100, { solide: [-21, -12, 42, 12], texte: 'evier', zw: 34 });
-  // Colette, à sa planche, et Rémy
-  const P5 = CONFIG.caramel.persos;
-  const col = new Entites.Perso({ id: 'coletteChef', cfg: P5.coletteChef, x: 128, y: 204, dir: 'down', fixe: true, dialogue: (J) => EpreuveCaramel.repliques('coletteChef', J) });
-  C.pnj.push(col); C.colette = col;
-  const remy = new Resto.Remy({ x: RX, y: RY + 1, h: 19, dialogue: (J) => EpreuveCaramel.parlerRemy(J) });
-  C.pnj.push(remy); C.remy = remy;
-  const lin = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: 176, y: 250, dir: 'up', visible: false, vitesse: 80 });
-  C.pnj.push(lin); C.linguiniCuisine = lin;
-  // les portes battantes vers la salle, en bas
-  P.rect(W / 2 - 24, H - 6, 48, 6, '#3a2618'); P.rect(W / 2 - 18, H - 10, 36, 4, '#6a4428');
+  // ---- l'îlot de marbre de la pâtisserie : le poste de Rémy
+  const ilot = poser(D.ilotPatisserie(), 124, 250, { solide: [-54, -26, 108, 26], texte: 'ilotPatisserie', zw: 70 });
+  void ilot;
+  poser(D.sacFarine(), 196, 240, { solide: [-6, -3, 12, 3] }); poser(D.sacFarine(), 208, 246, { solide: [-6, -3, 12, 3] });
+  // ---- le billot de Colette, ses légumes ; son couteau qui tape
+  const bil = poser(D.billot(), 400, 258, { solide: [-40, -26, 80, 26], texte: 'legumes', zw: 60 });
+  C.dynamiques.push({ sortY: 258.5, draw(g, J) {
+    const t = J.t || 0, x = bil.x + bil.def.planche[0], y = bil.y + bil.def.planche[1], up = Math.max(0, Math.sin(t * 14)) * 4;
+    g.fillStyle = '#e6e9f0'; g.fillRect(x, Math.round(y - 3 - up), 8, 2); g.fillStyle = '#1d1626'; g.fillRect(x + 8, Math.round(y - 3 - up), 4, 2);
+    if (up < 0.6) { g.fillStyle = '#7ab060'; g.fillRect(x - 2 + Math.round(Math.sin(t * 7) * 2), y - 4, 1, 1); }
+  } });
+  // ---- la table de dressage au milieu, Larousse qui dresse les assiettes, l'échelle pâtissière
+  const td = poser(D.tableDressage(), 292, 214, { solide: [-48, -24, 96, 24], texte: 'tableDressage', zw: 60 });
+  C.dynamiques.push({ sortY: 214.5, draw(g, J) {
+    const t = J.t || 0, k = Math.floor(t / 1.6) % 4, [ax, ay] = td.def.assiettes[k], x = td.x + ax, y = td.y + ay, p = (t / 1.6) % 1;
+    g.fillStyle = '#e6e9f0'; g.fillRect(x + 2, Math.round(y - 9 + p * 5), 1, 6); g.fillRect(x + 4, Math.round(y - 9 + p * 5), 1, 6);
+    if (p > 0.6) { g.fillStyle = '#5aa05a'; g.fillRect(x, y - 2, 2, 1); }
+  } });
+  C.lumiere(292, 200, 40, 'lamp');
+  poser(D.echelle(), 424, 172, { solide: [-14, -4, 28, 4], texte: 'echelle', zw: 26 });
+  // ---- l'étagère des légumes, les cagettes, la poubelle, le seau
+  poser(D.etagere(2), 30, 206, { solide: [-20, -6, 40, 6], texte: 'etagereLegumes', zw: 36 });
+  poser(D.cagettes(), 64, 208, { solide: [-10, -5, 20, 5] });
+  poser(D.poubelle(), 478, 240, { solide: [-6, -4, 12, 4] });
+  poser(D.seau(), 556, 222, { solide: [-6, -3, 12, 3] });
+  poser(D.cagettes(), 552, 300, { solide: [-10, -5, 20, 5] });
+  // ---- la plonge : le robinet goutte, la mousse déborde
+  const pl = poser(D.plonge(92), 522, FOND + 32, { solide: [-46, -18, 92, 18], texte: 'evier', zw: 60 });
+  C.dynamiques.push({ sortY: FOND + 32.5, draw(g, J) {
+    const t = J.t || 0, [rx, ry] = pl.def.robinet, x = pl.x + rx, y = pl.y + ry, ph = (t * 1.3) % 1;
+    g.fillStyle = '#bfe6f4'; g.fillRect(x, Math.round(y + 1 + ph * 12), 1, 2);
+    for (let k = 0; k < 5; k++) { const p = (t * 0.6 + k * 0.21) % 1; g.fillStyle = '#ffffff'; g.fillRect(Math.round(pl.x + 10 + k * 8 + Math.sin(t * 2 + k) * 2), Math.round(pl.y + 18 - p * 8), p > 0.7 ? 1 : 2, p > 0.7 ? 1 : 2); }
+  } });
+  // ---- l'horloge : les aiguilles tournent (lentement)
+  C.dynamiques.push({ sortY: 0, draw(g, J) {
+    const t = (J.t || 0) + 20.5 * 60, a = (t / 60) * Math.PI * 2 - Math.PI / 2, b = (t / 720) * Math.PI * 2 - Math.PI / 2;
+    g.fillStyle = '#1d1626'; for (let k = 1; k < 5; k++) g.fillRect(Math.round(544 + Math.cos(a) * k), Math.round(32 + Math.sin(a) * k), 1, 1);
+    for (let k = 1; k < 4; k++) g.fillRect(Math.round(544 + Math.cos(b) * k), Math.round(32 + Math.sin(b) * k), 1, 1);
+    g.fillStyle = '#d8323a'; g.fillRect(Math.round(544 + Math.cos(t * 6.28) * 4), Math.round(32 + Math.sin(t * 6.28) * 4), 1, 1);
+  } });
+
+  // ---- le passe, au premier plan, de part et d'autre des portes battantes
+  const PW = 254;
+  for (const [x, cl] of [[6, false], [W - 6 - PW, true]]) { poser(D.passe(PW, x, cl), x, H - 2, { solide: [0, -22, PW, 22] }); C.zone(x + 10, H - 30, PW - 20, 8, 'passe'); }
+  P.rect(W / 2 - 22, H - 8, 44, 8, '#120a0c'); P.rect(W / 2 - 18, H - 14, 36, 6, '#4a2a1a'); P.dither(W / 2 - 18, H - 14, 36, 6, '#6a3a24', 6);
   C.porte(W / 2 - 20, H - 10, 40, 10, 'restaurant', 'devantCuisine', 'down');
   C.zone(W / 2 - 20, H - 18, 40, 8, 'sortieCuisine');
   C.arrivees.entree = { x: W / 2, y: H - 24, dir: 'up' };
+
+  // ---- la brigade : Colette à son billot, Horst à ses sauces, Lalo à la plonge ; Rémy sur l'îlot de la pâtisserie
+  const P5 = CONFIG.caramel.persos;
+  const cuisinier = (id, x, y, dir) => { const p = new Entites.Perso({ id, cfg: P5[id], x, y, dir, fixe: true, dialogue: (J) => EpreuveCaramel.repliques(id, J) }); C.pnj.push(p); return p; };
+  C.colette = cuisinier('coletteChef', 400, 228, 'down');
+  C.colette.zone = () => ({ x: 380, y: 258, w: 40, h: 14, dialogue: C.colette.dialogue });
+  cuisinier('horst', 245, FOND + 52, 'up');
+  cuisinier('lalo', 512, FOND + 48, 'up');
+  cuisinier('larousse', 300, 186, 'down').zone = function () { return { x: 270, y: 214, w: 44, h: 12, dialogue: this.dialogue }; };
+  // un commis fait la navette entre le piano et le passe, une pile d'assiettes dans les bras
+  const commis = cuisinier('commis', 456, 300, 'up');
+  commis.fixe = false; commis.vitesse = 58;
+  const navette = [{ x: 456, y: 300 }, { x: 456, y: 188 }, { x: 352, y: 186 }];
+  const boucle = () => commis.allerVers(navette, 58, () => { commis.pauseT = 1.5; });
+  commis.update = ((orig) => function (dt, J) { if (this.pauseT > 0) { this.pauseT -= dt; if (this.pauseT <= 0) { navette.reverse(); boucle(); } } orig.call(this, dt, J); })(commis.update);
+  boucle();
+  const remy = new Resto.Remy({ x: 150, y: 251, h: 31, dialogue: (J) => EpreuveCaramel.parlerRemy(J) });
+  C.pnj.push(remy); C.remy = remy;
+  const lin = new Entites.Perso({ id: 'linguini', cfg: P5.linguini, x: W / 2, y: H + 20, dir: 'up', visible: false, vitesse: 80 });
+  C.pnj.push(lin); C.linguiniCuisine = lin;
   C.onEntree = (J) => EpreuveCaramel.entreeCuisine(J);
-  C.finaliser(0.2);
+  C.finaliser(0.3);
   return C;
 });

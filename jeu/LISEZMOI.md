@@ -52,7 +52,9 @@ image ni aucun son externe.
 - **Le magasin** : crèmerie et surgelés au fond, la **boucherie** de Tom au centre (enseigne,
   store rayé, charcuterie suspendue, vitrine réfrigérée, billot, chambre froide), des rayons pleins
   de produits qui forment un labyrinthe façon Pac-Man (aucune impasse) avec un îlot de chocolats
-  de Noël au milieu, deux caisses, l'étal de fruits et quelques clients à qui parler.
+  de Noël au milieu, deux caisses, l'étal de fruits et quelques clients à qui parler. Sol en dalles
+  de granito poli (traces de chariots), cartons rangés sur les gondoles, réglettes de prix et
+  étiquettes promo, panneaux suspendus (PATES, BOISSONS, CAFE…), lumière froide des néons.
 - **La scène** : Georges attend près de l'entrée (pas de chats à la boucherie). Ismae rejoint Tom
   (« My besto friendo ! »), passe derrière le comptoir, enfile un tablier… et se coupe le doigt.
   Il aperçoit Loane : « Viens me faire un bisou magique ! » — « Viens le chercher ! 😏 »
@@ -192,67 +194,66 @@ image ni aucun son externe.
   de caramel et d'un chef « tout petit », puis du caramel réussi une fois l'épreuve gagnée.
   Plus de 25 choses à regarder (vitrines, ardoise du menu, boîte aux lettres jaune, remparts, manège…).
 - **Le restaurant du chef Gusteau** (dans la rue, à côté de l'église ; Linguini attend devant) :
-  devanture bleu nuit et lettres dorées, vitrines aux chandelles. Dedans : parquet en chevrons,
-  papier peint bordeaux et doré, cheminée et ses chaussettes, sapin, le portrait de Gusteau
-  (« Tout le monde peut cuisiner »), six tables dressées aux chandelles, la vitrine des desserts
-  (une bûche… sans caramel). Anton Ego attend son dessert, un couple dîne, et Linguini fait le
-  tour de la salle en patins à roulettes. Au fond, les portes battantes de la cuisine.
-- **La cuisine** : carrelage noir et blanc, casseroles en cuivre, le grand fourneau et ses flammes
-  bleues, les légumes de la ratatouille, les fromages, les épices, le livre de Gusteau, le
-  passe-plat, les sacs de sucre, une guirlande et une couronne. Colette coupe des légumes.
-  **Rémy** attend sur son plan de travail, près de sa petite casserole.
-- **La rencontre** : Rémy explique qu'il manque le caramel au beurre salé du dîner de Noël
-  (Linguini a essayé avec du beurre doux, une catastrophe), et lance à Ismae qu'une certaine Loane
-  lui a parlé de son dernier caramel… « un morceau de charbon ».
-- **Le mini-jeu du caramel au beurre salé** (façon Cooking Mama, six étapes, environ deux minutes
-  et demie quand tout va bien ; Rémy, à gauche, réagit à tout) :
-  1. *Le sucre* : on maintient (doigt, clic ou Espace) pour pencher le paquet. Il faut 200 g à
-     8 g près, sur la balance. Le sucre continue de tomber quand on relâche, et le paquet lâche
-     parfois un paquet de sucre d'un coup : on finit par petites touches. 15 secondes.
-  2. *Faire fondre* : on règle le feu (curseur à droite, ou ↑↓) et on remue en rond (doigt,
-     souris, ou ←→). Le brûleur chauffe plus fort d'un côté (on voit la lueur orange) et ce côté
-     change de place : sans remuer, des points noirs apparaissent (trois, c'est brûlé) ; à plein
-     feu tout brûle ; trop doux, le sucre cristallise. Réussi quand tout a fondu et doré.
-  3. *Le beurre demi-sel* (papier « DEMI-SEL » et petit Gwenn-ha-du) : on coupe la motte sur les
-     pointillés (un toucher ou un glissé vers le bas, ou ←→ puis Espace) ; un peu de travers, ça
-     passe, mais cinq coupes à côté et le beurre est en miettes. Puis on glisse les morceaux un par un dans la casserole : chaque morceau fait
-     baisser la température en grésillant, le feu la fait remonter de plus en plus vite. Il faut
-     garder le thermomètre entre le bleu (le caramel fige) et le rouge (il brûle), et ne pas
-     mettre un morceau tant que le précédent n'a pas fondu (ça éclabousse).
-  4. *La crème* : on maintient (un doigt hors de la casserole, ou Espace) pour verser, en remuant
-     avec l'autre main. Versée trop vite ou sans remuer, ça mousse… et ça déborde. Trop lent, le
-     caramel durcit. Il faut ensuite remuer jusqu'à ce qu'il n'y ait plus de traînées de crème.
-  5. *La texture* : tout à la fois. Le feu a de l'inertie et il varie tout seul : il faut garder
-     la température dans le vert, remuer sans arrêt (sinon ça attache au fond), et appuyer sur
-     « RETIRER DU FEU » quand la consistance est dans le vert (la cuillère, à gauche, montre si
-     ça coule, si ça nappe ou si c'est trop épais). La fenêtre dure environ une seconde.
-  6. *Le petit pot* : on verse le caramel dans un petit pot en verre. Un doigt glisse pour
-     déplacer la casserole, l'autre maintient « VERSER » (ou ←→ et Espace). Plus on penche, plus
-     le filet coule fort… et plus il tombe loin : il faut suivre avec la casserole. Le filet coule
-     encore un instant quand on relâche, et le débit baisse à mesure que la casserole se vide. Et
-     Georges, caché sous le plan de travail, vient de temps en temps pousser le pot d'un coup de
-     patte ! Réussi quand le pot est rempli jusqu'à la ligne verte ; raté s'il déborde, ou s'il y
-     en a trop à côté (la jauge « À CÔTÉ »).
-- **Les échecs**, à regarder (quatorze en tout) : Rémy enseveli sous le sucre, Rémy qui s'endort
-  (« Zzz… »), fumée noire et alarme (il panique puis tousse), sucre cristallisé, beurre en
-  miettes ou fondu en flaque sur la planche (Rémy pleure), caramel figé avec la cuillère plantée
-  dedans, crème qui déborde jusqu'à noyer Rémy dans la mousse, caramel trop liquide qui
-  éclabousse, caramel trop épais (Rémy tire sur la cuillère… et tombe à la renverse), petit pot
-  qui déborde, caramel partout sur le plan de travail. On
-  recommence l'étape ratée autant de fois qu'on veut. Les réglages de difficulté sont `REGLAGES`,
-  en haut de `js/caramel.js` (ils ont été vérifiés avec des centaines de parties simulées : la
-  dernière étape est la plus exigeante).
-- **La victoire** : « Un caramel au beurre salé parfait ! Les Bretons peuvent être fiers de toi ! »,
-  Linguini emporte le caramel en salle, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE
-  OBTENU ! ». Ismae peut ensuite ressortir et se promener dans Montaigu (les habitants ont de
-  nouvelles répliques).
-- **La suite** : un écran annonce l'épreuve 6 : l'antiquaire de la grande rue attend Ismae devant
-  sa boutique (une flèche le montre).
+  devanture bleu nuit et lettres dorées, vitrines aux chandelles. Dedans, une grande salle à la
+  lueur des bougies (`js/decor-resto.js`, `js/carte-restaurant.js`) : parquet à chevrons usé au
+  milieu, grand tapis d'Orient, papier peint bordeaux et doré, pilastres de noyer, miroirs dorés,
+  deux lustres de cristal, appliques, la cheminée de marbre (feu animé, guirlande, chaussettes,
+  pendule), le portrait de Gusteau et ses cinq étoiles, le bar en zinc (bouteilles devant un
+  miroir, caisse enregistreuse, percolateur qui fume, tabourets), le chariot des desserts (le
+  Paris-Brest y apparaît après l'épreuve), le piano à queue et son pianiste (des notes s'envolent),
+  la banquette de velours, six tables nappées jusqu'au sol (chandelles, couverts, roses, vin), le
+  sapin et ses cadeaux, le pupitre du maître d'hôtel, le portemanteau, deux palmiers, l'ardoise du
+  menu. Anton Ego attend son dessert, Lou et sa maman, Monsieur Maurice, un couple sur la
+  banquette, Mustafa le maître d'hôtel, le pianiste ; Linguini fait le tour de la salle en patins.
+- **La cuisine** : tomettes, faïence blanche et frise bleue, la grande hotte « GUSTEAU » et ses
+  casseroles de cuivre, le piano de cuisson (six feux animés, bouillons, vapeur, fours qui
+  rougeoient), la chambre froide et sa couronne, l'affiche « Tout le monde peut cuisiner », la
+  plonge (le robinet goutte, la mousse), le garde-manger et sa fenêtre enneigée, l'horloge (les
+  aiguilles tournent), la table de dressage, l'échelle pâtissière, l'étagère des légumes, l'îlot de
+  marbre de la pâtisserie (le poste de Rémy) et, au premier plan, le passe et ses lampes
+  chauffantes. Colette coupe ses légumes, Horst touille sa sauce, Lalo fait la vaisselle, Larousse
+  dresse les assiettes, un commis fait la navette.
+- **La rencontre** : Rémy explique que ce soir, au dessert, c'est Paris-Brest au caramel au beurre
+  salé, que son pâtissier a la grippe et que Linguini a fait le caramel avec du beurre doux ; une
+  certaine Loane lui a parlé du dernier caramel d'Ismae… « un morceau de charbon ».
+- **Le mini-jeu : le service de Noël** (`js/service.js`, façon « Papa's Pizzeria ») : trois clients
+  l'un après l'autre, de plus en plus exigeants : Lou (6 ans), Monsieur Maurice, puis Anton Ego.
+  Chacun commande un Paris-Brest avec ses manies (couleur du caramel, crème, nombre de rosaces,
+  nappage, garnitures, « pas de sucre glace ! »…) ; chaque client a deux commandes possibles.
+  Cinq postes en bas de l'écran, on passe librement de l'un à l'autre (le four et le caramel
+  continuent de cuire pendant qu'on est ailleurs : les onglets clignotent quand il faut y aller) :
+  1. *Commande* : le client, à sa table, dicte sa commande ; le ticket s'écrit, puis reste affiché en
+     haut à droite. Plus tard, Linguini lui apporte le dessert en patins, il goûte et réagit.
+  2. *Caramel* : glisser le sac de sucre dans la casserole de cuivre, choisir le feu (éteint, doux,
+     moyen, vif), remuer en rond (sinon des points noirs apparaissent) ; quand la jauge de couleur
+     est dans le vert du ticket (blond, ambré ou brun), glisser le beurre demi-sel ; remuer pour
+     calmer la mousse (sinon ça déborde) ; maintenir le pichet de crème jusqu'au trait vert (trop
+     tôt, ça éclabousse) ; une ou deux pincées de fleur de sel ; « retirer du feu ». Trop cuit, il
+     brûle : on recommence.
+  3. *Four* : tracer la couronne de pâte à choux en suivant le cercle, glisser la plaque dans le
+     four, la sortir quand elle est dorée (jamais trop tôt : les choux retombent ; trop tard, ils
+     brûlent).
+  4. *Garnir* : couper la couronne en deux d'un trait, prendre la crème du ticket (praliné,
+     caramel ou vanille), pocher chaque rosace (elle grossit tant qu'on maintient : relâcher quand
+     le cercle devient vert), puis reposer le chapeau dessus.
+  5. *Dresser* : napper de caramel avec la cuillère (« un filet » ou « bien nappé »), puis les
+     garnitures demandées : amandes et pralin (on secoue le bocal), noisettes une à une, sucre glace
+     au tamis… et « SERVIR ! ».
+  La note du client mêle l'attente, le caramel, les choux, le montage et le dressage (en étoiles,
+  avec un pourboire). En dessous de sa note minimale (45 pour Lou, 50 pour Monsieur Maurice, 65
+  pour Anton Ego), le client renvoie son assiette et on la refait. Rémy, en bas à gauche, donne des
+  conseils au premier client et réagit à tout. Les réglages sont `REGLAGES`, en haut de
+  `js/service.js` ; les textes dans `config.js` → `caramel.service`.
+- **La victoire** : « Trois Paris-Brest, trois clients ravis ! », Linguini raconte qu'Anton Ego a
+  souri, puis « ÉPREUVE 5/6 TERMINÉE ! — CINQUIÈME INDICE OBTENU ! ». Ismae peut ensuite ressortir
+  et se promener dans Montaigu (les habitants et les gens du restaurant ont de nouvelles répliques).
+- **La suite** : un écran annonce l'épreuve 6 : l'antiquaire attend Ismae dans la rue, juste en face
+  du restaurant (une flèche le montre quand il sort de l'écran).
 
 ## Épreuve 6 : « La grande chasse » (le grenier de l'antiquaire, à Montaigu)
 
-- **L'antiquaire** (barbe blanche, lunettes, chapeau melon) attend sur le trottoir sud, devant sa
-  boutique : Loane est passée ce matin et a monté des choses dans son grenier… un sacré bazar. Il
+- **L'antiquaire** (barbe blanche, lunettes, chapeau melon) attend dans la rue, juste en face du
+  restaurant, et fait signe (« ! ») : Loane est passée ce matin et a monté des choses dans son grenier… un sacré bazar. Il
   fait monter Ismae par la trappe.
 - **Le grenier**, la nuit : le pignon en planches et son œil-de-bœuf (la lune, la neige), la
   charpente, des toiles d'araignée, deux ampoules nues, un lampadaire, la lampe verte du bureau, le
@@ -354,7 +355,7 @@ se met à jour tout seul en moins d'une minute.
 | --- | --- |
 | `js/scenes.js` | l'introduction (chatons, poursuite, Duchesse) et la quête de Tom |
 | `js/carte-rue.js` | le plan de la rue, les immeubles, la scène, les habitants, les chats |
-| `js/carte-superette.js` | le Carrefour ; le labyrinthe se règle avec les tableaux `Hm` et `Vm` |
+| `js/carte-superette.js` | le Carrefour (sol en granito, rayons, panneaux d'allée, néons) ; le labyrinthe se règle avec les tableaux `Hm` et `Vm` |
 | `js/epreuve-bisou.js` | l'épreuve 1 : la scène avec Tom, la poursuite de Loane, la victoire |
 | `js/indices.js` | le carnet d'indices, l'écran de victoire, l'annonce de la suite |
 | `js/carte-foret.js` | la forêt de Sherwood : sentiers, ruisseau, campement, clairière du tournoi |
@@ -371,10 +372,11 @@ se met à jour tout seul en moins d'une minute.
 | `js/bus.js` | l'épreuve 4 : le départ en bus, le mini-jeu de conduite, l'arrivée à Montaigu (Flash McQueen, Linguini) |
 | `js/carte-montaigu.js` | Montaigu : les rues, l'église, la place et son manège, le marché de Noël |
 | `js/decor-montaigu.js` | le restaurant Gusteau, l'église, les chalets, le manège, les remparts… |
-| `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (tables, fourneau, plans de travail…) |
+| `js/decor-resto.js` | les objets du restaurant : tables nappées, chaises bistrot, banquette, cheminée, lustres, bar, piano, fourneau, îlot de pâtisserie, billot, plonge, passe… |
+| `js/carte-restaurant.js` | la salle du restaurant et sa cuisine (le placement, les personnages, les animations) |
 | `js/persos-resto.js` | Rémy (petit sur la carte, grand dans le mini-jeu) et le portrait de Gusteau |
 | `js/epreuve-caramel.js` | l'épreuve 5 : les habitants, la rencontre avec Rémy, la victoire |
-| `js/caramel.js` | le mini-jeu du caramel au beurre salé (6 étapes) et ses échecs |
+| `js/service.js` | le mini-jeu du service de Noël : trois clients, cinq postes (commande, caramel, four, montage, dressage), les notes |
 | `js/carte-grenier.js` | le grenier de l'antiquaire : le pignon, la charpente, les meubles et les cachettes |
 | `js/decor-grenier.js` | les meubles et le bric-à-brac du grenier, les cinq souvenirs, leur verso et les symboles de la langue inconnue |
 | `js/epreuve-chasse.js` | l'épreuve 6 : l'antiquaire, la fouille, les découvertes (l'objet qui se retourne), Georges, la collection, la phrase |

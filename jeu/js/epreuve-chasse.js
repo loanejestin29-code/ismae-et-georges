@@ -110,8 +110,11 @@ const Chasse = (() => {
     });
   }
   // à chaque image, dans le grenier : la collection en haut à gauche ; Georges qui miaule sous son drap
-  let hudVu = null, miaouT = 2;
+  let hudVu = null, miaouT = 2, appelT = 0;
   function majGrenier(dt, J) {
+    // à Montaigu, l'antiquaire fait signe (un « ! » au-dessus de lui) tant qu'Ismae n'est pas monté
+    const a = J.carte.antiquaire;
+    if (a && a.visible && Q.chasse === 'aVenir' && !J.bloque() && (appelT -= dt) < 0) { appelT = 2.4; a.dire('!', 1.3); }
     const ici = J.carte.id === 'grenier' && Q.chasse !== 'aVenir';
     if (ici !== hudVu) { hudVu = ici; $('chasse').hidden = !ici; if (ici) { majHud(); $('aide').hidden = true; } } // l'aide du début laisse la place à la collection
     if (!ici || Q.chasse !== 'quete' || trouve('georges')) return;

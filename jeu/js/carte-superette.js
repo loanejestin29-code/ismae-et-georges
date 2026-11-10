@@ -14,7 +14,8 @@
 
 Jeu.enregistrerCarte('superette', () => {
   const T = 16, COLS = 28, ROWS = 28, W = COLS * T, H = ROWS * T;
-  const C = new Carte('superette', W, H, { ambiance: 'interieur', fond: '#0d0a14' });
+  const C = new Carte('superette', W, H, { ambiance: 'magasin', fond: '#0d0a14' });
+  C.neige = 0;
   const P = C.P, r = PX.rng(77);
   const BLUE = '#1d4f9c', RED = '#e1251b';
   const HAUT = 6;                 // première rangée de cases du labyrinthe (devant les frigos et la boucherie)
@@ -70,11 +71,14 @@ Jeu.enregistrerCarte('superette', () => {
   };
 
   // ---------------------------------------------------------------- sol
+  // sol : grandes dalles de granito poli (éclats de couleur), joints, reflets des néons, traces de chariots
   for (let y = FOND - 16; y < H; y += 16) for (let x = 0; x < W; x += 16) {
-    const c = ((x + y) / 16) % 2 ? '#dde1e7' : '#cdd3db';
-    P.rect(x, y, 16, 16, c); P.hline(x, y, 16, '#eef1f5'); P.vline(x, y, 16, '#e6e9ee');
+    const c = r.pick(['#d6dae1', '#d2d6de', '#dadee5', '#cfd4dc']);
+    P.rect(x, y, 16, 16, c); P.hline(x, y, 16, '#e8ebf0'); P.vline(x, y, 16, '#e2e5ea'); P.hline(x, y + 15, 16, '#bfc5ce'); P.vline(x + 15, y, 16, '#c4cad3');
+    for (let k = 0; k < 4; k++) P.px(x + 1 + r.int(14), y + 1 + r.int(14), r.pick(['#bcc3cd', '#c4bab0', '#b4bec9', '#e4e7ec']));
   }
   for (let k = 0; k < 10; k++) { const x0 = 10 + k * 46; for (let j = 0; j < 40; j++) P.rect(x0 + j, 330 + j * 0.6, 7, 1, 'rgba(255,255,255,0.2)'); }
+  for (let k = 0; k < 6; k++) { const y0 = 120 + r.int(260), x0 = 20 + r.int(380); for (let j = 0; j < 30; j++) { P.px(x0 + j, y0 + Math.round(Math.sin(j * 0.2) * 2), 'rgba(90,96,110,0.18)'); P.px(x0 + j, y0 + 4 + Math.round(Math.sin(j * 0.2) * 2), 'rgba(90,96,110,0.18)'); } }
   // carrelage rouge de la boucherie (derrière la vitrine)
   for (let y = 56; y < FOND; y += 8) for (let x = BX0; x < BX1; x += 8) {
     P.rect(x, y, 8, 8, ((x + y) / 8) % 2 ? '#b8543a' : '#a84a32'); P.hline(x, y, 8, '#c8705a'); P.vline(x, y, 8, '#943f2a');
@@ -255,14 +259,15 @@ Jeu.enregistrerCarte('superette', () => {
     { cols: ['#7a4aa8', '#f2c230', '#e86a9a', '#3a6aa8'], forme: 'sac' },          // croquettes
   ];
   const estRayon = (tx, ty) => ty >= 0 && ty < ROWS && tx >= 0 && tx < COLS && rayon[ty][tx] === 1;
+  // les produits d'une étagère, vus de face : bouteilles (bouchon, reflet), sacs, paquets et boîtes (étiquette, ombre)
   const produits = (Q, x0, sy, sect) => {
     for (let x = 1; x < T - 1;) {
-      const col = r.pick(sect.cols), hi = PX.shade(col, 0.35), lo = PX.shade(col, -0.3);
-      if (r.chance(0.08)) { x += 1; continue; } // un trou dans le rayon
-      if (sect.forme === 'bouteille') { const h = 3 + r.int(2); Q.rect(x0 + x, sy + 4 - h, 1, h, col); Q.px(x0 + x, sy + 4 - h, lo); x += 1 + r.int(2); }
-      else if (sect.forme === 'sac') { Q.rect(x0 + x, sy + 1, 3, 3, col); Q.hline(x0 + x, sy, 3, hi); Q.px(x0 + x + 1, sy + 2, '#ffffff'); x += 4; }
-      else if (sect.forme === 'paquet') { const w = 2 + r.int(2); Q.rect(x0 + x, sy + 2, w, 2, col); Q.hline(x0 + x, sy + 1, w, hi); x += w; }
-      else { const w = 2 + r.int(2), h = 3 + r.int(2); Q.rect(x0 + x, sy + 4 - h, w, h, col); Q.hline(x0 + x, sy + 4 - h, w, hi); Q.vline(x0 + x + w - 1, sy + 5 - h, h - 1, lo); x += w; }
+      const col = r.pick(sect.cols), hi = PX.shade(col, 0.4), lo = PX.shade(col, -0.32);
+      if (r.chance(0.07)) { x += 1; continue; } // un trou dans le rayon
+      if (sect.forme === 'bouteille') { const h = 3 + r.int(2); Q.rect(x0 + x, sy + 4 - h, 2, h, col); Q.px(x0 + x, sy + 4 - h, hi); Q.px(x0 + x + 1, sy + 3 - h, r.pick(['#ffffff', '#e1251b', '#f2c230'])); Q.px(x0 + x + 1, sy + 2, lo); x += 2 + r.int(2); }
+      else if (sect.forme === 'sac') { Q.rect(x0 + x, sy + 1, 3, 3, col); Q.hline(x0 + x, sy, 3, hi); Q.px(x0 + x + 1, sy + 2, '#ffffff'); Q.px(x0 + x + 2, sy + 3, lo); x += 4; }
+      else if (sect.forme === 'paquet') { const w = 2 + r.int(2); Q.rect(x0 + x, sy + 1, w, 3, col); Q.hline(x0 + x, sy + 1, w, hi); Q.px(x0 + x + w - 1, sy + 3, lo); if (w > 2) Q.px(x0 + x + 1, sy + 2, '#ffffff'); x += w; }
+      else { const w = 2 + r.int(2), h = 3 + r.int(2); Q.rect(x0 + x, sy + 4 - h, w, h, col); Q.hline(x0 + x, sy + 4 - h, w, hi); Q.vline(x0 + x + w - 1, sy + 5 - h, h - 1, lo); if (h > 3) Q.hline(x0 + x, sy + 2, w - 1, r.pick(['#ffffff', '#f4efe2'])); x += w; }
     }
   };
   for (let ty = 0; ty < ROWS; ty++) {
@@ -273,25 +278,32 @@ Jeu.enregistrerCarte('superette', () => {
       const c = PX.canvas(w, T + FACE), Q = PX.painter(c);
       const sect = SECTIONS[(tx + ty * 3) % SECTIONS.length];
       // dessus du rayon (vu d'en haut) : produits rangés en lignes
-      Q.rect(0, 0, w, T, '#c9d0d8'); Q.rect(1, 1, w - 2, T - 2, '#e6eaef');
+      // le dessus de la gondole : deux rangées de cartons (éclairés en haut à gauche), la cloison du milieu, les bords
+      Q.rect(0, 0, w, T, '#aeb6c2'); Q.rect(1, 1, w - 2, T - 2, '#dfe4ea');
       for (let i = 0; i < n; i++) {
         const x0 = i * T;
-        for (let yy = 3; yy < T - 2; yy += 4) for (let xx = 2; xx < T - 2; xx += 3) Q.rect(x0 + xx, yy, 2, 2, r.chance(0.85) ? r.pick(sect.cols) : '#f4f6f8');
-        Q.hline(x0 + 1, 8, T - 2, '#b8c0ca');
+        for (const yy of [2, 9]) for (let xx = 1; xx < T - 2;) {
+          const cw = 3 + r.int(2); if (xx + cw > T - 1) break;
+          if (r.chance(0.12)) { xx += cw; continue; }
+          const col = r.pick(sect.cols); Q.rect(x0 + xx, yy, cw, 5, col); Q.hline(x0 + xx, yy, cw, PX.shade(col, 0.4)); Q.vline(x0 + xx, yy, 5, PX.shade(col, 0.2)); Q.hline(x0 + xx, yy + 4, cw, PX.shade(col, -0.35)); Q.vline(x0 + xx + cw - 1, yy + 1, 4, PX.shade(col, -0.25));
+          xx += cw + (r.chance(0.3) ? 1 : 0);
+        }
+        Q.hline(x0, 7, T, '#8a94a2'); Q.hline(x0, 8, T, '#f4f6f8');
+        if ((tx + i + ty) % 5 === 0) { Q.rect(x0 + 5, 6, 6, 4, '#f2d020'); Q.hline(x0 + 5, 6, 6, '#fff080'); Q.px(x0 + 7, 8, RED); Q.px(x0 + 8, 8, RED); }
       }
-      Q.hline(0, 0, w, '#f6f8fa');
+      Q.hline(0, 0, w, '#f6f8fa'); Q.hline(0, T - 1, w, '#9aa4b0');
       // façade avant (seulement là où le rayon ne continue pas vers le bas) : deux étagères garnies
       for (let i = 0; i < n; i++) {
         if (estRayon(tx + i, ty + 1) || (ty + 1 < ROWS && rayon[ty + 1][tx + i] === 2)) continue;
         const x0 = i * T, y0 = T;
-        Q.rect(x0, y0, T, FACE, '#eceff3');
+        Q.rect(x0, y0, T, FACE, '#d8dde4'); Q.vline(x0, y0, FACE, '#c8ced8');
         for (let s = 0; s < 2; s++) {
           const sy = y0 + s * 5;
           produits(Q, x0, sy, sect);
-          Q.hline(x0, sy + 4, T, '#9aa4b0');
-          if (i % 2 === 0) Q.px(x0 + 4, sy + 4, r.chance(0.5) ? '#f2c230' : RED);
+          Q.hline(x0, sy + 4, T, '#f4f6f8'); // la réglette des prix
+          for (let k = 2; k < T - 2; k += 5) Q.px(x0 + k, sy + 4, r.chance(0.35) ? '#f2d020' : r.chance(0.5) ? RED : '#3a6aa8');
         }
-        Q.rect(x0, y0 + FACE - 2, T, 2, '#6a7282');
+        Q.rect(x0, y0 + FACE - 2, T, 2, '#5a6272'); Q.hline(x0, y0 + FACE - 2, T, '#8a92a2');
       }
       Q.vline(0, 0, T + FACE, '#9aa4b0'); Q.vline(w - 1, 0, T + FACE, '#7a8292');
       C.objet({ img: c, ax: 0, ay: T + FACE - 1 }, tx * T, (ty + 1) * T - 1, {});
@@ -303,6 +315,21 @@ Jeu.enregistrerCarte('superette', () => {
       tx = fin + 1;
     }
   }
+
+  // ---------------------------------------------------------------- les panneaux suspendus au-dessus des rayons
+  const panneau = (mot, col) => {
+    const w = Arendelle.largeurTexte(mot) + 8, c = PX.canvas(w + 2, 16), Q = PX.painter(c);
+    Q.vline(3, 0, 6, '#5a6070'); Q.vline(w - 2, 0, 6, '#5a6070');
+    Q.rect(0, 5, w + 2, 10, '#1d1626'); Q.rect(1, 6, w, 8, col); Q.hline(1, 6, w, PX.shade(col, 0.35)); Q.hline(1, 13, w, PX.shade(col, -0.3));
+    Arendelle.texte(Q, mot, 5, 8, '#ffffff');
+    return c;
+  };
+  [['PATES', 2, 0, BLUE], ['BOISSONS', 6, 0, '#2a8a4a'], ['CAFE', 1, 4, '#6a3e2e'], ['BISCUITS', 6, 4, RED], ['CONSERVES', 1, 1, '#c8682a'], ['ANIMAUX', 7, 1, '#7a4aa8']].forEach(([mot, c, rr, col]) => {
+    const img = panneau(mot, col), ty = HAUT + 2 + rr * 3, x = 32 + 48 * c - img.width / 2;
+    C.dessusImg(img, Math.round(x), ty * T - 10);
+  });
+  // les néons du plafond (des lumières froides, en rangées)
+  for (let y = 140; y < 420; y += 110) for (let x = 64; x < W; x += 160) C.lumiere(x, y, 130, 'neon');
 
   // ---------------------------------------------------------------- îlot de Noël (au centre du labyrinthe)
   const ilot = () => {
